@@ -3,6 +3,7 @@ import json
 import re
 from typing import List, Optional, Dict, Any
 
+
 class OllamaGenerator:
     """Handles interactions with Ollama API for generating responses"""
 
@@ -41,7 +42,7 @@ Provide only the direct answer to what was asked.
             api_url: Ollama API URL (default: http://localhost:11434)
             model: Model name (default: llama2)
         """
-        self.api_url = api_url.rstrip('/')
+        self.api_url = api_url.rstrip("/")
         self.model = model
         self.chat_endpoint = f"{self.api_url}/api/chat"
 
@@ -81,17 +82,20 @@ Provide only the direct answer to what was asked.
         if match:
             try:
                 tool_json = json.loads(match.group())
-                if 'tool' in tool_json and 'args' in tool_json:
+                if "tool" in tool_json and "args" in tool_json:
                     return tool_json
             except json.JSONDecodeError:
                 pass
 
         return None
 
-    def generate_response(self, query: str,
-                         conversation_history: Optional[str] = None,
-                         tools: Optional[List] = None,
-                         tool_manager=None) -> str:
+    def generate_response(
+        self,
+        query: str,
+        conversation_history: Optional[str] = None,
+        tools: Optional[List] = None,
+        tool_manager=None,
+    ) -> str:
         """
         Generate AI response with optional tool usage and conversation context.
 
@@ -109,16 +113,15 @@ Provide only the direct answer to what was asked.
 
         # Add conversation history if provided
         if conversation_history:
-            messages.append({
-                "role": "user",
-                "content": f"Previous conversation context:\n{conversation_history}\n\nNow, answer this new question:"
-            })
+            messages.append(
+                {
+                    "role": "user",
+                    "content": f"Previous conversation context:\n{conversation_history}\n\nNow, answer this new question:",
+                }
+            )
 
         # Add current query
-        messages.append({
-            "role": "user",
-            "content": query
-        })
+        messages.append({"role": "user", "content": query})
 
         # First API call - allow tool use detection
         response_text = self._call_ollama(messages)
@@ -129,8 +132,8 @@ Provide only the direct answer to what was asked.
 
             if tool_call:
                 # Tool was invoked - execute it
-                tool_name = tool_call.get('tool')
-                tool_args = tool_call.get('args', {})
+                tool_name = tool_call.get("tool")
+                tool_args = tool_call.get("args", {})
 
                 # Execute the tool
                 try:
@@ -138,17 +141,17 @@ Provide only the direct answer to what was asked.
 
                     # Create a clean response without the JSON part
                     response_without_json = re.sub(
-                        r'^\s*\{[^{}]*"tool"[^{}]*\}',
-                        '',
-                        response_text
+                        r'^\s*\{[^{}]*"tool"[^{}]*\}', "", response_text
                     ).strip()
 
                     # Continue conversation with tool results
                     messages.append({"role": "assistant", "content": response_text})
-                    messages.append({
-                        "role": "user",
-                        "content": f"Search results for your query:\n{tool_result}\n\nPlease provide the final answer based on these search results."
-                    })
+                    messages.append(
+                        {
+                            "role": "user",
+                            "content": f"Search results for your query:\n{tool_result}\n\nPlease provide the final answer based on these search results.",
+                        }
+                    )
 
                     # Final API call without tools to get answer
                     final_response = self._call_ollama(messages)
@@ -179,24 +182,26 @@ Provide only the direct answer to what was asked.
                 "options": {
                     "temperature": 0,
                     "num_predict": 800,  # Similar to Claude's max_tokens
-                }
+                },
             }
 
             response = requests.post(
                 self.chat_endpoint,
                 json=payload,
-                timeout=60  # Allow longer timeout for Ollama processing
+                timeout=60,  # Allow longer timeout for Ollama processing
             )
 
             if response.status_code != 200:
                 raise Exception(f"Ollama API error: {response.status_code}")
 
             result = response.json()
-            return result.get('message', {}).get('content', '').strip()
+            return result.get("message", {}).get("content", "").strip()
 
         except requests.exceptions.Timeout:
             raise Exception("Ollama request timed out. Model may be still loading.")
         except requests.exceptions.ConnectionError:
-            raise Exception(f"Cannot connect to Ollama at {self.api_url}. Is it running?")
+            raise Exception(
+                f"Cannot connect to Ollama at {self.api_url}. Is it running?"
+            )
         except Exception as e:
             raise Exception(f"Ollama error: {str(e)}")
