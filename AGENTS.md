@@ -1,32 +1,57 @@
 # AI Agent Instructions - Course Materials RAG System
 
+## Contexte Métier
+
+Ce système est un **assistant pédagogique RAG** destiné à des apprenants en ingénierie IA. Il répond à des questions sur 4 cours DeepLearning.ai :
+
+| Cours | Thème |
+|-------|-------|
+| course1_script.txt | Building Towards Computer Use with Anthropic |
+| course2_script.txt | MCP: Build Rich-Context AI Apps with Anthropic |
+| course3_script.txt | Advanced Retrieval for AI with Chroma |
+| course4_script.txt | Prompt Compression and Query Optimization |
+
+**Règles métier fondamentales :**
+- Réponses courtes, sourcées, factuelles — jamais d'invention hors corpus
+- Mono-domaine : si la question dépasse les cours chargés, le dire clairement
+- Latence acceptable : l'inférence Ollama locale peut prendre 10–30 s
+
+---
+
 This is a **Retrieval-Augmented Generation (RAG) system** for answering questions about course materials using semantic search and local LLM inference with **Ollama**.
 
 ## Quick Start for Agents
 
-### Prerequisites
-- **Ollama** installed and running (`ollama serve` in separate terminal)
-- **llama2 model** available (`ollama pull llama2`)
-- See `.claude/skills/setup-ollama.md` for detailed Ollama setup
+### Mode développement local
 
-### Setup & Installation
+**Prérequis :**
+- Ollama installé et en cours d'exécution (`ollama serve` dans un terminal séparé)
+- Modèle llama2 disponible (`ollama pull llama2`)
+- Voir `.claude/skills/setup-ollama.md` pour la configuration Ollama
+
 ```bash
-# Install dependencies
 uv sync
-
-# Create .env file
 cp .env.example .env
-# Edit .env if using non-default Ollama settings
-
-# Make sure Ollama is running in another terminal
-ollama serve
-
-# Start the application
+ollama serve                     # terminal séparé
 ./run.sh
-# or manually: cd backend && uv run uvicorn app:app --reload --port 8000
+# ou manuellement : cd backend && uv run uvicorn app:app --reload --port 8000
 ```
 
-Server runs on `http://localhost:8000` with API docs at `/docs`
+### Mode production (Docker)
+
+```bash
+# Définir le modèle Ollama si différent de llama2
+echo "OLLAMA_MODEL=llama2" > .env
+
+docker compose up --build        # premier lancement (télécharge le modèle ~4 Go)
+docker compose up                # lancements suivants
+```
+
+L'app est disponible sur `http://localhost:8000`, docs API sur `/docs`.
+
+**Volumes Docker persistants :**
+- `chroma_data` → données ChromaDB (ne pas supprimer sans backup)
+- `ollama_data` → poids du modèle Ollama mis en cache
 
 ## Architecture Overview
 
@@ -282,6 +307,9 @@ print(results.documents)  # See what was found
 | Frontend doesn't load | Check `frontend/index.html` path; verify static files mounted |
 | Session ID returns same results | Check `MAX_HISTORY` setting; clear session for new context |
 | Tool invocation not working | Check system prompt format in `ollama_generator.py`; verify JSON pattern |
+| Docker : app démarre avant Ollama | `entrypoint.sh` attend le healthcheck Ollama — attendre 30–60 s |
+| Docker : modèle re-téléchargé à chaque restart | Vérifier que le volume `ollama_data` est bien monté dans `docker-compose.yml` |
+| Réponse hors-sujet (hors cours) | Vérifier `SYSTEM_PROMPT` dans `ollama_generator.py` — renforcer "answer only from search results" |
 
 ## Related Documentation & Skills
 

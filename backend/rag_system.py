@@ -101,42 +101,45 @@ class RAGSystem:
     
     def query(self, query: str, session_id: Optional[str] = None) -> Tuple[str, List[str]]:
         """
-        Process a user query using the RAG system with tool-based search.
-        
-        Args:
-            query: User's question
-            session_id: Optional session ID for conversation context
-            
-        Returns:
-            Tuple of (response, sources list - empty for tool-based approach)
+        Process a user query using the RAG system.
+        Always retrieves from vector store first, then synthesizes with the LLM.
         """
-        # Create prompt for the AI with clear instructions
-        prompt = f"""Answer this question about course materials: {query}"""
-        
         # Get conversation history if session exists
         history = None
         if session_id:
             history = self.session_manager.get_conversation_history(session_id)
-        
-        # Generate response using AI with tools
+
+        # Always search the vector store
+        search_results = self.search_tool.execute(query=query)
+        sources = self.search_tool.last_sources[:]
+        self.search_tool.last_sources = []
+
+        # Build prompt with or without retrieved context
+        if search_results and "No results found" not in search_results:
+            prompt = (
+                f"Use the following course content to answer the question.\n\n"
+                f"Course content:\n{search_results}\n\n"
+                f"Question: {query}\n\n"
+                f"Answer based only on the course content above. "
+                f"If the content does not answer the question, say so."
+            )
+        else:
+            prompt = (
+                f"Answer this question about AI/ML courses: {query}\n\n"
+                f"No specific course content was found. Give a brief general answer "
+                f"and suggest the user try a more specific question."
+            )
+
+        # Generate response
         response = self.ai_generator.generate_response(
             query=prompt,
             conversation_history=history,
-            tools=self.tool_manager.get_tool_definitions(),
-            tool_manager=self.tool_manager
         )
-        
-        # Get sources from the search tool
-        sources = self.tool_manager.get_last_sources()
 
-        # Reset sources after retrieving them
-        self.tool_manager.reset_sources()
-        
         # Update conversation history
         if session_id:
             self.session_manager.add_exchange(session_id, query, response)
-        
-        # Return response with sources from tool searches
+
         return response, sources
     
     def get_course_analytics(self) -> Dict:

@@ -5,7 +5,7 @@ const API_URL = '/api';
 let currentSessionId = null;
 
 // DOM elements
-let chatMessages, chatInput, sendButton, totalCourses, courseTitles;
+let chatMessages, chatInput, sendButton, totalCourses, courseTitles, themeToggle;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -15,7 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     sendButton = document.getElementById('sendButton');
     totalCourses = document.getElementById('totalCourses');
     courseTitles = document.getElementById('courseTitles');
-    
+    themeToggle = document.getElementById('themeToggle');
+
+    initTheme();
     setupEventListeners();
     createNewSession();
     loadCourseStats();
@@ -30,6 +32,9 @@ function setupEventListeners() {
     });
     
     
+    // Theme toggle
+    themeToggle.addEventListener('click', toggleTheme);
+
     // Suggested questions
     document.querySelectorAll('.suggested-item').forEach(button => {
         button.addEventListener('click', (e) => {
@@ -150,6 +155,28 @@ async function createNewSession() {
     currentSessionId = null;
     chatMessages.innerHTML = '';
     addMessage('Welcome to the Course Materials Assistant! I can help you with questions about courses, lessons and specific content. What would you like to know?', 'assistant', null, true);
+}
+
+// Theme Functions
+function initTheme() {
+    const saved = localStorage.getItem('theme');
+    const isLight = saved === 'light';
+    document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
+    updateToggleButton(isLight);
+}
+
+function toggleTheme() {
+    const isCurrentlyLight = document.documentElement.getAttribute('data-theme') === 'light';
+    const nextTheme = isCurrentlyLight ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    localStorage.setItem('theme', nextTheme);
+    updateToggleButton(nextTheme === 'light');
+}
+
+function updateToggleButton(isLight) {
+    if (!themeToggle) return;
+    themeToggle.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
+    themeToggle.setAttribute('aria-pressed', String(isLight));
 }
 
 // Load course statistics
