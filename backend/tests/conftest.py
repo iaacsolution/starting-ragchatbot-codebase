@@ -18,14 +18,17 @@ from typing import List, Optional
 # requires a ../frontend directory that does not exist in CI / test runs.
 # ---------------------------------------------------------------------------
 
+
 class QueryRequest(BaseModel):
     query: str
     session_id: Optional[str] = None
+
 
 class QueryResponse(BaseModel):
     answer: str
     sources: List[str]
     session_id: str
+
 
 class CourseStats(BaseModel):
     total_courses: int
@@ -77,6 +80,7 @@ def create_test_app(rag_system) -> FastAPI:
 # Shared fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def mock_rag_system():
     """RAGSystem mock with sensible defaults for all test cases."""
@@ -100,6 +104,7 @@ def client(mock_rag_system):
 # ---------------------------------------------------------------------------
 # Reusable test-data fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def query_payload():

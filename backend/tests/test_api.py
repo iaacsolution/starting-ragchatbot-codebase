@@ -30,7 +30,6 @@ class TestQueryEndpoint:
 
     def test_uses_provided_session_id(self, client, mock_rag_system, query_payload_with_session):
         data = client.post("/api/query", json=query_payload_with_session).json()
-        # create_session must NOT be called when a session_id is supplied
         mock_rag_system.session_manager.create_session.assert_not_called()
         assert data["session_id"] == "existing_session"
 
