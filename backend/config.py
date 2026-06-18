@@ -12,7 +12,7 @@ class Config:
 
     # Ollama API settings
     OLLAMA_API_URL: str = os.getenv("OLLAMA_API_URL", "http://localhost:11434")
-    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "mistral")
+    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
 
 
     # Embedding model settings

@@ -58,6 +58,19 @@ html[data-theme="light"] {
     --welcome-border: #2563eb;
 }
 
+/* Explicit sidebar theme overrides */
+html[data-theme="dark"] .sidebar,
+html:not([data-theme="light"]) .sidebar { background-color: #1e293b; }
+html[data-theme="light"] .sidebar       { background-color: #ffffff; }
+
+html[data-theme="dark"] .stat-item,
+html:not([data-theme="light"]) .stat-item { background-color: #0f172a; }
+html[data-theme="light"] .stat-item       { background-color: #f8fafc; }
+
+html[data-theme="dark"] .suggested-item,
+html:not([data-theme="light"]) .suggested-item { background-color: #0f172a; }
+html[data-theme="light"] .suggested-item       { background-color: #f8fafc; }
+
 /* Theme Transitions */
 body,
 .sidebar,
