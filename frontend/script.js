@@ -37,7 +37,7 @@ function setupEventListeners() {
     // Suggested questions
     document.querySelectorAll('.suggested-item').forEach(button => {
         button.addEventListener('click', (e) => {
-            const question = e.target.getAttribute('data-question');
+            const question = e.currentTarget.getAttribute('data-question');
             chatInput.value = question;
             sendMessage();
         });
