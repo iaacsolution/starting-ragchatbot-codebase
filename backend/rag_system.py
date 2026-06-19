@@ -131,6 +131,7 @@ class RAGSystem:
         search_results = self.search_tool.execute(query=query)
         sources = self.search_tool.last_sources[:]
         self.search_tool.last_sources = []
+        self.last_contexts = [search_results] if search_results else []
 
         # Build prompt with or without retrieved context
         if search_results and "No results found" not in search_results:
