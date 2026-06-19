@@ -6,11 +6,16 @@ services:
     environment:
       - OLLAMA_API_URL=http://ollama:11434
       - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.2:1b}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-haiku-4-5-20251001}
+      - PHOENIX_ENDPOINT=http://phoenix:6006/v1/traces
     volumes:
       - chroma_data:/app/backend/chroma_db
     depends_on:
       ollama:
         condition: service_healthy
+      phoenix:
+        condition: service_started
     restart: unless-stopped
 
   ollama:
@@ -25,6 +30,39 @@ services:
       start_period: 10s
     restart: unless-stopped
 
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    ports:
+      - "6006:6006"
+    volumes:
+      - phoenix_data:/root/.phoenix
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
 volumes:
   chroma_data:
   ollama_data:
+  phoenix_data:
+  prometheus_data:
+  grafana_data:

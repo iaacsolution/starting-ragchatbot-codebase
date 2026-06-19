@@ -10,13 +10,29 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 
 from config import config
 from rag_system import RAGSystem
+from ragas_evaluator import evaluate_async
+
+# Phoenix tracing setup (no-op if Phoenix is unreachable)
+try:
+    from phoenix.otel import register
+    from openinference.instrumentation.anthropic import AnthropicInstrumentor
+
+    _phoenix_endpoint = os.getenv("PHOENIX_ENDPOINT", "http://localhost:6006/v1/traces")
+    _tracer_provider = register(project_name="rag-chatbot", endpoint=_phoenix_endpoint)
+    AnthropicInstrumentor().instrument(tracer_provider=_tracer_provider)
+except Exception:
+    pass
 
 # Initialize FastAPI app
 app = FastAPI(title="Course Materials RAG System", root_path="")
+
+# Prometheus metrics on /metrics
+Instrumentator().instrument(app).expose(app)
 
 # Add trusted host middleware for proxy
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
@@ -73,6 +89,13 @@ async def query_documents(request: QueryRequest):
         # Process query using RAG system
         answer, sources = rag_system.query(request.query, session_id)
 
+        evaluate_async(
+            question=request.query,
+            answer=answer,
+            contexts=rag_system.last_contexts,
+            api_key=config.ANTHROPIC_API_KEY,
+            model=config.ANTHROPIC_MODEL,
+        )
         return QueryResponse(answer=answer, sources=sources, session_id=session_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -94,7 +117,7 @@ async def get_course_stats():
 @app.on_event("startup")
 async def startup_event():
     """Load initial documents on startup"""
-    print(f"Using Ollama model: {config.OLLAMA_MODEL} at {config.OLLAMA_API_URL}")
+    print(f"Using Anthropic model: {config.ANTHROPIC_MODEL}")
     docs_path = "../docs"
     if os.path.exists(docs_path):
         print("Loading initial documents...")
