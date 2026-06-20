@@ -1,5 +1,5 @@
 import anthropic
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, AsyncIterator
 
 
 class AIGenerator:
@@ -32,10 +32,26 @@ Provide only the direct answer to what was asked.
 
     def __init__(self, api_key: str, model: str):
         self.client = anthropic.Anthropic(api_key=api_key)
+        self.async_client = anthropic.AsyncAnthropic(api_key=api_key)
         self.model = model
 
         # Pre-build base API parameters
         self.base_params = {"model": self.model, "temperature": 0, "max_tokens": 800}
+
+    async def generate_stream(self, query: str, conversation_history: str = None) -> AsyncIterator[str]:
+        system_content = (
+            f"{self.SYSTEM_PROMPT}\n\nPrevious conversation:\n{conversation_history}"
+            if conversation_history
+            else self.SYSTEM_PROMPT
+        )
+        api_params = {
+            **self.base_params,
+            "messages": [{"role": "user", "content": query}],
+            "system": system_content,
+        }
+        async with self.async_client.messages.stream(**api_params) as stream:
+            async for text in stream.text_stream:
+                yield text
 
     def generate_response(
         self,
