@@ -50,48 +50,80 @@ async function sendMessage() {
     const query = chatInput.value.trim();
     if (!query) return;
 
-    // Disable input
     chatInput.value = '';
     chatInput.disabled = true;
     sendButton.disabled = true;
 
-    // Add user message
     addMessage(query, 'user');
 
-    // Add loading message - create a unique container for it
-    const loadingMessage = createLoadingMessage();
-    chatMessages.appendChild(loadingMessage);
+    // Create assistant message div with loading dots
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message assistant';
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    contentDiv.innerHTML = `<div class="loading"><span></span><span></span><span></span></div>`;
+    messageDiv.appendChild(contentDiv);
+    chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
+    let fullText = '';
+    let firstChunk = true;
+
     try {
-        const response = await fetch(`${API_URL}/query`, {
+        const response = await fetch(`${API_URL}/query/stream`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                query: query,
-                session_id: currentSessionId
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query, session_id: currentSessionId })
         });
 
         if (!response.ok) throw new Error('Query failed');
 
-        const data = await response.json();
-        
-        // Update session ID if new
-        if (!currentSessionId) {
-            currentSessionId = data.session_id;
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+
+            for (const line of lines) {
+                if (!line.startsWith('data: ')) continue;
+                let data;
+                try { data = JSON.parse(line.slice(6)); } catch { continue; }
+
+                if (data.text) {
+                    if (firstChunk) {
+                        contentDiv.innerHTML = '';
+                        firstChunk = false;
+                    }
+                    fullText += data.text;
+                    contentDiv.textContent = fullText;
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    await new Promise(r => setTimeout(r, 0));
+                }
+
+                if (data.done) {
+                    if (!currentSessionId) currentSessionId = data.session_id;
+                    contentDiv.innerHTML = marked.parse(fullText);
+                    if (data.sources && data.sources.length > 0) {
+                        const sourcesEl = document.createElement('details');
+                        sourcesEl.className = 'sources-collapsible';
+                        sourcesEl.innerHTML = `
+                            <summary class="sources-header">Sources</summary>
+                            <div class="sources-content">${data.sources.join(', ')}</div>
+                        `;
+                        messageDiv.appendChild(sourcesEl);
+                    }
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            }
         }
-
-        // Replace loading message with response
-        loadingMessage.remove();
-        addMessage(data.answer, 'assistant', data.sources);
-
     } catch (error) {
-        // Replace loading message with error
-        loadingMessage.remove();
-        addMessage(`Error: ${error.message}`, 'assistant');
+        contentDiv.textContent = `Error: ${error.message}`;
     } finally {
         chatInput.disabled = false;
         sendButton.disabled = false;
