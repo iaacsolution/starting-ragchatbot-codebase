@@ -5,10 +5,12 @@ from typing import List, Optional
 
 warnings.filterwarnings("ignore", message="resource_tracker: There appear to be.*")
 
+import asyncio
+import json
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
@@ -81,12 +83,10 @@ class CourseStats(BaseModel):
 async def query_documents(request: QueryRequest):
     """Process a query and return response with sources"""
     try:
-        # Create session if not provided
         session_id = request.session_id
         if not session_id:
             session_id = rag_system.session_manager.create_session()
 
-        # Process query using RAG system
         answer, sources = rag_system.query(request.query, session_id)
 
         evaluate_async(
@@ -99,6 +99,97 @@ async def query_documents(request: QueryRequest):
         return QueryResponse(answer=answer, sources=sources, session_id=session_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/test/stream")
+async def test_stream():
+    async def generate():
+        words = [
+            "Bonjour",
+            " ",
+            "voici",
+            " ",
+            "un",
+            " ",
+            "test",
+            " ",
+            "de",
+            " ",
+            "streaming",
+            " ",
+            "token",
+            " ",
+            "par",
+            " ",
+            "token",
+            ".",
+        ]
+        for word in words:
+            yield f"data: {json.dumps({'text': word})}\n\n"
+            await asyncio.sleep(0.15)
+        yield f"data: {json.dumps({'done': True, 'sources': [], 'session_id': 'test'})}\n\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+@app.post("/api/query/stream")
+async def query_stream(request: QueryRequest):
+    session_id = request.session_id or rag_system.session_manager.create_session()
+
+    async def generate():
+        history = rag_system.session_manager.get_conversation_history(session_id)
+        loop = asyncio.get_event_loop()
+        search_results = await loop.run_in_executor(
+            None, lambda: rag_system.search_tool.execute(query=request.query)
+        )
+        sources = rag_system.search_tool.last_sources[:]
+        rag_system.search_tool.last_sources = []
+        rag_system.last_contexts = [search_results] if search_results else []
+
+        if search_results and "No results found" not in search_results:
+            prompt = (
+                f"Use the following course content to answer the question.\n\n"
+                f"Course content:\n{search_results}\n\n"
+                f"Question: {request.query}\n\n"
+                f"Answer based only on the course content above. "
+                f"If the content does not answer the question, say so."
+            )
+        else:
+            prompt = (
+                f"Answer this question about AI/ML courses: {request.query}\n\n"
+                f"No specific course content was found. Give a brief general answer "
+                f"and suggest the user try a more specific question."
+            )
+
+        full_response = ""
+        async for chunk in rag_system.ai_generator.generate_stream(
+            query=prompt, conversation_history=history
+        ):
+            full_response += chunk
+            yield f"data: {json.dumps({'text': chunk})}\n\n"
+            await asyncio.sleep(0)
+
+        rag_system.session_manager.add_exchange(
+            session_id, request.query, full_response
+        )
+        evaluate_async(
+            question=request.query,
+            answer=full_response,
+            contexts=rag_system.last_contexts,
+            api_key=config.ANTHROPIC_API_KEY,
+            model=config.ANTHROPIC_MODEL,
+        )
+        yield f"data: {json.dumps({'sources': sources, 'session_id': session_id, 'done': True})}\n\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @app.get("/api/courses", response_model=CourseStats)
@@ -134,7 +225,6 @@ class DevStaticFiles(StaticFiles):
     async def get_response(self, path: str, scope):
         response = await super().get_response(path, scope)
         if isinstance(response, FileResponse):
-            # Add no-cache headers for development
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             response.headers["Pragma"] = "no-cache"
             response.headers["Expires"] = "0"
