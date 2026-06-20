@@ -1,33 +1,2214 @@
-Course Title: Agent Skills with Anthropic
-Course Link: https://www.deeplearning.ai/courses/agent-skills-with-anthropic
+Course Title: Claude Code: A Highly Agentic Coding Assistant
+Course Link: https://www.deeplearning.ai/courses/claude-code-a-highly-agentic-coding-assistant
 Course Instructor: Elie Schoppik
+
+# introduction elie schoppik anthropic
+
+caude code
+
+Compréhension de la configuration et de la base de code
+
+rag 
+
+ajout de fonctionnalités
+
+tests, debogage des erreurs et refactorisation de code
+
+ajout simultané de plusieurs fonctionnalités
+
+exploration de l’intégration et des crochets github
+
+refactoring in jupyter notebook and creating a dashboard
+
+création d’un site web basé sur une maquette figma
+
+conclusion
+
+quizz
+
+**Prompts et résumés des leçons**
+
+
 
 Lesson 1: Introduction
 Agent Skills with Anthropic teaches how to create reusable skills that extend the capabilities of AI agents. Skills are folders of instructions that transform general-purpose agents into specialists. This course covers the structure of skills, best practices for writing them, and how to integrate them with Claude.ai, Claude Code, the Claude API, and the Claude Agent SDK. You will learn how to combine skills with MCP servers and subagents to build complex, composable AI systems. By the end of this course, you will be able to create custom skills for any domain, share them across projects and teams, and integrate them into production AI pipelines.
+# introduction elie schoppik anthropic
 
+Voici la transcription et la traduction française complète, fluide et professionnelle de cette vidéo d'introduction au cours, animée par **Andrew Ng** (fondateur de DeepLearning.AI) et **Elie Schoppik** (ingénieur chez Anthropic). Comme pour les autres modules, tous les repères temporels ont été retirés.
+
+Bienvenue dans ce cours consacré à **Claude Code**, l’assistant de programmation hautement agentique. Ce projet court a été développé en partenariat étroit avec Anthropic, et Elie Schoppik est de retour parmi nous pour nous dévoiler les meilleures pratiques d'utilisation de cet outil.
+
+Je suis particulièrement ravi de vous présenter ce programme. Claude Code est actuellement mon assistant de codage personnel favori. Il a permis de démultiplier ma productivité ainsi que celle de très nombreux développeurs. C’est un outil qui possède une profondeur technique remarquable. C'est pourquoi j'ai souhaité m'associer aux équipes d'Anthropic pour concevoir ce qui se veut le cours de référence sur l'ensemble des concepts fondamentaux permettant de l'exploiter de manière systématique.
+
+Merci, Andrew. Je suis ravi d'être de retour ici. Comme tu l'as souligné, notre parcours débutera par une explication claire de ce qu'est cet outil et de son fonctionnement interne. Nous irons ensuite beaucoup plus loin en apprenant à orchestrer plusieurs instances en parallèle, à manipuler les arbres de travail Git (*worktrees*) et à y connecter des serveurs **MCP (Model Context Protocol)**.
+
+Ce que nous avons observé ces dernières années, c'est une évolution fulgurante du codage assisté par l'intelligence artificielle. Tout a commencé par des développeurs posant des questions ponctuelles à des grands modèles de langage (LLMs). Nous sommes ensuite passés par l'autocomplétion avec GitHub Copilot, avant de voir émerger des outils de plus en plus autonomes.
+
+Lors de sa sortie, Claude Code a indéniablement marqué un saut technologique majeur en matière de degré d'autonomie (*agency*), redéfinissant le volume de tâches qu'un assistant de programmation peut accomplir seul. Beaucoup de développeurs ont été stupéfaits de constater qu'on pouvait lui confier une mission complexe et le laisser travailler en toute autonomie pendant plusieurs minutes, voire bien plus longuement. Aujourd'hui, certains ingénieurs ne se contentent plus de piloter une seule instance de Claude, ils en orchestrent plusieurs simultanément, les faisant travailler en parallèle sur différentes strates d'une même base de code.
+
+Cependant, coordonner une telle architecture requiert un ensemble de bonnes pratiques qui restent encore confidentielles. Si vous n'avez pas eu l'occasion de collaborer avec des ingénieurs qui maîtrisent ces règles de l'art, ce cours va vous apporter un gain de productivité massif. Vous découvrirez comment ces méthodes de travail déclenchent les performances exceptionnelles que je vois s'accomplir chez les développeurs qui maîtrisent l'outil.
+
+Pour introduire ces bonnes pratiques, le conseil le plus crucial lorsque vous collaborez avec Claude Code est de lui **fournir un contexte technique limpide** afin qu'il atteigne son objectif avec une efficacité maximale. Concrètement, cela consiste à pointer explicitement l'agent vers les fichiers stratégiques de votre projet, à décrire minutieusement les fonctionnalités et les comportements attendus, et à veiller à étendre correctement les capacités natives de Claude Code en lui rattachant des serveurs MCP ou d'autres outils de cet écosystème.
+
+Au cours de ce programme, vous appliquerez ces méthodologies à travers trois cas d'école très différents :
+
+1. **Un Chatbot RAG de bout en bout :** Vous implémenterez des fonctionnalités du Front-End au Back-End. Cela inclura du refactoring, l'écriture de tests unitaires et l'exploitation de l'intégration native avec GitHub pour auditer des requêtes de tirage (*Pull Requests*) et résoudre des tickets (*Issues*). Vous manipulerez les fonctions de planification (*Planning Mode*), les modes de réflexion (*Thinking Mode*), l'ouverture de sessions parallèles et la gestion fine de la mémoire de l'IA.
+2. **Analyse de Données et Notebooks Jupyter :** Nous changerons de registre pour explorer des données e-commerce. Nous utiliserons Claude Code pour refactoriser des notebooks, éliminer la dette technique et le code redondant, et migrer cette logique vers une application web sous forme de tableau de bord interactif.
+3. **Du Design Figma au Code de Production :** Enfin, nous partirons d'une maquette visuelle conçue dans Figma. Nous couplerons Claude Code au serveur MCP Figma ainsi qu'à un second serveur d'automatisation pour importer le design, itérer, tester et bâtir de manière 100% agentique une application Front-End Next.js puissante.
+
+Si vous n'utilisez pas encore Claude Code au quotidien, l'assimilation de ces concepts va vous apporter une accélération significative dans votre façon de concevoir des systèmes logiciels. Et même si vous êtes déjà un utilisateur régulier de l'outil, le fait qu'Elie partage ces méthodologies de manière aussi globale, exhaustive et systématique va, je l'espère, vous apporter de nouvelles techniques précieuses à intégrer immédiatement dans votre travail. J'en profite pour remercier chaleureusement Hawraa Salami, de l'équipe DeepLearning.AI, qui a grandement contribué à la création de ce cours.
+
+Dans la prochaine vidéo, Elie mettra en lumière l'architecture sous-jacente de Claude Code, et vous risquez d'être surpris par sa grande simplicité.
+
+Claude Code repose en effet sur un nombre très restreint d'outils : chercher des patterns de texte, lister des répertoires, inspecter des fichiers ou exécuter des expressions régulières (Regex). **Il ne s'appuie absolument pas sur une indexation sémantique lourde** consistant à vectoriser votre code ou à le transformer en une structure de base de données externe. Ce qui rend Claude Code si redoutablement efficace, c'est sa capacité agentique à parcourir vos fichiers, à prendre des notes techniques de manière autonome dans un fichier de mémoire (comme `code.md`) pour assimiler la dynamique de votre projet, puis à piloter ses prises de décision pour faire progresser votre code.
+
+C'est tout à fait exact. Et grâce à cette approche qui élimine tout besoin d'indexer la base de code sur un serveur tiers, **votre code source reste strictement local, sur votre machine.** Nous aborderons en détail les implications positives de cette architecture en matière de sécurité et de souveraineté des données pour les entreprises.
+
+Le décor est planté, installons l'outil et je vous donne rendez-vous dans la prochaine vidéo !
 Lesson 2: Why Use Skills - Part I
 Skills solve a fundamental problem with general-purpose AI agents: they are broad but not deep. A general agent knows a little about everything but lacks the specialized knowledge and workflow expertise needed for domain-specific tasks. Skills are reusable instruction sets that give agents deep expertise in a specific area. A skill is a directory containing a markdown file with instructions, examples, context, and optionally tool definitions and sub-workflows. When an agent loads a skill, it gains the knowledge and behavior defined in that skill for the duration of the task. Why skills matter: they make agent behavior consistent and reproducible, they encode expert knowledge that would otherwise require extensive prompting, they can be versioned and shared across teams, and they reduce the need to repeat context in every prompt. Skills work by providing structured context to the agent before it begins a task. This context includes what the skill does, when to use it, step-by-step instructions, examples of correct behavior, and common pitfalls to avoid. The agent uses this context to specialize its behavior for the task at hand.
+Dans cette première leçon, nous allons passer en revue le flux de travail agentique (*agentic workflow*) de **Claude Code**, les outils qu'il utilise pour naviguer au sein de votre base de code, ainsi que la mémoire qu'il conserve d'une session à l'autre. Plongeons dans le sujet.
+
+Voyons d'abord ce qu'est concrètement Claude Code. Lorsque nous parlons de systèmes agentiques, nous pensons généralement à un modèle, à un ensemble d'outils et à un environnement pour exécuter ces outils. Les modèles de langage excellent pour traiter des entrées et retourner des sorties. Cependant, dans bien des situations, ces modèles ne connaissent pas votre base de code, ne savent pas comment localiser des fichiers ni comment gérer des tâches multiples.
+
+C'est pourquoi, au lieu de dialoguer directement avec un modèle brut, nous allons lui fournir une interface d'exécution très légère (un harnais technique). Depuis votre terminal, vous allez utiliser cette interface pour exploiter l'intelligence du modèle afin d'accomplir des tâches de développement complexes. Plutôt que de soumettre une tâche directement au modèle et de le laisser chercher tant bien que mal des informations éparpillées, nous mettons à sa disposition un ensemble d'outils et un environnement dédié. Ces fonctionnalités permettent au modèle de parcourir méthodiquement les bases de code et de résoudre des problèmes d'une complexité bien supérieure.
+
+Quelles sont précisément ces fonctionnalités ? Elles permettent au modèle de disposer d'une mémoire pour se souvenir des préférences de l'utilisateur, de la structure de la base de code explorée ou de la tâche en cours. Nous offrons également au modèle un environnement au sein duquel il peut identifier les données dont il a besoin, formuler un plan d'action, puis l'exécuter. Avec un minimum de lignes de commande, nous pouvons ainsi capitaliser sur l'intelligence du modèle pour obtenir des résultats remarquables. Avec Claude Code, vous pouvez choisir d'utiliser Opus ou Sonnet, selon la complexité du travail à accomplir, la nature de la tâche et votre abonnement.
+
+Lorsque l'on découvre les capacités de Claude Code, il est tentant de n'y voir qu'un outil destiné à générer de grands volumes de code. Pourtant, nous allons débuter ce cours par l'une de ses fonctionnalités les plus puissantes : sa capacité à **découvrir, expliquer et concevoir**. Avant même de lui demander d'écrire la moindre ligne de code, utilisez Claude Code comme un levier pour monter rapidement en compétences sur une base de code existante. Nous aborderons bien sûr la génération de code, mais nous verrons également comment l'utiliser en dehors du terminal, dans des environnements comme GitHub. Nous détaillerons le refactoring, le débogage d'erreurs et `les cas d'usage où cet outil brille particulièrement`. De plus, il s'avère extrêmement précieux pour l'analyse de données et tout environnement où l'intelligence du modèle peut générer des visualisations percutantes, des ressources ou des livrables de qualité.
+
+Comme nous l'avons mentionné, nous fournissons au modèle un harnais et un environnement pour collecter du contexte et agir, le tout soutenu par une couche de mémoire dont nous détaillerons la structure dans un instant. Attardons-nous d'abord sur les outils et les fonctionnalités natives que nous mettons à la disposition du modèle.
+
+!image.png
+
+Pour illustrer l'utilisation des outils (*tool use*), imaginez qu'un utilisateur demande quel code est écrit dans un fichier spécifique. Le modèle de langage ne sait pas, par lui-même, naviguer dans une arborescence ou localiser un fichier. C'est ici que les outils interviennent. Clé en main, Claude Code intègre une liste ciblée d'outils, à commencer par la capacité de lire un fichier. Dès que le modèle identifie l'action requise, il appelle cet outil, accède au contenu du fichier et restitue les données à l'utilisateur. Cette capacité à appeler des outils transforme le modèle d'un simple assistant textuel en un agent logiciel extrêmement sophistiqué.
+
+!image.png
+
+Voici la liste des outils natifs intégrés dans Claude Code :
+
+- Des outils d'édition et de modification pour différents types de fichiers.
+
+!image.png
+
+- Des outils de lecture de fichiers.
+
+!image.png
+
+- Des outils d'action avancés pour identifier des patterns (motifs), effectuer des recherches sur le web, ou même créer et exécuter des sous-agents afin de déléguer des tâches particulièrement complexes.
+
+!image.png
+
+- Enfin, s'agissant d'un outil en ligne de commande, il intègre un outil indispensable pour exécuter des commandes Bash ou Shell.
+
+!image.png
+
+C'est cet appel d'outils qui permet à Claude Code de rassembler le contexte et les informations nécessaires pour résoudre des problèmes difficiles. Grâce à cette approche, Claude Code **n'a pas besoin d'indexer l'intégralité de votre base de code**, ce qui élimine d'emblée de potentielles failles de sécurité. De 
+
+!image.png
+
+plus, Claude Code est hautement extensible : vous pouvez lui ajouter de nouveaux outils en le connectant à des serveurs **MCP (Model Context Protocol)**. Le MCP est un protocole open-source et agnostique qui permet aux systèmes d'IA et aux sources de données de communiquer de manière transparente. Ces serveurs MCP enrichissent les fonctionnalités de Claude Code pour une grande variété de tâches professionnelles.
+
+!image.png
+
+Prenons le temps de préciser ce que signifie l'absence d'indexation de la base de code. Au lieu de générer une représentation structurée et figée de votre code et de l'analyser en permanence, Claude Code utilise une approche appelée **recherche agentique** (*agentic search*). Au lieu d'envoyer l'intégralité de vos fichiers vers un serveur externe — ce qui pourrait vous faire sortir de votre écosystème sécurisé —, Claude Code déploie un ou plusieurs agents équipés d'outils pour localiser précisément l'information recherchée. Ainsi, votre code n'est pas injecté massivement dans le contexte et `ne quitte pas votre environnement,` ce qui répond aux exigences de sécurité les plus strictes des entreprises.
+
+!image.png
+
+La mémoire de Claude, c'est-à-dire sa capacité à retenir ce qui s'est produit au cours des conversations précédentes ou lors d'actions antérieures, est gérée par un fichier au format Markdown nommé `claude.md`. Dans ce fichier `claude.md`, vous pouvez consigner vos configurations courantes ou vos guides de style. Ce document est automatiquement chargé dans le contexte de l'IA dès le lancement de l'outil. Par ailleurs, l'historique de vos conversations avec Claude Code est stocké localement sur votre machine. 
+
+!image.png
+
+Vous pouvez réinitialiser ce fil de discussion à tout moment pour ouvrir une nouvelle fenêtre de contexte vierge. À l'inverse, si vous devez reprendre une session précédente ou réactiver un échange antérieur, vous pouvez le faire très simplement.
+
+!image.png
+
+Faisons un test dans le terminal intégré de VS Code. Nous disposons d'un dossier nommé `demo`, pour l'instant vide. Ouvrons Claude Code en lançant la commande `claude`. S'agissant de la première exécution dans ce répertoire, l'outil nous demande de confirmer que nous faisons confiance aux fichiers de ce dossier, ce que nous validons. Après quelques conseils de prise en main, entrons une instruction simple : "Génère une visualisation sympa pour moi."
+
+!image.png
+
+Nous constatons immédiatement que Claude Code commence par structurer une liste d'actions à accomplir (*to-do list*). Dans un projet réel, cette liste pourrait consister à chercher dans une base de code, éditer des fichiers, écrire des tests ou extraire des rapports ; ici, il s'agit de concevoir une visualisation. Selon l'orientation choisie par le modèle, il peut s'agir d'effets de particules, de feux d'artifice ou d'autres éléments visuels. Notre objectif est de mesurer la rapidité avec laquelle Claude Code applique des modifications concrètes.
+
+!image.png
+
+Comme nous opérons directement au sein de Visual Studio Code et que Claude Code bénéficie d'une intégration native avec cet éditeur, nous voyons visuellement les fichiers se créer et se modifier en temps réel. Nous acceptons les modifications, et pour les étapes suivantes, nous pouvons autoriser Claude Code à appliquer ses changements de manière autonome sans nous demander de permission systématique.
+
+Notre visualisation est maintenant entièrement construite. Demandons à Claude Code de l'ouvrir dans notre navigateur internet. L'outil confirme l'action et lance la commande appropriée. Nous découvrons le résultat à l'écran : une interface interactive fonctionnelle. Nous pouvons y ajouter des particules, activer ou désactiver l'animation et vider le rendu. Nous pouvons enrichir cette application autant que nous le souhaitons, modifier ses fonctionnalités ou lui adjoindre de nouveaux modules. Ce test rapide démontre à quel point il est fluide et immédiat de prendre en main cet outil et d'obtenir un livrable opérationnel.
+
+Dans la prochaine leçon, nous explorerons comment utiliser Claude Code à l'échelle d'une base de code de grande envergure, et nous verrons toute sa puissance pour analyser et expliquer des architectures logicielles denses et complexes.
 
 Lesson 3: Why Use Skills - Part II
 Skills enable a new model of AI development where capabilities are modular and composable. Instead of building one large monolithic agent, you build a collection of skills that can be combined as needed. This modularity has several advantages: skills can be tested and improved independently, teams can develop skills in parallel, skills can be reused across different agents and projects, and new capabilities can be added by creating new skills without modifying existing ones. Skills also solve the context management problem. Instead of stuffing all instructions into a system prompt, skills are loaded on demand, keeping the active context focused and efficient. A skill is triggered by a user request or by another agent recognizing that the skill is relevant. The skill loader pattern: an orchestrator agent receives a task, identifies which skills are needed, loads those skills into the context, and delegates execution to a specialized sub-agent. This pattern enables multi-agent systems where each agent is an expert in its domain. Skills can also include guardrails: instructions that tell the agent what NOT to do, edge cases to watch out for, and how to handle errors or ambiguous situations.
+# Compréhension de la configuration et de la base de code
+
+Voici la transcription et la traduction française fluide, professionnelle et entièrement épurée de ses repères temporels.
+
+Le premier exemple sur lequel nous allons travailler est un chatbot RAG (Génération Augmentée de Récupération) de bout en bout. Déployons **Claude Code** pour explorer la base de code.
+
+Avant de commencer à demander à Claude Code d'écrire de grands volumes de code pour nous, voyons comment nous pouvons utiliser cet outil pour monter rapidement en compétences sur des bases de code de grande envergure. Dans notre cas d'école, nous disposons d'une application conçue pour discuter avec Claude à propos des supports de cours de *Deep Learning AI*.
+
+Si nous testons l'interface en lui demandant le plan du cours sur les applications d'IA à contexte enrichi avec le protocole MCP d'Anthropic, nous obtenons une réponse très détaillée structurant les leçons et leurs descriptions respectives. Voyons maintenant comment appréhender le code sous-jacent qui propulse cette application.
+
+De retour dans VS Code, le terminal est ouvert. Lançons Claude Code en tapant simplement la commande `claude`. Dans cet environnement, nous pouvons dialoguer directement avec notre base de code. **Commençons par une question de haut niveau pour obtenir une vue d'ensemble du projet.**
+
+!image.png
+
+Claude Code ne va pas scanner bêtement chaque fichier individuel. Il déploie une **recherche agentique** pour cartographier la base de code, identifier les fichiers les plus structurants et restituer une synthèse claire de l'architecture, des composants clés et des fonctionnalités de l'application.
+
+Si nous voulons comprendre comment les documents de cours sont ingérés, nous pouvons lui poser la question directement. Notre application utilise une architecture RAG pour extraire les informations pertinentes. On dit souvent que Claude Code est un fantastique ingénieur à vos côtés, mais **c'est un explicateur encore meilleur.** Avant de lui faire rédiger du code, utilisez-le pour comprendre la dynamique du système.
+
+!image.png
+
+!image.png
+
+L'outil nous indique précisément quelles portions de code découpent le texte en morceaux (*chunks*), lesquelles injectent le contexte de la leçon et comment sont stockées les métadonnées. Cette capacité à s'approprier un projet, en particulier lorsque vous ne maîtrisez pas la pile technologique ou le langage sous-jacent, est d'une valeur inestimable. Au lieu de naviguer manuellement dans chaque dossier, nous pouvons exiger des analyses spécifiques et même générer des diagrammes.
+
+!image.png
+
+**Demandons à Claude de retracer l'intégralité du processus de traitement d'une requête utilisateur, du frontend jusqu'au backend (**de bout en bout). Même si vos connaissances sur une partie de la stack sont limitées, Claude Code pallie ce manque.
+
+Pendant que l'outil travaille, il affiche sa liste de tâches (*to-do list*), ce qui permet de suivre sa réflexion en temps réel. À tout moment, vous pouvez appuyer sur la touche `Échap` pour interrompre le processus et réorienter l'agent. Ici, le plan est parfait : il part du frontend, suit les points de terminaison de l'API (endpoints), analyse le moteur RAG et détaille la génération de la réponse. Il inspecte les fichiers cibles et livre un résumé puissant.
+
+Notez que vous pouvez exécuter Claude Code dans le terminal intégré de VS Code ou ouvrir une instance de terminal dédiée. Le résultat affiché est extrêmement précis. Nous comprenons le comportement du JavaScript côté frontend, la réception de la requête par le backend, le filtrage par le système RAG, la recherche vectorielle au sein de la base de données **ChromaDB**, l'application de l'invite système (system prompt) et enfin le renvoi de la réponse finale à l'utilisateur.
+
+!image.png
+
+!image.png
+
+!image.png
+
+!image.png
+
+!image.png
+
+!image.png
+
+**Puisque les représentations visuelles facilitent grandement l'apprentissage, demandons à Claude de dessiner un diagramme pour illustrer ce flux**. Claude Code peut concevoir du rendu pour des visualisations web (via D3.js) ou générer directement de l'art ASCII de qualité dans le terminal.
+
+!image.png
+
+Le diagramme ASCII généré par l'outil est très propre : il modélise le point d'entrée frontend, l'appel API vers le backend, l'articulation des invites et des outils, la requête vectorielle dans ChromaDB et la synthèse finale par le grand modèle de langage. Vous pouvez enrichir Claude Code avec des outils tiers pour générer des visuels encore plus poussés, mais cette restitution native permet déjà de comprendre l'architecture en une fraction du temps habituellement nécessaire.
+
+!image.png
+
+Posons-lui maintenant une question pratique : **"Comment puis-je lancer cette application ?"** Claude identifie immédiatement la documentation de l'API, l'interface web et les variables d'environnement requises. Nous sommes prêts à coder.
+
+Examinons à présent l'une des commandes les plus importantes de Claude Code : la commande `/init`. En tapant une barre oblique (`/`), le terminal affiche la liste des commandes natives. La commande `/init` analyse la base de code pour initialiser automatiquement un fichier de mémoire technique appelé `CLAUDE.md`.
+
+Le fichier `CLAUDE.md` est la pièce maîtresse pour doter Claude Code d'une **mémoire à long terme** sur le projet. Il consigne la manière de gérer l'environnement, les commandes de build, de l'interfaçage des tests, du linter et toutes les directives spécifiques que Claude doit respecter à chaque ouverture de session.
+
+Il existe trois types de fichiers `CLAUDE.md` que vous pouvez exploiter :
+
+!image.png
+
+1. **`CLAUDE.md` (Au niveau du projet) :** Généré par la commande `/init`, il réside à la racine du projet. Il est partagé avec le reste de l'équipe et intégré au contrôle de version (Git). Vous pouvez également en imbriquer dans des sous-dossiers (ex: `/frontend` ou `/backend`) pour des instructions plus locales.
+2. **`CLAUDE.local.md` (Local) :** Destiné à vos configurations personnelles (préférences de terminal ou d'éditeur). Ce fichier est configuré pour être ignoré par Git et n'est pas partagé.
+3. **`CLAUDE.md` (Global) :** Placé dans le répertoire `.claude` de votre dossier d'accueil utilisateur (*home directory*), il applique ses directives à l'ensemble des projets traités par Claude Code sur votre machine.
+
+Lançons l'initialisation. Comme nous utilisons Claude Code conjointement avec Visual Studio Code, nous voyons le fichier se créer instantanément dans l'éditeur. À chaque action sur le système de fichiers, l'outil sollicite notre validation. Cette approche de l'humain au cœur de la boucle (*Human-in-the-loop*) garantit une sécurité totale. Vous pouvez accepter manuellement ou choisir l'option d'acceptation automatique pour accélérer le processus.
+
+Le fichier `CLAUDE.md` généré contient un aperçu du projet, les technologies clés, une vue d'ensemble de l'architecture et un diagramme des composants. Claude continue d'analyser le code et enrichit le document de manière autonome.
+
+!image.png
+
+Grâce à la commande `/ide`, Claude Code se connecte nativement à votre éditeur (ici VS Code). Dès que vous visitez un fichier ou inspectez des lignes de code spécifiques, l'éditeur transmet ce contexte en temps réel à Claude Code, facilitant grandement vos requêtes textuelles sur le code ouvert.
+
+Pour amender la mémoire de Claude sans ouvrir manuellement le fichier, vous pouvez utiliser le raccourci d'enregistrement direct (l'icône de livre ou la commande dédiée). 
+
+!image.png
+
+Spécifions par exemple : *"Utilise toujours uv pour lancer le serveur, n'utilise pas pip directement."* 
+
+!image.png
+
+!image.png
+
+!image.png
+
+L'outil nous demande où stocker cette règle (projet, local ou utilisateur). Choisissons la mémoire du projet pour que toute l'équipe en bénéficie. Le fichier `CLAUDE.md` s'actualise instantanément, et toute mention relative à la gestion des dépendances intègre désormais le gestionnaire **uv**.
+
+!image.png
+
+En dehors de `/init`, voici les principales commandes intégrées à connaître :
+
+- **/help :** Affiche une description rapide et un résumé de toutes les commandes disponibles.
+
+!image.png
+
+- **/clear :** Efface l'intégralité de l'historique de la conversation pour ouvrir une fenêtre de contexte totalement vierge. C'est idéal lorsque l'on change de tâche pour éviter de saturer la mémoire du modèle.
+
+!image.png
+
+- **/compact :** Compresse la session. Cette commande vide l'historique détaillé des échanges mais conserve un résumé des actions accomplies, permettant de poursuivre le développement sur une base de contexte allégée.
+- **La touche `Échap` :** Interrompt immédiatement n'importe quel processus ou génération en cours pour vous redonner la main sur le terminal.
+
+!image.png
+
+Pour conclure cette étape, voyons comment Claude Code s'interface nativement avec **Git**. Nous avons modifié notre configuration de projet et nous devons indexer et valider ces changements. Au lieu de taper manuellement les commandes Git et de rédiger péniblement un message de validation, demandons à Claude Code de s'en charger.
+
+L'agent analyse les différences de code (*diffs*), indexe les fichiers et génère un message de validation (*commit message*) particulièrement descriptif et normé. C'est un atout précieux pour l'historique du projet et pour vos futurs collaborateurs sur GitHub. Notre commit est prêt.
+
+Dans la prochaine leçon, nous allons passer à la vitesse supérieure et utiliser Claude Code pour écrire de grands volumes de fonctionnalités de manière totalement automatisée.
+
 
 Lesson 4: Skills vs Tools, MCP, and Subagents
 Understanding the distinction between skills, tools, MCP servers, and subagents is essential for designing effective AI systems. Tools are functions that an agent can call to interact with the world: reading files, searching the web, running code, calling APIs. Tools provide capabilities. Skills provide knowledge and instructions about how to use those capabilities effectively. MCP (Model Context Protocol) servers expose tools to agents in a standardized way. An MCP server can provide file system access, database queries, web browsing, or any external API. Skills and MCP are complementary: a skill might instruct the agent on how to use a specific MCP server effectively. Subagents are separate agent instances that handle specific subtasks. The difference between a skill and a subagent: a skill augments a single agent's behavior, while a subagent is an independent agent that runs in parallel or in sequence. Skills are loaded into the current agent's context. Subagents receive their own context and run independently. When to use each: use skills when you need to add domain knowledge or workflow instructions to an agent, use MCP when you need to give an agent access to external systems, use subagents when you need parallel execution or want to isolate complex subtasks. These three mechanisms are designed to work together: a skill might instruct an agent to spin up a subagent using a specific MCP server.
+# rag
+
+Vue globale du projet
+
+RAG Chatbot pour cours en ligne — un assistant qui répond à des questions sur des scripts de cours, en cherchant dans une base vectorielle plutôt qu'en s'appuyant uniquement sur la mémoire de Claude.
+
+---
+
+Ce que c'est
+
+Un système full-stack minimaliste en deux parties :
+
+- Backend Python (FastAPI) — indexe des fichiers texte de cours, expose une API de question/réponse
+- Frontend vanilla JS — interface de chat avec sidebar de stats et rendu markdown
+
+---
+
+La stack technique
+
+┌──────────────┬────────────────────────────────────────┐
+│    Couche    │              Technologie               │
+├──────────────┼────────────────────────────────────────┤
+│ Langage      │ Python 3.13+, JavaScript               │
+├──────────────┼────────────────────────────────────────┤
+│ Web          │ FastAPI + Uvicorn                      │
+│ framework    │                                        │
+├──────────────┼────────────────────────────────────────┤
+│ Vector DB    │ ChromaDB (persistance disque)          │
+├──────────────┼────────────────────────────────────────┤
+│ Embeddings   │ all-MiniLM-L6-v2                       │
+│              │ (sentence-transformers, local)         │
+├──────────────┼────────────────────────────────────────┤
+│ LLM          │ Claude via Anthropic SDK               │
+│              │ (claude-sonnet-4-20250514)             │
+├──────────────┼────────────────────────────────────────┤
+│ Package      │ uv                                     │
+│ manager      │                                        │
+└──────────────┴────────────────────────────────────────┘
+
+---
+
+Comment ça fonctionne
+
+1. Au démarrage, le serveur parse les fichiers docs/*.txt et les découpe en chunks de 800 caractères avec 100 de chevauchement, puis les encode en vecteurs et les stocke dans ChromaDB
+2. Quand l'utilisateur pose une question, le backend l'envoie à Claude avec un outil search_course_content disponible
+3. Claude décide s'il doit chercher — si oui, il appelle l'outil, qui fait une recherche sémantique dans ChromaDB et retourne les 5 chunks les plus proches
+4. Claude génère la réponse finale à partir de ces chunks
+5. Le frontend affiche la réponse en markdown avec les sources repliables
+
+---
+
+Structure des fichiers
+
+starting-ragchatbot-codebase/
+│
+├── backend/                  # Tout le code Python
+│   ├── app.py                # Routes FastAPI + point d'entrée
+│   ├── config.py             # Tous les paramètres tunables
+│   ├── rag_system.py         # Orchestrateur central
+│   ├── ai_generator.py       # Appels Anthropic (tool use)
+│   ├── vector_store.py       # Interface ChromaDB
+│   ├── search_tools.py       # Définition de l'outil Claude
+│   ├── document_processor.py # Parsing + chunking des .txt
+│   ├── session_manager.py    # Historique de conversation
+│   └── models.py             # Course, Lesson, CourseChunk
+│
+├── frontend/                 # Interface web
+│   ├── index.html
+│   ├── script.js             # Fetch API, rendu markdown
+│   └── style.css             # Thème sombre, responsive
+│
+├── docs/                     # Données : 4 scripts de cours .txt
+├── .env                      # ANTHROPIC_API_KEY (gitignored)
+├── pyproject.toml            # Dépendances uv
+└── run.sh                    # Lance le serveur depuis la racine
+
+---
+
+Ce qui est notable
+
+Tool use — Claude ne cherche pas automatiquement à chaque requête. Il décide lui-même si la question nécessite une recherche dans les cours ou s'il peut répondre de sa propre connaissance. Cela évite des appels ChromaDB inutiles.
+
+Deux appels API par requête quand Claude cherche : un premier pour décider et appeler l'outil, un second pour générer la réponse avec les résultats.
+
+Mémoire en RAM seulement — l'historique de conversation (max 2 tours) disparaît au redémarrage du serveur. ChromaDB en revanche persiste sur disque.
+
+Pas de tests, pas de CI — projet d'apprentissage/expérimentation.
+
+✻ Baked for 21s
+
+❯ What are the key data models? réponds en français
+
+Les modèles de données clés
+
+Il y a deux couches distinctes : les modèles domaine (ce que le système manipule en interne) et les modèles API (ce qui transite entre le frontend et le backend).
+
+---
+
+Couche domaine — backend/models.py
+
+Ces trois modèles représentent la structure des données de cours.
+
+Lesson — une leçon dans un cours
+lesson_number: int          # numéro séquentiel (1, 2, 3...)
+title: str                  # titre de la leçon
+lesson_link: Optional[str]  # URL vers la leçon
+
+Course — un cours complet
+title: str                  # titre — sert aussi d'identifiant unique dans ChromaDB
+course_link: Optional[str]  # URL du cours
+instructor: Optional[str]   # nom de l'instructeur
+lessons: List[Lesson]       # liste des leçons
+
+CourseChunk — un fragment de texte prêt pour le stockage vectoriel
+content: str                       # le texte brut du fragment
+course_title: str                  # cours d'origine
+lesson_number: Optional[int]       # leçon d'origine
+chunk_index: int                   # position dans le document
+
+CourseChunk est ce qui finit dans ChromaDB. Un cours génère N chunks ; chaque chunk porte les métadonnées nécessaires pour filtrer les recherches par cours ou par leçon.
+
+---
+
+Couche API — backend/app.py
+
+Ces modèles Pydantic valident les données qui entrent et sortent de l'API.
+
+QueryRequest — ce que le frontend envoie
+query: str                  # la question de l'utilisateur
+session_id: Optional[str]   # None si nouvelle session
+
+QueryResponse — ce que le backend retourne
+answer: str                 # réponse générée par Claude
+sources: List[str]          # ex: ["Intro to MCP - Lesson 2"]
+session_id: str             # ID à renvoyer dans les prochaines requêtes
+
+CourseStats — pour la sidebar du frontend
+total_courses: int
+course_titles: List[str]
+
+---
+
+Comment ils s'articulent
+
+Fichier .txt
+↓ document_processor.py
+Course + List[Lesson]        ← modèles domaine
+↓ vector_store.py
+List[CourseChunk]            ← stockés dans ChromaDB
+
+Question utilisateur
+↓ QueryRequest           ← modèle API entrant
+↓ rag_system + ChromaDB
+↓ QueryResponse          ← modèle API sortant
+Réponse affichée
+
+Le point de jonction clé : Course.title est utilisé comme id dans ChromaDB, ce qui permet la déduplication au rechargement — si un cours avec ce titre existe déjà, il n'est pas réindexé.
+
+✻ Brewed for 16s
+
+❯ Explain how the documents are processed réponds en français
+
+Je lis document_processor.py pour donner des détails précis.
+
+Read 1 file
+
+Comment les documents sont traités
+
+Tout se passe dans backend/document_processor.py. Le traitement se fait en deux grandes étapes : parsing (extraire la structure) puis chunking (découper le texte).
+
+---
+
+Étape 1 — Format attendu des fichiers
+
+Les fichiers .txt dans docs/ doivent respecter ce format :
+
+Course Title: Introduction au MCP
+Course Link: https://...
+Course Instructor: John Doe
+
+Lesson 1: Qu'est-ce que le MCP ?
+Lesson Link: https://...
+Contenu de la leçon 1...
+
+Lesson 2: Les outils MCP
+Lesson Link: https://...
+Contenu de la leçon 2...
+
+Si le format n'est pas respecté, le parser fait de son mieux : il utilise le nom du fichier comme titre de cours, et traite tout le contenu comme une seule leçon.
+
+---
+
+Étape 2 — Parsing (process_course_document, ligne 97)
+
+Fichier .txt
+│
+├── Lignes 1-3  → métadonnées du cours
+│       Course Title  → course.title  (aussi l'ID ChromaDB)
+│       Course Link   → course.course_link
+│       Course Instructor → course.instructor
+│
+└── Reste du fichier → scan ligne par ligne
+"Lesson N: Titre" détecté ?
+├── OUI → clôture la leçon précédente, démarre une nouvelle
+│         ligne suivante "Lesson Link:" → stockée, pas indexée
+└── NON → ajouté au contenu de la leçon courante
+
+À la fin du fichier, la dernière leçon est traitée manuellement (elle n'a pas de "leçon suivante" pour déclencher sa clôture).
+
+---
+
+Étape 3 — Chunking (chunk_text, ligne 25)
+
+Le texte de chaque leçon est découpé en chunks. Le découpage se fait par phrases, pas par nombre de caractères brut.
+
+Texte de la leçon
+│
+├── 1. Normalisation des espaces (re.sub)
+├── 2. Découpage en phrases
+│       regex : coupe après . ! ? suivi d'un espace + majuscule
+│       ignore les abréviations courantes (M. Dr. etc.)
+│
+└── 3. Assemblage en chunks
+tant que chunk_size (800 chars) non dépassé → ajouter phrase
+sinon → clore le chunk, démarrer le suivant
+
+```
+        overlap : les N dernières phrases du chunk courant
+        sont reprises au début du chunk suivant
+        (jusqu'à chunk_overlap = 100 chars)
+```
+
+Pourquoi par phrases ? Couper au milieu d'une phrase casse le sens. Cette approche garantit que chaque chunk se termine sur une phrase complète.
+
+---
+
+Étape 4 — Injection de contexte
+
+Chaque chunk reçoit un préfixe avant d'être stocké dans ChromaDB :
+
+┌─────────────────────────────┬─────────────────────────┐
+│          Situation          │     Préfixe ajouté      │
+├─────────────────────────────┼─────────────────────────┤
+│ Premier chunk d'une leçon   │ "Lesson N content: ..." │
+│ (sauf dernière)             │                         │
+├─────────────────────────────┼─────────────────────────┤
+│ Tous les chunks de la       │ "Course Titre Lesson N  │
+│ dernière leçon              │ content: ..."           │
+├─────────────────────────────┼─────────────────────────┤
+│ Chunks sans leçon           │ aucun préfixe           │
+│ (fallback)                  │                         │
+└─────────────────────────────┴─────────────────────────┘
+
+C'est une légère incohérence dans le code (lignes 185-188 vs 234) : la dernière leçon reçoit plus de contexte que les autres. Le comportement n'est probablement pas intentionnel.
+
+---
+
+Résultat final
+
+1 fichier .txt
+→ 1 objet Course  (avec ses Lessons)
+→ N objets CourseChunk  (un par fragment de texte)
+
+Stockés dans ChromaDB :
+course_catalog   ← Course (titre, instructeur, liens)
+course_content   ← CourseChunk × N (texte + métadonnées)
+
+Un cours de 4 leçons avec ~5000 mots génère environ 20-30 chunks selon la densité du texte.
+
+✻ Crunched for 29s
+
+❯ What is the format of the document expected by the document_processor? réponds en français
+
+D'après le code que je viens de lire (document_processor.py, lignes 97-259) :
+
+Format attendu
+
+Course Title: Titre du cours
+Course Link: https://lien-vers-le-cours.com
+Course Instructor: Prénom Nom
+
+Lesson 1: Titre de la leçon 1
+Lesson Link: https://lien-vers-la-leçon.com
+Contenu de la leçon 1. Tout le texte ici est libre.
+Il peut s'étendre sur plusieurs lignes.
+
+Lesson 2: Titre de la leçon 2
+Lesson Link: https://lien-vers-la-leçon.com
+Contenu de la leçon 2...
+
+Lesson 3: Titre de la leçon 3
+...
+
+---
+
+Règles précises
+
+En-tête du cours (3 premières lignes) :
+
+- Course Title: — requis pour nommer le cours. Si absent, le nom du fichier est utilisé comme fallback
+- Course Link: — optionnel
+- Course Instructor: — optionnel
+- Une ligne vide après les métadonnées est tolérée
+
+Leçons :
+
+- Chaque leçon commence par Lesson N: Titre (insensible à la casse)
+- N est un entier (0, 1, 2, 3...)
+- La ligne Lesson Link: immédiatement après l'en-tête de leçon est optionnelle — si présente, elle est stockée comme métadonnée mais pas indexée dans le texte
+- Tout ce qui suit jusqu'à la prochaine ligne Lesson N: est considéré comme le contenu de la leçon
+
+Fallback si le format n'est pas respecté :
+Tout le contenu après les 3 premières lignes est traité comme un seul bloc de texte sans structure de leçon.
+
+---
+
+Exemple concret (un des fichiers docs/)
+
+Course Title: Introduction to Claude and AI Assistants
+Course Link: https://example.com/course
+Course Instructor: Jane Smith
+
+Lesson 1: What is Claude?
+Lesson Link: https://example.com/lesson1
+Claude is an AI assistant made by Anthropic. It can help with...
+
+Lesson 2: How to Use Claude Effectively
+Lesson Link: https://example.com/lesson2
+To get the best results from Claude, start by...
+
+---
+
+Ce qui est ignoré / tolérant
+
+- La casse des mots-clés (course title:, COURSE TITLE:, Course Title: → tous acceptés)
+- Les espaces supplémentaires autour des valeurs
+- Les lignes vides entre les paragraphes d'une leçon (ajoutées au contenu)
+- Les fichiers .pdf et .docx sont acceptés par le filtre de fichiers (rag_system.py:81), mais il n'y a pas de code de parsing pour ces formats — seuls les .txt fonctionnent réellement
+
+✻ Worked for 17s
+
+❯ How are the course chunks loaded to the database? réponds en français
+
+J'ai déjà lu vector_store.py et rag_system.py dans cette session — je peux répondre directement.
+
+Comment les chunks sont chargés dans ChromaDB
+
+Vue d'ensemble du flux
+
+docs/*.txt
+↓  rag_system.add_course_folder()       [rag_system.py:52]
+↓  document_processor.process_course_document()
+↓
+Course + List[CourseChunk]
+↓
+vector_store.add_course_metadata(course)    → collection course_catalog
+vector_store.add_course_content(chunks)     → collection course_content
+
+---
+
+Étape 1 — Déduplication avant indexation
+
+Avant de traiter quoi que ce soit, add_course_folder récupère les titres déjà présents dans ChromaDB :
+
+# rag_system.py:76
+
+existing_course_titles = set(self.vector_store.get_existing_course_titles())
+
+Si course.title est déjà dans cet ensemble → le fichier est skippé. L'indexation est donc idempotente : relancer le serveur 10 fois ne crée pas de doublons.
+
+---
+
+Étape 2 — Indexation des métadonnées du cours
+
+add_course_metadata() ajoute le cours dans la collection course_catalog :
+
+# vector_store.py:150
+
+self.course_catalog.add(
+documents=[course.title],          # texte vectorisé = juste le titre
+metadatas=[{
+"title": course.title,
+"instructor": course.instructor,
+"course_link": course.course_link,
+"lessons_json": json.dumps([...]),  # liste des leçons sérialisée
+"lesson_count": len(course.lessons)
+}],
+ids=[course.title]                 # titre = clé unique
+)
+
+Cette collection sert uniquement à la résolution de nom : quand Claude passe course_name="MCP", ChromaDB cherche dans course_catalog quel titre correspond le mieux, et retourne le titre exact pour filtrer ensuite course_content.
+
+---
+
+Étape 3 — Indexation du contenu (les chunks)
+
+add_course_content() ajoute tous les chunks dans la collection course_content :
+
+# vector_store.py:162
+
+self.course_content.add(
+documents=[chunk.content for chunk in chunks],   # texte vectorisé
+metadatas=[{
+"course_title": chunk.course_title,
+"lesson_number": chunk.lesson_number,
+"chunk_index": chunk.chunk_index
+} for chunk in chunks],
+ids=[f"{chunk.course_title.replace(' ', '*')}*{chunk.chunk_index}" for chunk in chunks]
+)
+
+ChromaDB vectorise automatiquement le contenu de chaque chunk via all-MiniLM-L6-v2 (configuré à l'initialisation du VectorStore).
+
+---
+
+Les deux collections ChromaDB
+
+┌────────────────┬──────────────────┬───────────────────┐
+│   Collection   │     Contenu      │       Usage       │
+├────────────────┼──────────────────┼───────────────────┤
+│                │ 1 document par   │ Résolution        │
+│ course_catalog │ cours (le titre) │ sémantique du nom │
+│                │                  │  de cours         │
+├────────────────┼──────────────────┼───────────────────┤
+│                │ N documents par  │ Recherche de      │
+│ course_content │ cours (les       │ contenu par       │
+│                │ chunks)          │ similarité        │
+└────────────────┴──────────────────┴───────────────────┘
+
+---
+
+Déclenchement au démarrage
+
+Tout ce processus est déclenché automatiquement par l'événement startup de FastAPI :
+
+# app.py:88
+
+@app.on_event("startup")
+async def startup_event():
+docs_path = "../docs"
+if os.path.exists(docs_path):
+courses, chunks = rag_system.add_course_folder(docs_path, clear_existing=False)
+print(f"Loaded {courses} courses with {chunks} chunks")
+
+clear_existing=False préserve les données existantes — seuls les nouveaux cours sont ajoutés. Pour tout réindexer from scratch, il faut supprimer backend/chroma_db/ avant de relancer.
+
+✻ Churned for 21s
+
+❯ Trace the process of handling user's query from frontend to backend réponds toujoiurs en français tout le long du projet
+
+Je sauvegarde ta préférence de langue pour les prochaines sessions.
+
+Recalled 1 memory, wrote 2 memories
+
+Préférence enregistrée. Voici le traitement complet d'une question, fichier par fichier :
+
+---
+
+1. L'utilisateur tape sa question — frontend/script.js
+
+sendMessage()  [ligne 45]
+
+- La valeur du champ texte est récupérée et nettoyée
+- Le bouton et le champ sont désactivés pour éviter les doubles envois
+- La question est affichée immédiatement dans le chat (bulle utilisateur)
+- Un indicateur de chargement (trois points animés) est inséré
+
+// ligne 63
+const response = await fetch(`/api/query`, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({
+query: query,           // "What is MCP?"
+session_id: currentSessionId  // null si première question
+})
+});
+
+---
+
+1. Réception et validation — backend/app.py
+
+# ligne 56
+
+@app.post("/api/query")
+async def query_documents(request: QueryRequest):
+
+- Pydantic valide automatiquement le JSON entrant (QueryRequest)
+- Si session_id est null → une nouvelle session est créée :
+session_id = rag_system.session_manager.create_session()
+
+# retourne "session_1", "session_2", etc.
+
+- La question est transmise à l'orchestrateur :
+answer, sources = rag_system.query(request.query, session_id)
+
+---
+
+1. Préparation du contexte — backend/rag_system.py
+
+# ligne 102
+
+def query(self, query, session_id):
+
+Deux choses sont préparées avant d'appeler Claude :
+
+Le prompt :
+prompt = f"Answer this question about course materials: {query}"
+
+L'historique de conversation :
+history = self.session_manager.get_conversation_history(session_id)
+
+# retourne une chaîne formatée :
+
+# "User: question précédente\nAssistant: réponse précédente"
+
+# ou None si première question
+
+Puis l'appel au générateur :
+response = self.ai_generator.generate_response(
+query=prompt,
+conversation_history=history,
+tools=self.tool_manager.get_tool_definitions(),  # définition de search_course_content
+tool_manager=self.tool_manager
+)
+
+---
+
+1. Premier appel à Claude — backend/ai_generator.py
+
+# ligne 43
+
+def generate_response(self, query, conversation_history, tools, tool_manager):
+
+Le system prompt est assemblé :
+system = SYSTEM_PROMPT                          # instructions fixes
++ "\n\nPrevious conversation:\n" + history  # si historique existant
+
+Paramètres envoyés à l'API Anthropic :
+{
+"model": "claude-sonnet-4-20250514",
+"temperature": 0,
+"max_tokens": 800,
+"system": system,
+"messages": [{"role": "user", "content": prompt}],
+"tools": [définition de search_course_content],
+"tool_choice": {"type": "auto"}   # Claude décide s'il cherche
+}
+
+Deux cas possibles à la réception :
+
+stop_reason == "end_turn"   → Claude répond directement, sans chercher
+→ retourne response.content[0].text  ← fin
+
+stop_reason == "tool_use"   → Claude veut chercher
+→ _handle_tool_execution()  ← continue
+
+---
+
+1. Exécution de l'outil — backend/search_tools.py
+
+# ligne 109
+
+for content_block in initial_response.content:
+if content_block.type == "tool_use":
+tool_result = tool_manager.execute_tool(
+content_block.name,   # "search_course_content"
+**content_block.input # {"query": "...", "course_name": "MCP"}
+)
+
+ToolManager.execute_tool() délègue à CourseSearchTool.execute() :
+
+# ligne 52
+
+def execute(self, query, course_name=None, lesson_number=None):
+results = self.store.search(query, course_name, lesson_number)
+
+---
+
+1. Recherche vectorielle — backend/vector_store.py
+
+# ligne 61
+
+def search(self, query, course_name=None, lesson_number=None):
+
+Si course_name est fourni → résolution sémantique d'abord :
+
+# ligne 102
+
+results = self.course_catalog.query(
+query_texts=["MCP"],   # recherche "MCP" dans les titres de cours
+n_results=1
+)
+
+# → retourne "Introduction to MCP" (correspondance partielle acceptée)
+
+Puis recherche dans le contenu :
+
+# ligne 93
+
+results = self.course_content.query(
+query_texts=["What is MCP?"],
+n_results=5,                    # MAX_RESULTS dans config.py
+where={"course_title": "Introduction to MCP"}  # filtre optionnel
+)
+
+ChromaDB encode la question avec all-MiniLM-L6-v2 et retourne les 5 chunks les plus proches par similarité cosinus.
+
+Les résultats sont formatés avec leur contexte :
+[Introduction to MCP - Lesson 2]
+Lesson 2 content: MCP (Model Context Protocol) is a standard...
+
+[Introduction to MCP - Lesson 1]
+Lesson 1 content: In this course we will cover...
+
+Les sources ("Introduction to MCP - Lesson 2") sont mémorisées dans last_sources.
+
+---
+
+1. Deuxième appel à Claude — backend/ai_generator.py
+
+# ligne 123
+
+messages = [
+{"role": "user",      "content": "Answer this question..."},
+{"role": "assistant", "content": [tool_use block]},
+{"role": "user",      "content": [tool_result: chunks formatés]}
+]
+
+final_response = self.client.messages.create(
+model=..., messages=messages, system=system
+# sans "tools" cette fois → Claude ne peut plus chercher
+)
+
+Claude génère la réponse finale en s'appuyant sur les chunks retournés.
+
+---
+
+1. Remontée de la réponse — backend/rag_system.py → backend/app.py
+
+sources = self.tool_manager.get_last_sources()   # ["Intro to MCP - Lesson 2"]
+self.tool_manager.reset_sources()
+self.session_manager.add_exchange(session_id, query, response)  # historique mis à jour
+return response, sources
+
+app.py emballe et retourne :
+{
+"answer": "MCP (Model Context Protocol) is...",
+"sources": ["Introduction to MCP - Lesson 2"],
+"session_id": "session_1"
+}
+
+---
+
+1. Affichage — frontend/script.js
+
+// ligne 85
+currentSessionId = data.session_id;   // conservé pour la prochaine question
+loadingMessage.remove();
+addMessage(data.answer, 'assistant', data.sources);
+
+addMessage() :
+
+- Convertit la réponse markdown → HTML via marked.parse()
+- Ajoute une section <details> repliable si des sources sont présentes
+- Réactive le champ de saisie
+
+---
+
+Résumé chronologique
+
+[Browser]   frappe + Enter
+[script.js] POST /api/query  {query, session_id}
+[app.py]    valide + crée session si besoin
+[rag]       prépare prompt + historique
+[claude]    appel 1 → décide de chercher  (stop_reason: tool_use)
+[tools]     execute search_course_content
+[chromadb]  résolution nom cours + recherche sémantique → 5 chunks
+[claude]    appel 2 → génère réponse avec les chunks
+[rag]       collecte sources + met à jour session
+[app.py]    retourne {answer, sources, session_id}
+[script.js] affiche markdown + sources repliables
+
+Durée typique : 1-3 secondes selon la latence API Anthropic. La recherche ChromaDB est locale et quasi-instantanée.
+
+✻ Brewed for 56s
+
+❯ 
+
+Draw a diagram that illustrates this flow
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           NAVIGATEUR                                     │
+│                        frontend/script.js                                │
+│                                                                          │
+│   ┌──────────────┐    sendMessage()    ┌──────────────────────────────┐ │
+│   │  Zone de     │ ──────────────────► │  POST /api/query             │ │
+│   │  saisie      │                     │  { query, session_id }       │ │
+│   └──────────────┘                     └──────────────┬───────────────┘ │
+│                                                        │                 │
+│   ┌──────────────────────────────────────────────────┐│                 │
+│   │  Affichage réponse                               ││                 │
+│   │  marked.parse() → markdown → HTML               ◄┤                 │
+│   │  <details> Sources repliables                    ││                 │
+│   └──────────────────────────────────────────────────┘│                 │
+└───────────────────────────────────────────────────────┼─────────────────┘
+│
+HTTP                      │
+┌─────────────────────────────────  ▼  ──────────────┐
+│                    BACKEND                          │
+│                                                     │
+│  ┌──────────────────────────────────────────────┐  │
+│  │  app.py   POST /api/query                    │  │
+│  │  • Validation Pydantic (QueryRequest)        │  │
+│  │  • Création session si session_id absent     │  │
+│  └───────────────────┬──────────────────────────┘  │
+│                      │                              │
+│                      ▼                              │
+│  ┌──────────────────────────────────────────────┐  │
+│  │  rag_system.py   query()                     │  │
+│  │  • Récupère historique (session_manager)     │  │
+│  │  • Construit prompt                          │  │
+│  │  • Récupère définitions des outils           │  │
+│  └───────────────────┬──────────────────────────┘  │
+│                      │                              │
+│                      ▼                              │
+│  ┌──────────────────────────────────────────────┐  │
+│  │  ai_generator.py   generate_response()       │  │
+│  │                                              │  │
+│  │  APPEL 1 ────────────────────────────────►  │  │
+│  │  { system, messages, tools, tool_choice }   │  │
+│  │                                   ANTHROPIC  │  │
+│  │  ◄──────────────────────────────────────── │  │
+│  │  stop_reason ?                              │  │
+│  └──────┬────────────────────┬─────────────────┘  │
+│         │                    │                      │
+│   "end_turn"           "tool_use"                  │
+│         │                    │                      │
+│         │                    ▼                      │
+│         │  ┌────────────────────────────────────┐  │
+│         │  │  search_tools.py                   │  │
+│         │  │  CourseSearchTool.execute()        │  │
+│         │  │  • reçoit query + course_name      │  │
+│         │  └────────────────┬───────────────────┘  │
+│         │                   │                       │
+│         │                   ▼                       │
+│         │  ┌────────────────────────────────────┐  │
+│         │  │  vector_store.py   search()        │  │
+│         │  │                                    │  │
+│         │  │  1. course_catalog.query()         │  │
+│         │  │     "MCP" → "Intro to MCP"        │  │
+│         │  │     (résolution sémantique)        │  │
+│         │  │                                    │  │
+│         │  │  2. course_content.query()         │  │
+│         │  │     similarité cosinus → top 5    │  │
+│         │  │     chunks + métadonnées           │  │
+│         │  └────────────────┬───────────────────┘  │
+│         │                   │  5 chunks             │
+│         │                   ▼                       │
+│         │  ┌────────────────────────────────────┐  │
+│         │  │  ai_generator.py                   │  │
+│         │  │                                    │  │
+│         │  │  APPEL 2 ───────────────────────► │  │
+│         │  │  { messages + tool_result }       │  │
+│         │  │                          ANTHROPIC │  │
+│         │  │  ◄────────────────────────────── │  │
+│         │  │  réponse finale générée            │  │
+│         │  └────────────────┬───────────────────┘  │
+│         │                   │                       │
+│         └──────────┬────────┘                       │
+│                    │                                 │
+│                    ▼                                 │
+│  ┌──────────────────────────────────────────────┐  │
+│  │  rag_system.py  (suite)                      │  │
+│  │  • Collecte sources (last_sources)           │  │
+│  │  • session_manager.add_exchange()            │  │
+│  └───────────────────┬──────────────────────────┘  │
+│                      │                              │
+│                      ▼                              │
+│  ┌──────────────────────────────────────────────┐  │
+│  │  app.py   QueryResponse                      │  │
+│  │  { answer, sources, session_id }             │  │
+│  └───────────────────┬──────────────────────────┘  │
+└──────────────────────┼──────────────────────────────┘
+│
+HTTP         │
+───────────────────────┘
+{ answer, sources, session_id }
+│
+▼
+navigateur
+
+Légende :
+
+┌──────────────────┬────────────────────────────────────┐
+│     Symbole      │           Signification            │
+├──────────────────┼────────────────────────────────────┤
+│ ──► / ◄──        │ Flux de données                    │
+├──────────────────┼────────────────────────────────────┤
+│ ? après          │ Branchement conditionnel           │
+│ stop_reason      │                                    │
+├──────────────────┼────────────────────────────────────┤
+│ APPEL 1 / APPEL  │ Deux requêtes distinctes vers      │
+│ 2                │ l'API Anthropic                    │
+├──────────────────┼────────────────────────────────────┤
+│ ANTHROPIC        │ Service externe (latence réseau)   │
+└──────────────────┴────────────────────────────────────┘
+
+Le chemin court (sans recherche) saute directement de APPEL 1 vers rag_system (suite) via la branche "end_turn".
+
+✻ Crunched for 28s
+
+❯ Explain how the text is transformed into chunks? What is the size of each chunk?
+
+J'ai déjà lu document_processor.py dans cette session — je réponds directement.
+
+Comment le texte est découpé en chunks
+
+La méthode chunk_text() — ligne 25
+
+Le découpage ne se fait pas en coupant bêtement tous les N caractères. Il se fait phrase par phrase, ce qui garantit qu'aucune phrase n'est coupée en plein milieu.
+
+---
+
+Étape 1 — Nettoyage du texte
+
+text = re.sub(r'\s+', ' ', text.strip())
+
+Tous les espaces multiples, tabulations et retours à la ligne sont normalisés en un espace simple. Le texte devient une longue ligne continue.
+
+---
+
+Étape 2 — Découpage en phrases
+
+sentence_endings = re.compile(
+r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\!|\?)\s+(?=[A-Z])'
+)
+sentences = sentence_endings.split(text)
+
+La regex coupe après . ! ? uniquement si la lettre suivante est une majuscule — ce qui évite de couper sur les abréviations courantes comme M. Dr. e.g. etc.
+
+---
+
+Étape 3 — Assemblage des phrases en chunks
+
+phrases : ["Claude is...", "It was created...", "The model...", "You can...", ...]
+
+i = 0
+┌─────────────────────────────────────────────────────┐
+│  chunk en cours                                      │
+│  ajoute phrase[i]  →  800 chars atteints ?          │
+│       NON → ajoute phrase[i+1]                      │
+│       OUI → clore le chunk, démarrer le suivant     │
+└─────────────────────────────────────────────────────┘
+
+Concrètement :
+
+- On accumule des phrases tant que la taille totale reste sous 800 caractères
+- Dès qu'ajouter la prochaine phrase dépasserait 800 → on ferme le chunk et on en démarre un nouveau
+- Une phrase qui dépasse à elle seule 800 caractères est quand même ajoutée seule (pas de coupure forcée)
+
+---
+
+Étape 4 — Le chevauchement (overlap)
+
+Après avoir clôturé un chunk, le prochain ne repart pas de zéro. Les dernières phrases du chunk courant sont reprises au début du suivant :
+
+Chunk 1 : [phrase A] [phrase B] [phrase C] [phrase D]
+↑_________________________↑
+Chunk 2 :                      [phrase C] [phrase D] [phrase E] [phrase F]
+
+Le chevauchement s'arrête quand on a accumulé 100 caractères en remontant depuis la fin du chunk. En pratique, cela représente 1 à 3 phrases selon leur longueur.
+
+Pourquoi ? Si une information importante est à cheval entre deux chunks, elle apparaît dans les deux — la recherche sémantique peut donc la retrouver depuis l'un ou l'autre.
+
+---
+
+Taille des chunks
+
+┌───────────────┬──────────────┬────────────────────────┐
+│   Paramètre   │    Valeur    │        Fichier         │
+├───────────────┼──────────────┼────────────────────────┤
+│ CHUNK_SIZE    │ 800          │ backend/config.py      │
+│               │ caractères   │ ligne 19               │
+├───────────────┼──────────────┼────────────────────────┤
+│ CHUNK_OVERLAP │ 100          │ backend/config.py      │
+│               │ caractères   │ ligne 20               │
+└───────────────┴──────────────┴────────────────────────┘
+
+800 caractères représentent environ 120-150 mots ou 5-8 phrases de longueur moyenne.
+
+---
+
+Illustration concrète
+
+Texte brut d'une leçon (3000 caractères) :
+
+├── Chunk 0  [0    → ~800]   "Lesson 2 content: Claude is an AI..."
+│                             ↑ préfixe de contexte ajouté (1er chunk)
+│
+├── Chunk 1  [~700 → ~1500]  "...The model supports tool use..."
+│             ↑ repart 100 chars avant la fin du chunk 0
+│
+├── Chunk 2  [~1400 → ~2200] "...Tool use allows Claude to search..."
+│
+└── Chunk 3  [~2100 → ~3000] "...In the next lesson we will cover..."
+
+---
+
+Ce qu'on peut modifier
+
+Pour changer la taille des chunks, éditer backend/config.py :
+
+CHUNK_SIZE: int = 800    # augmenter → plus de contexte par chunk, moins précis
+CHUNK_SIZE: int = 400    # diminuer → plus précis, moins de contexte
+CHUNK_OVERLAP: int = 100 # augmenter → plus de continuité entre chunks
+
+Attention : tout changement nécessite de supprimer backend/chroma_db/ et de relancer le serveur pour réindexer avec les nouveaux paramètres.
+
+✻ Churned for 28s
+
+❯ Describe the api endpoints
+
+J'ai déjà lu app.py dans cette session — voici la description complète.
+
+Les endpoints de l'API
+
+L'API expose 2 endpoints JSON + 1 montage de fichiers statiques.
+
+---
+
+POST /api/query
+
+Rôle : Traite une question utilisateur et retourne la réponse de Claude.
+
+Requête :
+{
+"query": "What is MCP?",
+"session_id": "session_1"
+}
+
+Champ: query
+Type: string
+Obligatoire: oui
+Description: La question de l'utilisateur
+────────────────────────────────────────
+Champ: session_id
+Type: string
+Obligatoire: non
+Description: ID de session pour la mémoire conversationnelle.
+Si absent, une nouvelle session est créée automatiquement
+
+Réponse :
+{
+"answer": "MCP (Model Context Protocol) is a standard...",
+"sources": ["Introduction to MCP - Lesson 2", "Introduction to MCP - Lesson 1"],
+"session_id": "session_1"
+}
+
+┌────────────┬──────────────┬────────────────────────────┐
+│   Champ    │     Type     │        Description         │
+├────────────┼──────────────┼────────────────────────────┤
+│            │              │ Réponse générée par Claude │
+│ answer     │ string       │  (peut contenir du         │
+│            │              │ markdown)                  │
+├────────────┼──────────────┼────────────────────────────┤
+│            │              │ Chunks utilisés pour       │
+│ sources    │ List[string] │ générer la réponse. Vide   │
+│            │              │ si Claude a répondu sans   │
+│            │              │ chercher                   │
+├────────────┼──────────────┼────────────────────────────┤
+│            │              │ ID à renvoyer dans les     │
+│ session_id │ string       │ prochaines requêtes pour   │
+│            │              │ conserver le contexte      │
+└────────────┴──────────────┴────────────────────────────┘
+
+Erreur : HTTP 500 avec { "detail": "message d'erreur" } si une exception est levée.
+
+---
+
+GET /api/courses
+
+Rôle : Retourne les statistiques du catalogue de cours — utilisé par la sidebar du frontend au chargement de la page.
+
+Requête : aucun paramètre.
+
+Réponse :
+{
+"total_courses": 4,
+"course_titles": [
+"Introduction to Claude and AI Assistants",
+"Introduction to MCP",
+"Building RAG Systems",
+"Advanced Prompt Engineering"
+]
+}
+
+───────────────────────────────────────── claude-md-setup ──
+Comment modifier le modèle Claude utilisé ?
+
+
 
 Lesson 5: Exploring Pre-Built Skills
 Anthropic provides a library of pre-built skills that cover common development workflows. Exploring these skills is the best way to understand the structure and conventions for writing your own. Pre-built skills include: code-review (reviews code for bugs, style issues, and improvements), security-review (performs security analysis of code changes), implement-feature (guides the agent through feature implementation with planning and testing), run (starts the application and verifies behavior), verify (validates that a change works correctly), and init (initializes a CLAUDE.md file for a new project). Each skill follows a consistent structure: a frontmatter section with the skill name and description, a trigger section that defines when the skill should be used, a step-by-step instructions section, examples of correct behavior, and notes on edge cases and limitations. Reading pre-built skills reveals important patterns: skills use imperative language ("do X before Y"), they anticipate common mistakes, they provide decision trees for handling different scenarios, and they reference other skills when relevant. The skills directory is typically located at ~/.claude/skills/ for global skills or .claude/skills/ for project-specific skills. Skills are loaded automatically when their trigger conditions are met, or explicitly when the user invokes them with a slash command.
+# ajout de fonctionnalités
+
+Voici la transcription et la traduction française propre, fluide, entièrement nettoyée de ses repères temporels et enrichie d'illustrations didactiques.
+
+## 1. Guidage par le Contexte et Mode Plan (*Plan Mode*)
+
+Maintenant que vous avez une bonne compréhension de notre application chatbot, nous allons enrichir l'interface utilisateur et implémenter un tout nouvel outil côté backend.
+
+Auparavant, lorsque nous demandions l'aperçu d'un cours à l'IA, nous obtenions des informations détaillées accompagnées de sources textuelles brutes sous forme de chaînes de caractères. Notre premier objectif est de transformer ces sources en véritables liens hypertextes clairs et cliquables pour l'utilisateur, pointant directement vers le document d'origine.
+
+Pour mener à bien des modifications d'une telle envergure, nous allons nous appuyer sur deux piliers :
+
+!image.png
+
+1. **Le ciblage explicite des fichiers.**
+2. **L'activation du mode Plan (*Plan Mode*).**
+
+L'efficacité de Claude Code dépend directement de la qualité du contexte que vous lui fournissez. Bien que l'agent dispose d'une recherche agentique pour localiser les ressources, lui indiquer d'emblée les fichiers cibles accélère considérablement l'exécution. Dans le terminal de Claude Code, vous pouvez utiliser le symbole `@` suivi de la complétion par tabulation (`Tab`) pour marquer et lier précisément un fichier ou un dossier au contexte de votre invite.
+
+!image.png
+
+Pour les fonctionnalités complexes touchant plusieurs composants, il est fortement déconseillé de laisser l'IA écrire du code immédiatement. Vous devez d'abord concevoir une phase de réflexion. 
+
+!image.png
+
+Pour activer le **mode Plan**, appuyez deux fois sur la touche `Maj+Tab` (*Shift+Tab*). Une fois le mode activé, soumettez votre invite (ex: *"**Construis une interface affichant des citations sources cliquables sous forme de liens**"*).
+
+!image.png
+
+Plutôt que de modifier brutalement le code, Claude Code va lire les fichiers nécessaires, analyser la stack du frontend au backend, puis dresser un plan d'action structuré. Vous avez alors la possibilité d'amender ce plan ou de le valider.
+
+Pour exécuter le plan, vous pouvez activer l'option d'acceptation automatique (*auto-accept*) en appuyant une fois sur `Maj+Tab`. Claude Code génère alors sa liste de tâches (*to-do list*), applique les modifications JavaScript et CSS sur le frontend, adapte les structures de données sur le backend et livre son bilan sans solliciter de validation humaine à chaque ligne de code.
+
+!image.png
+
+!image.png
+
+## 2. Itération Visuelle par Capture d'Écran et serveurs MCP
+
+Une fois les modifications appliquées, nous testons l'interface. Les liens hypertextes apparaissent bien sous nos réponses, mais leur couleur bleue par défaut les rend presque invisibles et difficiles à lire sur notre thème sombre.
+
+!image.png
+
+Pour ajuster l'interface visuelle, vous pouvez simplement décrire le problème textuellement, ou exploiter la capacité de vision de Claude en lui transmettant directement une capture d'écran de l'interface défaillante. Dans le terminal de Claude Code, collez l'image accompagnée de la consigne : *"Ces liens sont difficiles à lire. Rends l'interface plus esthétique."* L'IA analyse l'image, identifie les règles CSS en cause et corrige instantanément la palette de couleurs du frontend.
+
+!image.png
+
+Cependant, prendre manuellement des captures d'écran et les injecter dans le terminal reste une tâche répétitive. Pour automatiser ce flux de design et de test, nous pouvons connecter Claude Code à un serveur **MCP (Model Context Protocol)** dédié à la manipulation de navigateur : **Playwright**.
+
+!image.png
+
+!image.png
+
+!image.png
+
+Pour intégrer cet outil, quittez Claude Code
+
+!image.png
+
+ et lancez la commande suivante dans votre terminal :
+
+!image.png
+
+Bash
+
+```
+claude mcp add playwright npx @playwright/mcp@latest
+```
+
+!image.png
+
+Relancez Claude Code. En tapant la commande `/mcp`, vous constatez que l'agent est désormais connecté au serveur Playwright et dispose d'une suite d'outils programmatiques avancés : évaluation de scripts JavaScript, navigation, clics, saisie textuelle et captures d'écran automatisées.
+
+!image.png
+
+!image.png
+
+Testons cette synergie en demandant à Claude Code d'ajouter un bouton "Nouveau Chat" dans l'interface pour réinitialiser la session sans avoir à recharger la page. Nous activons le mode Plan et spécifions nos exigences d'alignement et de style pour que ce bouton s'intègre harmonieusement avec le reste de la charte graphique.
+
+Grâce au serveur MCP Playwright, Claude Code va ouvrir un navigateur headless en arrière-plan, charger l'application, prendre une capture d'écran, analyser visuellement le rendu du bouton, ajuster ses classes CSS (suppression des bordures, correction des icônes en doublon dans le HTML) et valider la conformité esthétique finale de manière 100% autonome et programmatique.
+
+!image.png
+
+## 3. Extension du Backend : Implémentation d'Outils Déterministes
+
+!image.png
+
+Après avoir stabilisé l'interface graphique, nettoyons notre historique de conversation avec la commande `/clear` afin de libérer de l'espace de contexte avant d'aborder notre chantier sur le backend.
+
+Actuellement, les informations extraites par notre moteur RAG lors de la consultation d'un cours restent globales. Nous souhaitons implémenter un nouvel outil permettant à l'utilisateur de lister précisément le numéro, le titre et la description détaillée de chaque leçon associée à un cours.
+
+!image.png
+
+Pour cela, nous demandons à Claude Code d'intervenir sur le fichier `search_tools.py`. Grâce à la mémoire de projet consignée dans le fichier `CLAUDE.md`, l'agent assimile immédiatement l'architecture globale et conçoit son plan d'action :
+
+!image.png
+
+Python
+
+# 
+
+```
+# Exemple conceptuel de l'extension d'outils dans search_tools.py
+def get_course_lessons_details(course_id: str) -> dict:
+    """Outil permettant d'extraire la structure fine et le descriptif des leçons."""
+    # Logique d'extraction des métadonnées de cours
+    pass
+```
+
+Le plan d'action validé par l'agent se déploie en trois étapes :
+
+1. **Écriture du code Python :** Ajout de la fonction déterministe d'extraction des leçons dans `search_tools.py`.
+2. **Mise à jour de l'invite système (*System Prompt*) :** Ajustement des instructions du LLM pour lui apprendre à orchestrer ce nouvel outil lorsque la requête s'y prête.
+3. **Enregistrement de l'outil :** Connexion du module au cœur de notre agent RAG.
+
+Une fois la liste de tâches complétée, nous retournons sur notre navigateur. En interrogeant à nouveau le chatbot sur le programme d'une formation, le modèle exploite son nouvel outil backend et restitue une arborescence complète, hautement structurée et détaillée des leçons, agrémentée de nos liens sources optimisés.
+
+Dans la prochaine leçon, nous étudierons le comportement du système en cas de défaillance, et nous verrons comment utiliser Claude Code pour déboguer des erreurs complexes, rédiger des tests unitaires robustes et sécuriser nos déploiements en production.
+
+
 
 Lesson 6: Creating Custom Skills
 Creating a custom skill involves writing a markdown file that encodes expert knowledge and workflow instructions for a specific domain. The anatomy of a skill file: the filename should be descriptive (e.g., deploy-to-production.md), the file starts with frontmatter defining the skill name and description, the body contains structured instructions in sections. Key sections of a skill: WHEN TO USE (trigger conditions), CONTEXT (background knowledge the agent needs), STEPS (the workflow to follow, numbered), EXAMPLES (concrete examples of correct behavior), PITFALLS (common mistakes to avoid), and OUTPUT FORMAT (what the agent should produce). Best practices for writing skills: be explicit about ordering constraints (what must happen before what), include decision points with clear criteria, provide examples of both correct and incorrect behavior, define success criteria so the agent knows when the task is complete, keep skills focused on a single domain or workflow. A skill for deploying a FastAPI application might include: steps for running tests, building a Docker image, pushing to a registry, updating environment variables, and verifying the deployment is healthy. The skill would also include rollback instructions in case of failure. Skills should be tested by running them on representative tasks and checking that the agent follows the workflow correctly. Iterate on the skill based on observed failures.
+# tests, debogage des erreurs et refactorisation de code
+
+Voici la synthèse et la traduction française complète, fluide et professionnelle de cette leçon axée sur les stratégies avancées de **tests, débogage sous réflexion continue (*Thinking*), et refactoring multi-tours** avec Claude Code.
+
+## 1. Débogage Méthodique par les Tests sous Réflexion Étendue
+
+Imaginons que nous reprenions un projet après une période d'absence. En interrogeant notre chatbot RAG sur le contenu spécifique d'une leçon, le système n'affiche aucune donnée et lève une exception. Face à une panne, la tentation est grande de copier-coller l'erreur à la hâte ou de multiplier les captures d'écran, au risque d'aiguiller l'IA sur une fausse piste.
+
+L'approche de grade production impose une démarche inverse, infiniment plus structurée : **l'isolation pilotée par les tests.** Nous savons que l'erreur prend sa source au sein de l'un de ces trois composants clés :
+
+- `ai_generator.py` : Responsable de la conformité des appels d'API avec Anthropic.
+- `rag_system.py` : L'orchestrateur central des requêtes de génération augmentée.
+- `search_tools.py` : Le module de déclaration de nos outils déterministes.
+- 
+
+!image.png
+
+Pour résoudre l'anomalie, nous activons le **mode Plan** (`Maj+Tab` à deux reprises) et soumettons une invite ordonnant à l'agent de concevoir une suite de tests unitaires et d'intégration via le framework **pytest**, en simulant (*mockant*) la base de données vectorielle ChromaDB.
+
+!image.png
+
+Puisque la résolution de ce bug s'avère complexe, Claude Code active automatiquement sa fonctionnalité de **réflexion étendue** (*Extended Thinking*). Ce mode alloue une portion de jetons (*tokens*) dédiée exclusivement au raisonnement pur de l'IA avant toute production de code. L'interface nous donne à voir en temps réel le fil de cette réflexion, nous permettant d'interrompre le processus (`Échap`) si l'analyse s'écarte des objectifs requis.
+
+!image.png
+
+Après avoir synchronisé nos dépendances de test avec le gestionnaire **uv** (`uv add pytest`), l'agent déploie l'architecture de test et exécute la suite. Le verdict des assertions isole immédiatement la faille : la variable de configuration globale `MAX_RESULTS` (qui régit le nombre maximal de segments textuels extraits de ChromaDB lors d'une recherche vectorielle) est inexplicablement initialisée à **zéro**. L'IA rectifie la constante, relance la suite pytest (qui passe désormais à 100% au vert) et résout le bogue de manière pérenne et documentée.
+
+!image.png
+
+!image.png
+
+!image.png
+
+!image.png
+
+## 2. Refactoring de l'Architecture pour les Dialogues Multi-Tours
+
+Une fois le pipeline stabilisé, nous abordons une phase de refactoring de notre backend. Actuellement, notre moteur `ai_generator.py` est conçu pour n'exécuter qu'**un seul et unique appel d'outil par requête utilisateur**. Cette architecture s'avère insuffisante pour traiter des demandes transversales complexes (par exemple : *"Compare le plan du cours A avec celui du cours B afin d'identifier des sujets similaires"*), qui requièrent par nature une itération, une récursion ou un dialogue multi-tours avec le LLM.
+
+Pour formuler ce besoin dense, nous rédigeons un fichier de spécifications Markdown nommé `backend-outil-refactor.md`. Ce document consigne explicitement :
+
+!image.png
+
+!image.png
+
+!image.png
+
+!image.png
+
+!image.png
+
+!image.png
+
+!image.png
+
+1. Le comportement actuel et le comportement cible souhaité (gestion récursive des outils).
+2. Une simulation de flux d'exécution attendu (*mock flow*).
+3. L'exigence de n'évaluer que le comportement logique externe des fonctions, sans contraindre inutilement la gestion de leur état interne.
+
+Python
+
+on donne le prompt de backend-tool-refactor.md à claude code
+
+```
+# Représentation conceptuelle du comportement cible (Multi-turn Tool Loop)
+def generate_response_with_loop(user_query: str, max_turns: int = 5):
+    # L'agent doit être capable d'itérer et de chaîner les appels d'outils
+    # au sein d'une même session jusqu'à résolution ou épuisement des tours.
+    pass
+```
+
+## 3. Parallélisation du Raisonnement via les Sous-Agents
+
+Face à un refactoring structurel où la solution optimale n'est pas évidente d'entrée de jeu, confier la décision à un agent unique peut s'avérer risqué. **Nous tirons alors parti de la capacité de Claude Code à orchestrer des sous-agents en parallèle via son outil interne `task`.**
+
+!image.png
+
+!image.png
+
+Nous désactivons l'option d'acceptation automatique (*auto-accept*) pour conserver la gouvernance sur les modifications et soumettons notre fichier de spécifications au terminal. L'agent principal déploie instantanément deux sous-agents autonomes, dotés chacun de leur propre espace de contexte isolé, chargés de concevoir deux visions d'architecture distinctes:
+
+| **Approche A (Itérative)** | **Approche B (Globale et Multi-tours)** |
+| --- | --- |
+| Plus simple, robuste et rétrocompatible. | Plus lourde, s'appuyant sur de multiples fonctions utilitaires. |
+| **Sécurisée, intégration à faible risque**. | Optimisée pour la maintenabilité à long terme. |
+
+!image.png
+
+**Nous sélectionnons l'Approche A pour sa simplicité et activons le mode Plan afin de passer au crible les impacts avant application.** Le plan d'action de l'IA détaille l'ajustement de la signature de la méthode (introduction d'un paramètre `max_turns`), la réécriture de la boucle de traitement des messages et la mise à jour de la suite pytest sans altérer les points de terminaison de l'API.
+
+!image.png
+
+!image.png
+
+!image.png
+
+!image.png
+
+!image.png
+
+Après validation, Claude Code modifie le fichier `ai_generator.py`, met à jour nos cas de tests et confirme le succès de l'intégration directement depuis le terminal.
+
+!image.png
+
+Vérifions le bon fonctionnement du système sur le navigateur. En demandant à notre chatbot d'identifier les cours traitant d'un sujet identique à la leçon 5 de notre formation MCP, l'application orchestre désormais une suite séquentielle d'appels d'outils :
+
+!image.png
+
+- **Premier tour :** Le modèle appelle l'outil d'extraction pour analyser le contenu de la leçon 5 du cours MCP.
+    
+    !image.png
+    
+- **Second tour :** Il exploite ces résultats pour lancer une recherche comparative sur les autres référentiels de cours disponibles dans ChromaDB, avant de restituer une synthèse finale rigoureuse et validée.
+
+!image.png
+
+Le refactoring est un succès total : le pipeline est agile, résilient et validé par une couverture de tests automatisée. Dans la prochaine leçon, nous verrons comment démultiplier notre productivité en exécutant plusieurs sessions simultanées de Claude Code sans aucun risque de chevauchement ou d'écrasement de fichiers, en exploitant la puissance des **Git worktrees**.
+
+
 
 Lesson 7: Skills with the Claude API
 Skills can be integrated into Claude API applications to give Claude specialized behavior for specific tasks. When using the Claude API, you can implement skills by including the skill content in the system prompt, by loading skill files dynamically based on the user's request, or by using a skill router that selects the appropriate skill for each request. Implementation pattern using the Claude API: create a skill loader that reads skill files from a directory, implement a router that maps user intents to skills, prepend the selected skill content to the system prompt before each API call. Example with the Anthropic Python SDK: load skill content from a markdown file, pass it as the system prompt to the messages.create endpoint, combine with tool definitions if the skill requires tool use. Skills with tool use: a skill can define which tools the agent should use and how to use them. For example, a data analysis skill might instruct the agent to always use the code execution tool to verify calculations, and to produce charts using matplotlib. Caching skill content: since skills are static text, they are excellent candidates for prompt caching with the Anthropic API. Use the cache_control parameter with type ephemeral to cache skill content and reduce costs on repeated calls. Multi-skill routing: when a user request could match multiple skills, implement a classification step that selects the most relevant skill, or combine multiple skills into a single context if the task requires multiple domains of expertise.
+# ajout simultané de plusieurs fonctionnalités
+
+## 1. Automatisation via les Commandes Personnalisées (/commands)
+
+Bien que Claude Code intègre nativement une suite de commandes par barre oblique (`/init`, `/clear`, `/compact`), l'outil se révèle hautement extensible en vous permettant de **concevoir vos propres raccourcis personnalisés**.
+
+Pour implémenter une commande sur mesure, l'architecture impose une structure simple au sein de votre répertoire de projet :
+
+!image.png
+
+- Créez un dossier nommé `commands` à l'intérieur du répertoire racine `.claude`.
+- Créez un fichier au format Markdown dont le nom correspondra exactement au raccourci clavier ciblé (ex: `implement-feature.md`).
+
+L'un des aspects les plus puissants de ces fichiers réside dans la possibilité de capturer des arguments dynamiques saisis par l'utilisateur dans le terminal en invoquant la variable globale `$ARGUMENTS`.
+
+Markdown
+
+# 
+
+```
+# implement-feature
+
+Cette commande automatise la planification et l'écriture de composants frontend.
+
+## Instructions
+Prends en entrée la demande suivante : $ARGUMENTS.
+Génère exclusivement les modifications requises pour l'interface graphique (frontend)
+et consigne obligatoirement le résumé des fichiers impactés dans frontend-changes.md.
+```
+
+!image.png
+
+Contrairement au fichier `CLAUDE.md` qui est injecté de manière systématique et transparente au début de chaque session, les fichiers du dossier `commands` restent dormants. Ils n'encombrent pas votre fenêtre de contexte par défaut et ne s'activent que lorsque vous les appelez explicitement dans le terminal (ex: `/implement-feature [votre argument]`).
+
+Pour que Claude Code indexe votre nouvelle commande, quittez l'instance puis relancez-la. En tapant la barre oblique `/`, vous constaterez que votre outil sur mesure apparaît dans la liste, sa description étant automatiquement extraite des premières lignes de votre document Markdown. Vous pouvez alors déléguer à Claude Code le soin d'indexer et de valider ce fichier dans votre dépôt Git via un commit proprement documenté.
+
+!image.png
+
+## 2. Développement Parallèle Isolé : Le Pattern Git Worktree
+
+Lorsque vous devez mener de front le développement de plusieurs fonctionnalités distinctes (par exemple : ajuster l'interface graphique, étendre la couverture de tests API et configurer l'infrastructure DevOps), ouvrir de simples terminaux en parallèle dans le même répertoire s'avère extrêmement risqué. Si deux instances de l'IA manipulent simultanément ou de façon croisée les mêmes fichiers, vous ferez face à des écrasements de code, des corruptions d'état et des régressions complexes.
+
+!image.png
+
+Pour isoler totalement le raisonnement et les actions de vos agents, la bonne pratique consiste à coupler Claude Code avec les **arbres de travail Git** (`Git worktrees`). Un *worktree* vous permet de lier plusieurs répertoires de travail indépendants à un unique dépôt Git local. Chaque dossier possède sa propre branche active et ses fichiers physiques isolés, éliminant tout risque d'interférence.
+
+Déployons trois chantiers en parallèle en créant un dossier masqué `.trees` à la racine de notre projet, puis initialisons nos arbres de travail :
+
+!image.png
+
+Bash
+
+```
+git worktree add .trees/ui_feature -b feature/ui-theme
+git worktree add .trees/test_feature -b feature/api-tests
+git worktree add .trees/quality_feature -b feature/code-linting
+```
+
+Nous divisons notre terminal en trois fenêtres distinctes, chacune positionnée dans l'un de ces sous-répertoires, puis nous lançons une instance de `claude` dans chaque environnement. Grâce à cette isolation physique, nos agents peuvent travailler en simultané sur des tâches orthogonales ou manipuler les mêmes fichiers de configuration sans jamais s'entrechoquer :
+
+!image.png
+
+1. **Terminal 1 (UI) :** Nous appelons notre commande personnalisée `/implement-feature` pour concevoir un bouton de bascule entre un thème sombre et un thème clair en JavaScript et CSS.
+
+!image.png
+
+1. **Terminal 2 (Tests) :** Nous ordonnons à l'agent d'étendre la couverture de tests unitaires sur nos points de terminaison FastAPI.
+
+!image.png
+
+1. **Terminal 3 (Qualité) :** Nous demandons l'intégration d'outils de qualité de code, impliquant l'écriture de configurations spécifiques pour le linter et le formateur **Black**.
+
+!image.png
+
+## 3. Résolution Assistée des Conflits de Fusion
+
+Au cours de ces développements parallèles, le Terminal 2 (Tests) et le Terminal 3 (Qualité) ont tous deux été amenés à modifier de façon indépendante le même fichier de configuration central du projet : `pyproject.toml`.
+
+!image.png
+
+Une fois les fonctionnalités finalisées dans chaque arbre de travail, nous demandons à l'agent d'écrire un message de validation descriptif et d'exécuter le commit localement au sein de chaque répertoire. Nous pouvons désormais fermer nos trois terminaux isolés et revenir à notre espace de travail principal sur la branche `main` afin de centraliser nos développements.
+
+!image.png
+
+Plutôt que d'exécuter les commandes de fusion manuellement et de manipuler péniblement les marqueurs de conflits au sein de notre éditeur, nous confions la gouvernance de la réconciliation à Claude Code. Nous lui soumettons l'instruction globale : *"Fusionne tous les arbres de travail situés dans le dossier .trees et résous les conflits s'il y en a."*.
+
+!image.png
+
+L'agent analyse l'historique Git et déroule séquentiellement les opérations de fusion :
+
+!image.png
+
+- La branche `feature/api-tests` est intégrée sans encombre.
+- La branche `feature/ui-theme` est fusionnée avec succès.
+- Lors de l'intégration de `feature/code-linting`, Git lève une exception et interrompt le processus en raison des modifications concurrentes appliquées sur le fichier `pyproject.toml`.
+
+L'approche de recherche agentique de Claude Code prend ici tout son sens. L'IA n'applique pas une résolution aveugle. Elle inspecte les deux blocs de code en conflit (les dépendances de test d'un côté, la configuration du formateur de l'autre), comprend la sémantique de chaque intention, fusionne proprement les lignes au sein du fichier `pyproject.toml`, valide la syntaxe et valide le commit de fusion de manière totalement autonome.
+
+En ouvrant notre navigateur, nous constatons que l'application est parfaitement fonctionnelle : le bouton de bascule dynamique Thème Clair / Thème Sombre opère sans défaillance, tandis que notre backend est désormais intégralement structuré, lnté et couvert par notre nouvelle suite de tests automatisée. Le cycle de livraison est validé, sans qu'aucune collision de code n'ait eu lieu.
+
+Dans la prochaine leçon, nous verrons comment étendre l'usage de Claude Code au-delà de votre machine locale en l'intégrant directement au cœur de l'écosystème **GitHub** pour automatiser la revue de vos requêtes de tirage (*Pull Requests*).
+
+
 
 Lesson 8: Skills with Claude Code
 Skills integrate natively with Claude Code as slash commands. A skill file placed in the .claude/skills/ directory of a project (or in ~/.claude/skills/ for global skills) becomes available as a slash command with the skill's filename as the command name. Example: a skill file named deploy.md becomes available as /deploy in Claude Code. When the user types /deploy, Claude Code loads the skill content and uses it to guide the deployment workflow. Project-specific vs global skills: project skills are stored in .claude/skills/ and are only available when working in that project. Global skills are stored in ~/.claude/skills/ and are available in all projects. Skills can also be triggered automatically based on context, not just by explicit slash commands, if the skill's frontmatter defines trigger conditions. Combining skills with hooks: Claude Code hooks can trigger skills automatically. For example, a PostToolUse hook could invoke a code-review skill after every file edit, or a Stop hook could trigger a summary skill when a long task completes. Skills with subagents in Claude Code: a skill can instruct Claude Code to spawn subagents using the Agent tool. The skill defines the task for the subagent, which tools it should use, and how to integrate the subagent's output into the main workflow. This enables parallel execution of independent tasks within a single Claude Code session. Best practices for Claude Code skills: keep skill files focused and concise, use CLAUDE.md to document which skills are available in the project, include examples of when to use each skill.
+# exploration de l’intégration et des crochets github
 
+Voici la synthèse et la traduction française complète de cette leçon consacrée à l'utilisation de **Claude Code en dehors du terminal (via l'intégration GitHub)**, à l'automatisation des revues de *Pull Requests*, à la résolution de tickets (*Issues*), et à l'implémentation de **cycles de vie programmatiques via les Hooks**.
+
+## 1. Clôture des Worktrees et Synchronisation Git
+
+Dans la session précédente, nous avions laissé nos arbres de travail Git (*worktrees*) actifs. Avant de basculer sur l'intégration distante, nous devons nettoyer notre environnement local. À l'aide de la commande `claude --resume` (ou le drapeau de reprise), nous réactivons le contexte de notre discussion précédente.
+
+!image.png
+
+Nous ordonnons à Claude Code : *"Supprime le dossier `.trees`, nettoie les arbres de travail locaux ainsi que leurs branches correspondantes, puis pousse le code fusionné sur GitHub."*. L'agent exécute séquentiellement les commandes de détachement Git, supprime physiquement les répertoires isolés, nettoie les branches de fonctionnalités (*feature branches*) devenues obsolètes, et synchronise la branche principale vers notre dépôt distant via un `git push origin main`.
+
+!image.png
+
+!image.png
+
+## 2. Intégration GitHub de Grade Production
+
+Pour étendre l'intelligence de Claude Code directement au sein de votre forge logicielle, nous initialisons l'installation de l'application GitHub officielle d'Anthropic via la commande native suivante :
+
+!image.png
+
+Bash
+
+```
+/install-github-app
+```
+
+Cette commande ouvre votre navigateur et lance la phase d'authentification et d'association sécurisée avec vos dépôts. L'intégration automatise deux flux de travail majeurs basés sur le SDK sous-jacent de Claude Code :
+
+!image.png
+
+1. **L'analyse et la revue automatique de code** au sein des *Pull Requests* (PR).
+2. **La résolution autonome de bogues et de fonctionnalités** par simple mention (*tag*) de l'IA dans les tickets (*Issues*).
+3. 
+
+!image.png
+
+Lors de la configuration, l'agent génère un jeton d'accès persistant (*long-lived token*) et injecte automatiquement deux fichiers d'action YAML au sein de votre répertoire `.github/workflows/` :
+
+- Un workflow dédié au traitement des tickets.
+- Un workflow dédié aux revues de code (contenant des filtres paramétrables par auteur, branches ou répertoires cibles).
+
+!image.png
+
+### La Revue de Code Automatisée
+
+!image.png
+
+!image.png
+
+Dès qu'une *Pull Request* est soumise sur GitHub, l'action déclenche une instance distante de Claude. L'IA agit comme un relecteur technique rigoureux (un nouveau coéquipier virtuel) : elle examine les fichiers modifiés, évalue la dette technique, valide la sécurité, vérifie la conformité avec vos exigences qualité et publie un rapport d'audit détaillé sous forme de commentaires structurés au sein de la PR, validant ou bloquant la fusion.
+
+!image.png
+
+!image.png
+
+## 3. Résolution Autonome de Tickets (*Issues*)
+
+!image.png
+
+Imaginons qu'un collaborateur ouvre un ticket sur GitHub signalant une régression esthétique : *"L'en-tête 'Course Material Assistant' et son sous-titre surcharger l'interface utilisateur, il faut les supprimer ainsi que la ligne horizontale inférieure, tout en conservant le bouton de bascule des thèmes configuré précédemment."*.
+
+!image.png
+
+Pour déléguer cette tâche à l'IA, il suffit de lui attribuer le ticket ou de la mentionner directement dans les commentaires (ex: `@claude, peux-tu réparer ça ?`).
+
+!image.png
+
+L'agent GitHub prend instantanément le relais en arrière-plan et déploie un flux d'exécution calqué sur notre terminal local :
+
+!image.png
+
+!image.png
+
+!image.png
+
+- Il crée une branche de correction dédiée.
+- Il applique une recherche agentique pour localiser les fichiers d'interface en cause.
+- Il analyse le code, supprime proprement les balises d'en-tête HTML et la ligne horizontale sans altérer la logique JavaScript du bouton de bascule de thèmes.
+- Il valide le correctif par des tests, exécute le commit et pousse une nouvelle *Pull Request* de correction liée au ticket d'origine, accompagnée de sa propre documentation explicative.
+- 
+
+!image.png
+
+!image.png
+
+!image.png
+
+!image.png
+
+Après qu'une seconde instance de Claude a audité et validé le code produit par la première, nous fusionnons la PR sur GitHub. De retour dans notre terminal local, un simple `git pull` rapatrie les modifications : l'en-tête est épuré, le design est parfaitement conforme et l'intégrité de l'application est préservée.
+
+## 4. Cycle de Vie Programmatique : Implémentation des Hooks
+
+!image.png
+
+L'une des fonctionnalités avancées de Claude Code est la capacité d'intercepter et de conditionner le cycle de vie de l'agent via des **Hooks** (crochets d'exécution). Semblables aux hooks Git, ils vous permettent d'injecter des scripts ou des commandes shell arbitraires avant ou après l'activation d'un outil par l'IA.
+
+!image.png
+
+Pour configurer graphiquement ou inspecter ces événements, invoquez la commande :
+
+Bash
+
+# 
+
+```
+/hooks
+```
+
+> ⚠️ **Avertissement de Sécurité Crucial :** L'activation de commandes shell arbitraires via les hooks requiert une vigilance absolue. Vous devez valider scrupuleusement les scripts exécutés pour éviter tout effet de bord ou faille de sécurité au sein de votre environnement de développement.
+> 
+
+!image.png
+
+L'architecture permet de se brancher sur de multiples points de synchronisation de l'agent :
+
+!image.png
+
+- `BeforeToolUse` : S'exécute avant l'appel d'un outil (permet d'interdire ou de conditionner l'usage d'une commande selon le contexte).
+
+!image.png
+
+- 
+
+!image.png
+
+- 
+
+!image.png
+
+- 
+
+!image.png
+
+- `PostToolUse` : S'exécute immédiatement après l'utilisation réussie d'un outil.
+
+!image.png
+
+- Événements liés aux notifications, aux soumissions d'invites ou avant la conclusion de la réponse d'un sous-agent.
+
+### Implémentation d'un Hook `PostToolUse`
+
+Pour matérialiser ce concept, nous configurons un hook qui s'activera exclusivement lorsque Claude Code appelle les outils natifs de lecture (`view_file`) ou de recherche (`grep`). Nous stipulons que dès que l'action se termine, le terminal doit exécuter la commande système vocale `say "Tout est fait !"`.
+
+Cette configuration est automatiquement sérialisée et stockée localement dans votre fichier de configuration de projet `.claude/settings.local.json` :
+
+JSON
+
+# 
+
+```
+{
+  "hooks": {
+    "PostToolUse": {
+      "matcher": "view_file|grep",
+      "cmd": "say 'Tout est fait !'"
+    }
+  }
+}
+```
+
+Testons l'implémentation. Nous relançons Claude Code et lui demandons de lire le script de démarrage `run.sh`. L'agent appelle l'outil de lecture, affiche le contenu à l'écran, et instantanément, notre machine émet l'alerte vocale *"Tout est fait !"*, confirmant le déclenchement du hook.
+
+Au-delà de cet exemple ludique, les hooks de grade production permettent d'automatiser des tâches MLOps et DevOps indispensables : exécuter un linter ou un formatage automatique dès qu'un fichier est modifié, lancer une suite de tests pytest après chaque réécriture de fonction, ou forcer une phase d'auto-revue par l'IA avant de valider une modification d'infrastructure.
+
+Dans la prochaine leçon, nous étudierons l'interfaçage de Claude Code avec les **Notebooks Jupyter** pour concevoir des visualisations de données avancées, manipuler des graphiques complexes et piloter vos refactorings au sein d'un environnement scientifique hautement interactif.
 Lesson 9: Skills with the Claude Agent SDK
 The Claude Agent SDK provides a programmatic interface for building multi-agent systems where skills are first-class citizens. The SDK allows you to define agents with specific skills, compose agents into pipelines, and orchestrate complex workflows. Core concepts of the Claude Agent SDK: Agent (an LLM with a system prompt, tools, and skills), Task (a unit of work assigned to an agent), Skill (a reusable instruction set loaded into an agent's context), Pipeline (a sequence or graph of agents and tasks). Defining an agent with skills using the SDK: specify the model, provide a base system prompt, list the skills to load, define the tools available to the agent. The SDK handles skill loading, context management, and tool execution automatically. Multi-agent patterns with the SDK: the Orchestrator-Worker pattern (one orchestrator agent routes tasks to specialized worker agents, each loaded with relevant skills), the Pipeline pattern (agents are chained in sequence, each processing the output of the previous agent), the Parallel pattern (multiple agents run simultaneously on independent subtasks, results are merged by a reducer agent). Skill composition: the SDK supports loading multiple skills into a single agent, and skills can reference other skills. This enables skill hierarchies where a high-level skill delegates to lower-level skills. Error handling in multi-agent systems: the SDK provides mechanisms for agents to signal failure, retry tasks with different skills, and escalate to human oversight when confidence is low. Best practices for the Agent SDK: design skills to be stateless so they can be reused across agents, use structured output (JSON schemas) for inter-agent communication, implement observability with traces and metrics from the start.
+# refactoring in jupyter notebook and creating a dashboard
+
+Voici la synthèse et la traduction française complète de cette leçon consacrée à l'utilisation de **Claude Code sur des Notebooks Jupyter**, au refactoring de scripts scientifiques selon le principe de **séparation des préoccupations**, et à la migration d'une logique d'analyse de données vers une interface web interactive propulsée par **Streamlit**.
+
+## 1. Diagnostic d'un Notebook Déstructuré
+
+Dans le domaine de la *Data Science*, les notebooks Jupyter sont d'excellents outils d'exploration, mais ils tendent à devenir désorganisés, denses et difficiles à maintenir en production.
+
+Prenons notre premier cas d'étude : un notebook analysant des données e-commerce fictives issues de plusieurs fichiers CSV. Le script utilise la bibliothèque **Pandas** pour ingérer les tables, fusionner les paniers et calculer des indicateurs clés comme l'évolution du chiffre d'affaires d'une année sur l'autre (2022 vs 2023).
+
+Bien que le notebook affiche les résultats attendus, l'architecture souffre de plusieurs défauts majeurs :
+
+- Présence d'avertissements de performance (*Python Warnings*) lors des jointures de tables.
+- Concomitance de la logique métier (calculs statistiques, filtrages) et de la logique de présentation (génération de graphiques Matplotlib/Seaborn) au sein des mêmes cellules.
+- Code écrit en dur (*hardcoded*) pour l'année 2023, empêchant toute réutilisation dynamique pour les années futures (2024, 2025).
+
+Pour industrialiser ce script, notre objectif est d'extraire la logique métier vers des modules Python orientés objet et de générer un notebook épuré, configuré et hautement visuel.
+
+## 2. Refactoring et Séparation des Préoccupations (*Separation of Concerns*)
+
+Pour formuler nos exigences sans surcharger le terminal, nous rédigeons un fichier Markdown de spécifications nommé `refactor-notebook.md`. Nous y lions notre notebook d'origine en utilisant le symbole `@` pour guider la recherche agentique de Claude Code.
+
+Si vous hésitez sur la structure de votre invite, une excellente pratique consiste à utiliser une instance de Claude AI ou Claude Code en amont pour lui demander : *« Voici mon objectif de refactoring, génère-moi l'invite la plus efficace pour accomplir cette tâche. »*.
+
+Le plan d'architecture validé avec Claude Code impose la création de trois composants distincts :
+
+1. `data_processor.py` : Un module orienté objet dédié à l'ingestion sécurisée des CSV et au nettoyage des données.
+2. `business_metrics.py` : Un module regroupant les fonctions mathématiques pures (calcul du panier moyen, croissance annuelle, satisfaction client) prenant en entrée des DataFrames Pandas.
+3. `dashboard_notebook.ipynb` : Un notebook Jupyter de présentation, exploitant l'outil natif de lecture et d'écriture de notebooks de Claude Code (`read_notebook`).
+
+Au cours de la génération, Claude Code applique une structure de classes rigoureuse, documente chaque fonction avec des docstrings claires, et isole les constantes de configuration (années, mois cibles) au début du nouveau notebook.
+
+Lors de l'exécution des cellules du notebook refactorisé, une exception de type `KeyError` est levée en raison d'un dictionnaire mal indexé. Pour résoudre l'anomalie, nous injectons directement la portion de code en cause dans Claude Code : l'agent analyse l'erreur de clé, applique instantanément le correctif requis dans le module Python sous-jacent, et stabilise le pipeline de données. Les rendus de tableaux et les résumés statistiques s'affichent désormais de manière fluide et lisible.
+
+## 3. Migration vers une Interface Web Interactive avec Streamlit
+
+Bien que le notebook refactorisé soit propre, partager un fichier `.ipynb` avec des décideurs métiers reste peu pratique. Nous décidons donc de migrer notre logique de données vers un tableau de bord web interactif de grade production en utilisant la bibliothèque **Streamlit**.
+
+Nous créons un fichier de configuration nommé `convert-to-dashboard.md` et définissons le cahier des charges de notre interface utilisateur :
+
+- **En-tête :** Titre professionnel et filtres dynamiques (années, mois).
+- **Ligne de KPIs :** Cartes de score pour le chiffre d'affaires, la croissance mensuelle, le panier moyen et le volume total de commandes.
+- **Zone de graphiques :** Courbes de revenus interactives, diagrammes de répartition sectorielle par catégorie, cartographie des ventes par État et graphiques de satisfaction client.
+
+Python
+
+# 
+
+```
+# Structure conceptuelle de l'interface Streamlit dans dashboard.py
+import streamlit as st
+import plotly.express as px
+from business_metrics import MetricsCalculator
+
+st.set_page_config(page_title="E-Commerce Dashboard", layout="wide")
+st.title("Tableau de Bord Performance Ventes")
+
+# Définition des filtres dans la barre latérale (Sidebar)
+selected_year = st.sidebar.selectbox("Année", [2022, 2023, 2024])
+```
+
+Claude Code génère le fichier `dashboard.py`. Il y intègre les composants Streamlit (`st.columns`, `st.metric`), injecte des styles CSS personnalisés pour soigner l'aspect visuel, et encapsule les graphiques interactifs via la bibliothèque **Plotly** pour permettre le survol des données à la souris.
+
+Pour tester notre application, nous ouvrons un terminal adjacent et lançons le serveur local :
+
+Bash
+
+```
+streamlit run dashboard.py
+```
+
+Si le terminal lève une erreur indiquant que la commande `streamlit` est introuvable, cela signifie que les dépendances ne sont pas installées dans l'environnement. Un coup de `pip install -r requirements.txt` (fichier de dépendances généré automatiquement par Claude Code) résout le problème.
+
+À la première ouverture dans le navigateur, nous constatons deux imperfections : l'application s'initialise par défaut sur l'année 2024 (pour laquelle les données sont incomplètes, ce qui fausse les courbes de croissance mensuelle), et certaines cartes graphiques inférieures s'affichent vides.
+
+Nous soumettons ces derniers ajustements UI à Claude Code : *"Modifie le code pour définir l'année 2023 comme filtre par défaut, ajoute un filtrage fin par mois pour le graphique de revenus, et supprime les cartes redondantes ou vides."*. L'agent réécrit la logique de filtrage des DataFrames Pandas dans `dashboard.py` et ajuste l'affichage des conteneurs CSS.
+
+L'interface s'actualise instantanément : les données sont cohérentes, les visualisations Plotly sont élégantes, et les filtres dynamiques réagissent au quart de tour. En un minimum de temps, nous sommes passés d'un notebook brut et désorganisé à une application web d'aide à la décision, prête à être déployée et partagée avec les équipes.
+
+Dans la prochaine leçon, nous franchirons un cap supplémentaire en concevant une application web complexe sous **Next.js**, et nous verrons comment connecter Claude Code à des serveurs MCP tiers dédiés à **Figma** et **Playwright** pour transcrire automatiquement une maquette graphique en composants de code de production.
 
 Lesson 10: Conclusion
 Skills represent a paradigm shift in how AI capabilities are built and shared. Instead of encoding all knowledge in model weights or system prompts, skills provide a modular, versioned, and composable approach to agent specialization. Key takeaways from this course: skills make agents consistent and reproducible by encoding expert knowledge in structured markdown files, skills integrate with Claude.ai, Claude Code, the Claude API, and the Claude Agent SDK through a unified convention, skills are complementary to tools and MCP servers — tools provide capabilities, skills provide knowledge about how to use them, multi-agent systems built with skills are more maintainable than monolithic agents because each skill can be tested and improved independently, prompt caching with skills reduces API costs significantly when skills are reused across many requests. The future of agent development is compositional: teams will maintain libraries of skills that can be mixed and matched to build specialized agents for any domain. Contributing to shared skill libraries — within a team or the broader community — accelerates AI development across projects. Start by identifying repetitive prompting patterns in your current workflows, extract them into skills, and iterate based on observed agent behavior.
+
+# création d’un site web basé sur une maquette figma
+
+Voici la synthèse et la traduction française complète de cette dernière leçon consacrée à l'intégration de **Claude Code avec les serveurs MCP (Model Context Protocol) de Figma et Playwright**. Vous y découvrirez comment transcrire une maquette graphique en une application web moderne sous **Next.js**, l'auditer par programmation et l'alimenter avec les données réelles d'une API financière.
+
+---
+
+## 1. Architecture de l'Environnement et Protocoles MCP
+
+Pour franchir un cap dans le développement Front-End, Claude Code ne se contente plus de manipuler des fichiers locaux : il collabore en temps réel avec des services externes grâce au protocole **MCP**.
+
+Dans cette session de production, nous orchestrons trois technologies majeures :
+
+1. **Next.js (App Router) :** La stack framework React moderne qui propulsera l'application finale.
+
+!image.png
+
+1. **Le serveur MCP Figma (Mode Dev) :** Permet à l'IA d'inspecter l'arbre des composants d'une maquette, d'en extraire les styles CSS, les dimensions et les assets graphiques.
+
+!image.png
+
+1. **Le serveur MCP Playwright :** Un outil d'automatisation de navigateur permettant à Claude d'ouvrir l'application localement, de cliquer sur les éléments et de prendre des captures d'écran pour valider visuellement le rendu.
+    
+    !image.png
+    
+
+Pour initialiser le projet, nous créons une nouvelle application Next.js avec les dépendances standards à la racine de notre répertoire. Pendant l'installation, nous configurons notre espace **Figma** : dans les préférences de l'outil, nous activons explicitement le serveur MCP en mode développeur et copions l'identifiant unique du calque contenant notre tableau de bord financier.
+
+De retour dans le terminal, nous rattachons les deux serveurs MCP à notre instance Claude Code locale (Rappel : les configurations MCP sont isolées par projet pour garantir la sécurité et l'étanchéité des environnements) :
+
+Voici les commandes complètes et prêtes à l'emploi pour enregistrer ces deux serveurs MCP dans ton environnement local.
+
+Dans l'écosystème de **Claude Code**, l'enregistrement se fait en passant à la commande `claude mcp add` le nom que tu souhaites donner au serveur, suivi de la commande système (souvent via `npx` ou `node`) permettant de l'exécuter.
+
+### 1. Commande pour le serveur MCP Playwright
+
+Ce serveur permet à Claude de piloter un navigateur Node (Chromium), de naviguer sur tes applications locales, de cliquer sur des boutons et de prendre des captures d'écran.
+
+Bash
+
+# 
+
+```
+claude mcp add playwright npx -y @playwright/mcp@latest
+```
+
+### 2. Commande pour le serveur MCP Figma (Mode Dev)
+
+Ce serveur permet à Claude de s'interfacer avec l'API de Figma pour inspecter tes maquettes, lire les calques et en extraire le CSS.
+
+> ⚠️ **Prérequis :** Tu as besoin d'un **Personal Access Token (PAT)** Figma. Tu peux le générer dans les paramètres de ton compte Figma (section *Tokens*).
+> 
+
+Remplace `VOTRE_TOKEN_FIGMA` par ton véritable jeton dans la commande ci-dessous :
+
+Bash
+
+```
+claude mcp add figma-dev npx -y @modelcontextprotocol/server-figma --env FIGMA_ACCESS_TOKEN=VOTRE_TOKEN_FIGMA
+```
+
+### 💡 Comment vérifier que l'installation a réussi ?
+
+Une fois ces commandes exécutées dans ton terminal classique, relance ton instance Claude Code avec la commande `claude`. Une fois à l'intérieur de l'interface de l'agent, tape :
+
+Bash
+
+```
+/mcp
+```
+
+Cette commande interne va lister les serveurs MCP actifs pour ton projet et afficher les outils mis à disposition (ex: `playwright_navigate`, `playwright_screenshot`, `figma_get_file`, etc.).
+
+Tu as réussi à générer ton token Figma, ou tu veux qu'on valide la commande pour un autre outil (comme les bases de données ou GitHub) ?
+
+Pour auditer la bonne connexion des canaux, nous invoquons la commande :
+
+```bash
+/mcp
+```
+
+L'interface confirme que le serveur Figma expose 5 outils natifs, incluant `get_image` (pour capturer un rendu visuel d'un calque) et `get_code` (pour inspecter les propriétés CSS/React sous-jacentes).
+
+---
+
+## 2. De la Maquette Figma aux Composants React (Next.js)
+
+Notre objectif est de coder un tableau de bord macroéconomique basé sur les données de la Réserve Fédérale Américaine (FRED). La maquette Figma fournit une structure globale : une barre latérale de navigation (*sidebar*), une grille de cartes de score (KPIs) et des zones de graphiques.
+
+> 💡 **Conseil de production :** Pour des tâches complexes d'ingénierie et d'alignement visuel, basculez le modèle de Claude Code sur **Claude 3 Opus** (si votre forfait le permet). Opus offre une meilleure finesse d'analyse des structures géométriques et des styles complexes, bien que Claude 3.5 Sonnet reste très performant.
+> 
+
+Nous soumettons l'invite à Claude en lui fournissant l'identifiant du calque Figma. L'agent déroule alors son plan d'action de manière autonome :
+
+1. Il appelle l'outil `get_image` de Figma pour analyser l'aspect visuel, puis `get_code` pour comprendre l'arborescence.
+2. Il détecte que la bibliothèque de graphiques interactifs **Recharts** est requise et l'installe via le gestionnaire de paquets (`npm install recharts`).
+3. Il écrit l'architecture dans le dossier `/app` de Next.js, structure le fichier global `globals.css` pour le thème, et segmente le code en composants React réutilisables (`Sidebar.tsx`, `KpiCard.tsx`, `AnalyticsChart.tsx`).
+
+Pendant l'écriture, le serveur de développement Next.js tourne déjà en tâche de fond sur le port 3000. Pour vérifier la conformité de l'interface sans quitter notre terminal, nous demandons à Claude d'utiliser **Playwright**. L'agent ordonne au navigateur sans tête (*headless browser*) de naviguer sur `http://localhost:3000` et de prendre une capture d'écran.
+
+En inspectant le retour visuel de Playwright, le résultat est impressionnant : la mise en page générale, la typographie et les graphiques Recharts sont fidèles. Claude identifie de lui-même un léger décalage d'alignement dans la barre latérale et procède immédiatement à des ajustements CSS correctifs pour parfaire le design.
+
+---
+
+## 3. Connexion à une API Réelle (Données Économiques de la FRED)
+
+Pour l'instant, le tableau de bord affiche des données statiques fictives. Nous voulons remplacer ces valeurs par de vraies données économiques : l'Indice des Prix à la Consommation (IPC/Inflation), le taux de chômage et le rendement des bons du Trésor à 10 ans.
+
+!image.png
+
+Claude Code utilise ses outils de recherche web pour explorer la documentation officielle de l'API de la Réserve Fédérale. L'IA nous informe qu'un jeton d'authentification est obligatoire pour consommer ces ressources. Nous récupérons une clé API FRED depuis notre compte et la fournissons à Claude.
+
+L'agent bascule sur le développement du Back-End :
+
+- Il crée un service de requêtage asynchrone (`/services/fredApi.ts`) pour interroger les points de terminaison (*endpoints*) officiels de la FRED.
+- Il implémente un système de proxy ou de requêtes côté serveur (*Server-side fetching*) pour contourner les restrictions de partage de ressources (CORS) et sécuriser la clé API.
+- Il adapte les composants graphiques pour qu'ils gèrent les états de chargement (*loading*) et les structures de séries temporelles renvoyées par l'API.
+
+```tsx
+// Exemple de structure de service générée par l'agent dans services/fredApi.ts
+export async function fetchEconomicSeries(seriesId: string) {
+  const apiKey = process.env.FRED_API_KEY;
+  const response = await fetch(`https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&api_key=${apiKey}&file_type=json`);
+  const data = await response.json();
+  return data.observations;
+}
+```
+
+Une fois le code mis à jour, nous relançons une validation via Playwright. L'interface s'affiche : les graphiques statiques ont laissé place aux véritables courbes historiques du chômage américain et des fluctuations obligataires. Les données sont réelles, dynamiques et parfaitement intégrées à l'interface utilisateur.
+
+---
+
+## Conclusion du Cours Claude Code
+
+En l'espace de quelques leçons, nous avons exploré toute la puissance de Claude Code :
+
+- **Localement :** Maîtrise du terminal, exploration de bases de code complexes, résolution de bugs syntaxiques et automatisation des processus via les **Hooks**.
+- **En équipe :** Gestion des branches Git complexes (*worktrees*) et déploiement d'une intégration **GitHub** automatisant les revues de code et la résolution de tickets.
+- **En Data Science :** Refactoring de Notebooks Jupyter et migration vers des applications analytiques **Streamlit**.
+- **En Front-End :** Interfaçage de serveurs **MCP (Figma, Playwright)** pour transformer instantanément une idée visuelle en une application **Next.js** connectée au monde réel.
+
+Vous disposez désormais de toutes les clés pour intégrer Claude Code dans vos cycles de développement professionnels et accélérer drastiquement votre productivité au quotidien. Bon code !
+# conclusion
+
+Voici la transcription et la traduction française fluide, professionnelle et entièrement épurée de ses repères temporels pour cette conclusion du cours.
+
+Félicitations pour être arrivé jusqu'ici ! Vous avez appris à utiliser **Claude Code** pour explorer, tester, refactoriser et déboguer vos bases de code de manière totalement agentique.
+
+Vous tirerez le meilleur parti de Claude Code en lui fournissant des instructions claires, en clarifiant le contexte technique et en pointant explicitement l'agent vers les fichiers pertinents de votre projet. Assurez-vous de consigner vos règles de conception, vos normes de style et vos directives d'architecture dans le fichier `CLAUDE.md` (ou `agent.md`), ainsi que toute information stratégique que vous souhaitez que Claude Code garde en mémoire à long terme pour votre projet.
+
+Pensez également à étendre de manière significative les capacités de Claude Code en le connectant à des serveurs **MCP (Model Context Protocol)** tiers comme **Playwright** pour l'automatisation des tests ou **Figma** pour l'intégration de vos maquettes graphiques.
+
+Merci beaucoup de m'avoir accompagné tout au long de ce voyage technique. J'ai vraiment hâte de voir les architectures complexes et les applications puissantes que vous allez bâtir aux côtés de Claude Code !
+# quizz
+
+## Quiz
+
+Passer ・ 70/70 points gagnés
+
+Vous devez gagner 50/70 points pour réussir.
+
+Question 1 :
+
+10/10 points
+
+Dans le contexte du développement de logiciels assistés par l'IA, qu'est-ce qui distingue un assistant de codage agent comme Claude Code des autres outils de codage d'IA ?
+
+1. Un assistant de codage agentic est un outil d'IA qui génère du code standard statique basé sur des modèles de projet prédéfinis.
+2. Un assistant de codage agentique est un outil d'IA qui gère les opérations de contrôle de version et suit les changements sur plusieurs branches d'un projet logiciel.
+3. Un assistant de codage agentique est un outil d'IA qui planifie et exécute de manière autonome des tâches de codage à l'aide d'outils au sein d'une base de code.
+    
+    Correct
+    
+    Les assistants de codage agentique peuvent planifier, naviguer et prendre des actions indépendamment au sein d'une base de code à l'aide d'outils intégrés, plutôt que de simplement fournir des suggestions.
+    
+4. Un assistant de codage agentique est un outil d'IA qui fournit des suggestions de code et une documentation basées sur les invites de l'utilisateur au sein d'une base de code.
+
+Question 2 :
+
+10/10 points
+
+Quel est le but principal de l'utilisation du mode plan avant d'apporter des modifications importantes à une base de code avec un assistant de codage agent ?
+
+1. Le mode Plan est utilisé pour appliquer automatiquement les suggestions de refactorisation du code sur plusieurs fichiers avant de valider des modifications.
+2. Le mode Plan est utilisé pour exécuter des repères de performance sur un nouveau code avant de mettre à jour les fichiers dans le répertoire du projet.
+3. Le mode Plan est utilisé pour effectuer une analyse de code statique et identifier les problèmes potentiels de flinting avant que les modifications ne soient appliquées.
+4. Le mode plan est utilisé pour examiner et approuver un plan de modification détaillé avant qu'un assistant agent ne modifie plusieurs fichiers.
+    
+    Correct
+    
+    Le mode plan vous permet de voir et d'approuver un plan complet pour les modifications de code, ce qui vous aide à prévenir les modifications involontaires dans l'ensemble de la base de code.
+    
+
+Question 3 :
+
+10/10 points
+
+Pourquoi est-il important de maintenir des fichiers mémoire distincts tels que CLAUDE.md et CLAUDE.local.md lorsque vous travaillez sur un projet avec Claude Code ?
+
+1. La maintenance de fichiers de mémoire séparés comme CLAUDE.md et CLAUDE.local.md propage les paramètres personnels du développeur dans le référentiel de projet partagé.
+2. La maintenance de fichiers mémoire distincts comme CLAUDE.md et CLAUDE.local.md simplifie la documentation du projet en intégrant des notes personnelles de développement dans le fichier mémoire partagé.
+3. La maintenance de fichiers mémoire séparés comme CLAUDE.md et CLAUDE.local.md sépare les règles de projet partagées des paramètres personnels spécifiques au développeur.
+    
+    Correct
+    
+    Cette approche garantit que les configurations à l'échelle du projet sont partagées avec l'équipe, tandis que les préférences et les personnalisations individuelles restent privées.
+    
+4. La maintenance de fichiers mémoire séparés comme CLAUDE.md et CLAUDE.local.md simplifie les flux de travail de contrôle de version en conservant les modifications de configuration personnelles dans des commits distincts des mises à jour à l'échelle du projet.
+
+Question 4 :
+
+10/10 points
+
+Lors du refactoring ou de l'extension d'une application assistée par l'IA, comment les tests aident-ils à maintenir la fiabilité du code ?
+
+1. Les tests sont destinés à améliorer les performances pendant le refactoring ou l'extension et à rationaliser les dépendances de mise à jour dans toute la base de code.
+2. Les tests aident à surveiller les performances de l'application en évaluant les temps de réponse et en optimisant l'utilisation des ressources.
+3. Les tests aident à détecter, déboguer et prévenir les erreurs en vérifiant la fonctionnalité pendant le refactoring ou l'extension et en capturant les régressions tôt.
+    
+    Correct
+    
+    Les tests vérifient que les fonctionnalités existantes et nouvelles fonctionnent comme prévu pendant les changements, fournissant une détection précoce des régressions et soutenant un développement fiable.
+    
+4. Les tests aident à documenter la structure de l'application pendant le refactoring ou l'extension et garantissent un formatage de code cohérent sur tous les modules.
+
+Question 5 :
+
+10/10 points
+
+Comment les arbres de travail Git aident-ils les équipes à développer des fonctionnalités en parallèle et à éviter les écrasements de fichiers dans les projets collaboratifs ?
+
+1. L'utilisation de Git worktrees permet aux équipes de développer des fonctionnalités en parallèle et empêche les écrasements de fichiers en fusionnant toutes les modifications dans un seul répertoire partagé.
+2. L'utilisation de Git worktrees permet aux équipes de suivre automatiquement les modifications apportées aux fichiers et empêche les écrasements de fichiers en centralisant les modifications dans une seule branche.
+3. L'utilisation de Git worktrees permet aux équipes de développer des fonctionnalités en parallèle et empêche les écrasements de fichiers en verrouillant les fichiers dans chaque arbre de travail pendant le développement.
+4. L'utilisation des arbres de travail Git permet aux équipes de développer des fonctionnalités en parallèle et empêche les écrasements de fichiers en isolant les modifications dans des arbres de travail distincts.
+    
+    Correct
+    
+    Les arbres de travail Git permettent à chaque fonctionnalité ou tâche d'être développée dans son propre environnement isolé, de sorte que les changements ne sont pas en conflit ou ne s'écrasent pas.
+    
+
+Question 6 :
+
+10/10 points
+
+En quoi la recherche agente dans Claude Code diffère-t-elle de l'indexation de base de code, et quelle est l'implication clé de cette distinction en matière de sécurité ?
+
+1. La recherche agentique utilise des intégrations sémantiques pour créer une structure consultable de la base de code, exposant potentiellement plus de données à des systèmes externes.
+2. La recherche agentique précharge les fichiers de code dans un cache temporaire avant d'interroger, exposant potentiellement des données sensibles en mémoire.
+3. La recherche d'agents nécessite que Claude analyse toute la base de code à l'avance, ce qui augmente le risque de fuite de données sensibles.
+4. La recherche agentique permet à Claude de lire les fichiers au besoin au lieu d'indexer l'ensemble de la base de code, ce qui réduit les risques de sécurité liés à l'exposition des données.
+    
+    Correct
+    
+    La recherche d'agents évite d'envoyer l'ensemble de la base de code ailleurs en ne lisant que les fichiers pertinents en cas de besoin, ce qui permet de minimiser le risque de fuite de données sensibles.
+    
+
+Question 7 :
+
+10/10 points
+
+Quel est le rôle principal des serveurs MCP dans l'extension des capacités d'un assistant de codage agent comme Claude Code ?
+
+1. Les serveurs MCP permettent à Claude Code de refactoriser automatiquement les bases de code et d'appliquer les normes de codage à l'échelle du projet sans intervention manuelle.
+2. Les serveurs MCP fournissent un stockage de mémoire supplémentaire à Claude Code, ce qui lui permet de conserver l'historique du projet et les préférences des utilisateurs à travers les sessions.
+3. Les serveurs MCP gèrent les jetons d'authentification pour une communication sécurisée avec les services externes.
+4. Les serveurs MCP permettent à Claude Code d'interagir avec des outils et des sources de données externes, étendant ainsi ses fonctionnalités au-delà des capacités intégrées.
+    
+    Correct
+    
+    Les serveurs MCP permettent à Claude Code de se connecter à des outils et des sources de données supplémentaires, ce qui lui permet d'effectuer un plus large éventail de tâches qui vont au-delà des fonctionnalités par défaut.
+    # **Prompts et résumés des leçons**
+
+# **Prompts et résumés des leçons**
+
+Cette note comprend les liens vers les invites utilisées dans les leçons, des ressources supplémentaires et un résumé des fonctionnalités du Code Claude.
+
+**Remarque** : pour marquer cet élément de lecture comme terminé, assurez-vous de faire défiler vers le bas jusqu'à la fin et de cliquer sur "Marquer comme terminé".
+
+## **Invites**
+
+Voici les liens vers les notes et les invites des leçons :
+
+- **Invites de la leçon 2 : Configuration et compréhension de la base de code**
+- **Invites de la leçon 3 : Ajout de fonctionnalités**
+- **Invites de la leçon 4 : Test, débogage d'erreur et refactorisation du code**
+- **Invites de la leçon 5 : Ajout de plusieurs fonctionnalités simultanément - Utilisation de Git Worktrees**
+- **Notes pour la leçon 6 : Références à l'intégration et aux crochets GitHub**
+- **Instructions de la leçon 7 : Refactoriser un cahier Jupyter et créer un tableau de bord**
+- **Invites de la leçon 8 : Création d'une application Web basée sur une maquette Figma**
+
+## **Ressources supplémentaires**
+
+Pour en savoir plus sur ces fonctionnalités ainsi que sur d'autres fonctionnalités, vous pouvez consulter :
+
+- **Documentation du code Claude**
+- **Claude Code Flux de travail communs**
+- **Meilleures pratiques du code Claude**
+- **Cas d'utilisation du code Claude**
+
+Il y a aussi un excellent cours sur l'Académie Anthropique que vous pouvez consulter pour voir plus d'exemples avec Claude Code :
+
+- **Code Claude en action**
+
+## **Résumé des caractéristiques du code Claude**
+
+### **Gestion de la mémoire du projet**
+
+- `/init`: Claude Code analyse votre base de code et crée le fichier CLAUDE.md dans votre répertoire de projet.
+    - CLAUDE.md guide Claude à travers votre base de code, en soulignant les commandes importantes, l'architecture et le style de codage. Il est automatiquement inclus dans le contexte chaque fois que vous lancez Claude Code.
+    - Here's an **example** of a CLAUDE.md file generated by `init` for the RAG chatbot example.
+- `#`: Use `#` to quickly add a memory. Useful when you see Claude Code repeats an error.
+    - **Example 1**: since the project is a `uv` project, we added these to CLAUDE.md file using `#`:
+        - `#`Utilisez uv pour exécuter des fichiers python ou ajouter des dépendances
+    - **Exemple 2 :** vous pouvez informer Claude Code du schéma de la base de données, dans ce cas, puisque vous avez une base de données vectorielle, vous pouvez informer Claude Code des collections stockées dans la base de données vectorielle :
+        - `#`La base de données vectorielle a deux collections :
+            - `course_catalog`:
+                - stocke les titres de cours pour la résolution des noms
+                - Métadonnées pour chaque cours : titre, instructeur, lien de cours, numéro de leçon, numéro de leçon, liss_json (liste de leçons : numéro de leçon, titre de leçon, lien de leçon)
+            - `course_content`:
+                - stocke des morceaux de texte pour la recherche sémantique
+                - Métadonnées pour chaque morceau : course_title, lesson_number, chunk_index
+
+### **Résumé des commandes de code Claude**
+
+| **Commande** | **description** |
+| --- | --- |
+| `/clear` | efface l'historique actuel des conversations |
+| `/compact` | résume l'historique actuel des conversations |
+| `ESC` | Interrompre Claude pour le rediriger ou le corriger |
+| `ESC ESC` | Rembobiner la conversation à un moment plus tôt |
+| `@` | Mention files with `@` to include its content in your request |
+| `/mcp` | Gérer la connexion MCP et vérifier les serveurs MCP disponibles avec les outils fournis (**MCP avec Claude Code**) |
+
+You can use regular bash command within Claude Code, but you need to start the command with `!` (for example: `!pwd`). You can type `exit` to quit Claude Code.
+
+| **Raccourcis** | **description** |
+| --- | --- |
+| `shift`+`tab` | basculer entre le mode de planification et d'acceptation automatique |
+| prendre une capture d'écran | `cmd`+ `shift`+ `ctrl` + `4` (Mac) or `Win` + `Shift` + `S`(Windows) |
+| coller une capture d'écran | `Ctrl` + `V` (might not work on Windows) |
+
+### **Caractéristiques supplémentaires de Claude**
+
+- **Mode de réflexion étendu**
+    
+    Pour les tâches complexes (par exemple, les changements architecturaux complexes, le débogage de problèmes compliqués), vous pouvez utiliser le mot "penser" pour déclencher **le mode de réflexion étendue**. Il y a plusieurs niveaux de pensée : "penser" < "penser dur" < "penser plus fort" < "ultrapenser". Chaque niveau alloue plus de budget de réflexion pour Claude.
+    
+- **Utilisation de sous-agents**
+    
+    Vous avez appris que l'un des outils prés à l'emploi pour Claude Code est **Task**, que Claude Code peut utiliser pour lancer des sous-agents pour des tâches complexes en plusieurs étapes. Vous pouvez explicitement demander à Claude Code d'utiliser des sous-agents pour réfléchir à des idées ou pour enquêter sur de multiples aspects d'une question ou d'un problème que vous souhaitez résoudre. Ces agents intégrés sont à usage général.
+    
+    Vous pouvez également créer vos sous-agents spécialisés personnalisés. Chaque sous-agent a sa propre fenêtre de contexte, et vous pouvez définir une invite système personnalisée et des outils spécifiques pour chaque sous-agent. Cette partie n'est pas couverte par ce cours, mais vous pouvez vérifier les détails dans la documentation **ici**.
