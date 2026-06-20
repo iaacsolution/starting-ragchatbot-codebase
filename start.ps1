@@ -1,14 +1,31 @@
-$job = Start-Job -ScriptBlock {
-    Set-Location "C:\Users\trist\course-rag\starting-ragchatbot-codebase\backend"
-    uv run uvicorn app:app --reload --port 8000
+param(
+    [switch]$docker,
+    [switch]$build
+)
+
+$root = "C:\Users\trist\course-rag\starting-ragchatbot-codebase"
+
+if ($docker) {
+    $cmd = if ($build) { "docker compose up --build" } else { "docker compose up" }
+    Write-Host "Demarrage Docker ($cmd)..." -ForegroundColor Cyan
+    $job = Start-Job -ScriptBlock {
+        param($r, $b)
+        Set-Location $r
+        if ($b) { docker compose up --build } else { docker compose up }
+    } -ArgumentList $root, $build
+} else {
+    Write-Host "Demarrage du serveur local..." -ForegroundColor Cyan
+    $job = Start-Job -ScriptBlock {
+        param($r)
+        Set-Location "$r\backend"
+        uv run uvicorn app:app --reload --port 8000
+    } -ArgumentList $root
 }
 
-Write-Host "Demarrage du serveur..." -ForegroundColor Cyan
-
 do {
-    Start-Sleep -Seconds 1
+    Start-Sleep -Seconds 2
     try {
-        $response = Invoke-WebRequest -Uri "http://localhost:8000/api/courses" -TimeoutSec 2 -ErrorAction Stop
+        Invoke-WebRequest -Uri "http://localhost:8000/api/courses" -TimeoutSec 2 -ErrorAction Stop | Out-Null
         $ready = $true
     } catch {
         $ready = $false
