@@ -118,7 +118,12 @@ async function sendMessage() {
                         `;
                         messageDiv.appendChild(sourcesEl);
                     }
+                    const badge = document.createElement('span');
+                    badge.className = 'ragas-badge pending';
+                    badge.textContent = '⏳ évaluation…';
+                    messageDiv.appendChild(badge);
                     chatMessages.scrollTop = chatMessages.scrollHeight;
+                    pollRagasScore(badge);
                 }
             }
         }
@@ -245,5 +250,43 @@ async function loadCourseStats() {
         if (courseTitles) {
             courseTitles.innerHTML = '<span class="error">Failed to load courses</span>';
         }
+    }
+}
+
+// Poll /api/metrics/ragas until scores are ready, then update the badge
+async function pollRagasScore(badge, attempts = 0) {
+    const MAX_ATTEMPTS = 10;
+    const INTERVAL_MS = 3000;
+
+    if (attempts >= MAX_ATTEMPTS) {
+        badge.remove();
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/metrics/ragas`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        if (!data.ready) {
+            setTimeout(() => pollRagasScore(badge, attempts + 1), INTERVAL_MS);
+            return;
+        }
+
+        if (data.faithfulness === null) {
+            badge.remove();
+            return;
+        }
+
+        const score = data.faithfulness;
+        const pct = Math.round(score * 100);
+        const level = score >= 0.8 ? 'good' : score >= 0.6 ? 'medium' : 'poor';
+        const icon = score >= 0.8 ? '✓' : score >= 0.6 ? '~' : '✗';
+
+        badge.className = `ragas-badge ${level}`;
+        badge.textContent = `${icon} fidélité ${pct}%`;
+        badge.title = `Faithfulness: ${score} · Relevancy: ${data.relevancy}`;
+    } catch {
+        setTimeout(() => pollRagasScore(badge, attempts + 1), INTERVAL_MS);
     }
 }

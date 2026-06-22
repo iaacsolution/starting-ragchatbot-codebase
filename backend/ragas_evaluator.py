@@ -1,8 +1,12 @@
 from concurrent.futures import ThreadPoolExecutor
 from prometheus_client import Gauge, Histogram
 
-faithfulness_gauge = Gauge("ragas_faithfulness", "RAGAS faithfulness score (last query)")
-relevancy_gauge = Gauge("ragas_answer_relevancy", "RAGAS answer relevancy score (last query)")
+faithfulness_gauge = Gauge(
+    "ragas_faithfulness", "RAGAS faithfulness score (last query)"
+)
+relevancy_gauge = Gauge(
+    "ragas_answer_relevancy", "RAGAS answer relevancy score (last query)"
+)
 faithfulness_hist = Histogram(
     "ragas_faithfulness_hist",
     "RAGAS faithfulness distribution",
@@ -16,8 +20,13 @@ relevancy_hist = Histogram(
 
 _executor = ThreadPoolExecutor(max_workers=1)
 
+# Last computed scores — read by GET /api/metrics/ragas
+last_scores: dict = {"faithfulness": None, "relevancy": None, "ready": False}
+
 
 def _run_ragas(question: str, answer: str, contexts: list, api_key: str, model: str):
+    global last_scores
+    last_scores = {"faithfulness": None, "relevancy": None, "ready": False}
     try:
         from ragas import evaluate, EvaluationDataset, SingleTurnSample
         from ragas.metrics import Faithfulness, AnswerRelevancy
@@ -43,10 +52,18 @@ def _run_ragas(question: str, answer: str, contexts: list, api_key: str, model: 
         relevancy_gauge.set(r)
         faithfulness_hist.observe(f)
         relevancy_hist.observe(r)
+        last_scores = {
+            "faithfulness": round(f, 2),
+            "relevancy": round(r, 2),
+            "ready": True,
+        }
     except Exception as e:
         print(f"RAGAS evaluation error: {e}")
+        last_scores = {"faithfulness": None, "relevancy": None, "ready": True}
 
 
-def evaluate_async(question: str, answer: str, contexts: list, api_key: str, model: str):
+def evaluate_async(
+    question: str, answer: str, contexts: list, api_key: str, model: str
+):
     if contexts:
         _executor.submit(_run_ragas, question, answer, contexts, api_key, model)

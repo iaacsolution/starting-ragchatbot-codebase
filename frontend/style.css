@@ -791,6 +791,51 @@ details[open] .suggested-header::before {
     transform: translateX(2px);
 }
 
+/* RAGAS Score Badge */
+.ragas-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.4rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+}
+
+.ragas-badge:hover { opacity: 1; }
+
+.ragas-badge.pending {
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--text-secondary);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.ragas-badge.good {
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.ragas-badge.medium {
+    background: rgba(251, 146, 60, 0.12);
+    color: #fb923c;
+    border: 1px solid rgba(251, 146, 60, 0.25);
+}
+
+.ragas-badge.poor {
+    background: rgba(239, 68, 68, 0.12);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+[data-theme="light"] .ragas-badge.good   { color: #16a34a; }
+[data-theme="light"] .ragas-badge.medium { color: #ea580c; }
+[data-theme="light"] .ragas-badge.poor   { color: #dc2626; }
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .main-content {
