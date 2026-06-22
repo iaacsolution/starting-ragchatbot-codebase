@@ -17,7 +17,7 @@ from pydantic import BaseModel
 
 from config import config
 from rag_system import RAGSystem
-from ragas_evaluator import evaluate_async
+from ragas_evaluator import evaluate_async, last_scores
 
 # Phoenix tracing setup (no-op if Phoenix is unreachable)
 try:
@@ -190,6 +190,14 @@ async def query_stream(request: QueryRequest):
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+@app.get("/api/metrics/ragas")
+async def get_ragas_scores():
+    """Return the last RAGAS evaluation scores (computed async after each query)"""
+    import ragas_evaluator
+
+    return ragas_evaluator.last_scores
 
 
 @app.get("/api/courses", response_model=CourseStats)
