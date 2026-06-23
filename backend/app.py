@@ -279,10 +279,17 @@ async def get_feedback_summary():
 
 @app.get("/api/metrics/ragas")
 async def get_ragas_scores():
-    """Return the last RAGAS evaluation scores (computed async after each query)"""
+    """Return the last RAGAS evaluation scores + auto-tune state"""
     import ragas_evaluator
 
-    return ragas_evaluator.last_scores
+    history = ragas_evaluator._score_history
+    avg = round(sum(history) / len(history), 2) if history else None
+    return {
+        **ragas_evaluator.last_scores,
+        "avg_faithfulness": avg,
+        "history_size": len(history),
+        "max_results": config.MAX_RESULTS,
+    }
 
 
 @app.get("/api/courses", response_model=CourseStats)
