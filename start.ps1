@@ -25,7 +25,7 @@ if ($docker) {
 do {
     Start-Sleep -Seconds 2
     try {
-        Invoke-WebRequest -Uri "http://localhost:8000/api/courses" -TimeoutSec 2 -ErrorAction Stop | Out-Null
+        Invoke-WebRequest -Uri "http://localhost:8000/api/courses" -TimeoutSec 2 -UseBasicParsing -ErrorAction Stop | Out-Null
         $ready = $true
     } catch {
         $ready = $false
