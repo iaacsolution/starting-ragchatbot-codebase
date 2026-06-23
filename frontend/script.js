@@ -286,7 +286,7 @@ function sendFeedback(rating, query, upBtn, downBtn) {
 
 // Poll /api/metrics/ragas until scores are ready, then update the badge
 async function pollRagasScore(badge, attempts = 0) {
-    const MAX_ATTEMPTS = 10;
+    const MAX_ATTEMPTS = 20;
     const INTERVAL_MS = 3000;
 
     if (attempts >= MAX_ATTEMPTS) {
