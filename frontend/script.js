@@ -122,6 +122,25 @@ async function sendMessage() {
                     badge.className = 'ragas-badge pending';
                     badge.textContent = '⏳ évaluation…';
                     messageDiv.appendChild(badge);
+
+                    const thumbs = document.createElement('span');
+                    thumbs.className = 'thumbs-container';
+                    const upBtn = document.createElement('button');
+                    upBtn.className = 'thumb-btn';
+                    upBtn.textContent = '👍';
+                    upBtn.title = 'Bonne réponse';
+                    const downBtn = document.createElement('button');
+                    downBtn.className = 'thumb-btn';
+                    downBtn.textContent = '👎';
+                    downBtn.title = 'Réponse insuffisante';
+                    thumbs.appendChild(upBtn);
+                    thumbs.appendChild(downBtn);
+                    messageDiv.appendChild(thumbs);
+
+                    const capturedQuery = query;
+                    upBtn.addEventListener('click', () => sendFeedback(1, capturedQuery, upBtn, downBtn));
+                    downBtn.addEventListener('click', () => sendFeedback(-1, capturedQuery, upBtn, downBtn));
+
                     chatMessages.scrollTop = chatMessages.scrollHeight;
                     pollRagasScore(badge);
                 }
@@ -251,6 +270,18 @@ async function loadCourseStats() {
             courseTitles.innerHTML = '<span class="error">Failed to load courses</span>';
         }
     }
+}
+
+function sendFeedback(rating, query, upBtn, downBtn) {
+    upBtn.disabled = true;
+    downBtn.disabled = true;
+    upBtn.classList.toggle('active', rating > 0);
+    downBtn.classList.toggle('active', rating < 0);
+    fetch(`${API_URL}/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: currentSessionId, rating, query }),
+    }).catch(() => {});
 }
 
 // Poll /api/metrics/ragas until scores are ready, then update the badge

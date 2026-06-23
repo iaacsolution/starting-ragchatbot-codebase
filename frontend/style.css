@@ -836,6 +836,31 @@ details[open] .suggested-header::before {
 [data-theme="light"] .ragas-badge.medium { color: #ea580c; }
 [data-theme="light"] .ragas-badge.poor   { color: #dc2626; }
 
+/* Thumbs feedback buttons */
+.thumbs-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    margin-top: 0.4rem;
+    margin-left: 0.4rem;
+}
+
+.thumb-btn {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.1rem 0.35rem;
+    opacity: 0.45;
+    transition: opacity 0.15s ease, border-color 0.15s ease;
+    line-height: 1.4;
+}
+
+.thumb-btn:hover:not(:disabled) { opacity: 0.9; border-color: var(--border-color); }
+.thumb-btn:disabled { cursor: default; }
+.thumb-btn.active { opacity: 1; border-color: var(--border-color); }
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .main-content {
