@@ -16,15 +16,23 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 
 from config import config
+from query_rewriter import rewrite as rewrite_query
 from rag_system import RAGSystem
 from ragas_evaluator import evaluate_async, last_scores
 
 # Phoenix tracing setup (no-op if Phoenix is unreachable)
 try:
+    import socket
+    import urllib.parse
     from phoenix.otel import register
     from openinference.instrumentation.anthropic import AnthropicInstrumentor
 
     _phoenix_endpoint = os.getenv("PHOENIX_ENDPOINT", "http://localhost:6006/v1/traces")
+    _parsed = urllib.parse.urlparse(_phoenix_endpoint)
+    _phoenix_host = _parsed.hostname or "localhost"
+    _phoenix_port = _parsed.port or 6006
+    with socket.create_connection((_phoenix_host, _phoenix_port), timeout=1.0):
+        pass
     _tracer_provider = register(project_name="rag-chatbot", endpoint=_phoenix_endpoint)
     AnthropicInstrumentor().instrument(tracer_provider=_tracer_provider)
 except Exception:
@@ -143,8 +151,20 @@ async def query_stream(request: QueryRequest):
     async def generate():
         history = rag_system.session_manager.get_conversation_history(session_id)
         loop = asyncio.get_event_loop()
+
+        # Rewrite query to improve semantic search recall
+        course_titles = [
+            c["title"] for c in rag_system.vector_store.get_all_courses_metadata()
+        ]
+        search_query = await loop.run_in_executor(
+            None,
+            lambda: rewrite_query(
+                request.query, config.ANTHROPIC_API_KEY, course_titles
+            ),
+        )
+
         search_results = await loop.run_in_executor(
-            None, lambda: rag_system.search_tool.execute(query=request.query)
+            None, lambda: rag_system.search_tool.execute(query=search_query)
         )
         sources = rag_system.search_tool.last_sources[:]
         rag_system.search_tool.last_sources = []
