@@ -192,6 +192,33 @@ async def query_stream(request: QueryRequest):
     )
 
 
+_feedback_log: list = []
+
+
+class FeedbackRequest(BaseModel):
+    session_id: str
+    rating: int  # 1 = thumbs up, -1 = thumbs down
+    query: str = ""
+
+
+@app.post("/api/feedback")
+async def post_feedback(request: FeedbackRequest):
+    import ragas_evaluator
+
+    entry = {
+        "session_id": request.session_id,
+        "rating": request.rating,
+        "query": request.query,
+        "faithfulness": ragas_evaluator.last_scores.get("faithfulness"),
+    }
+    _feedback_log.append(entry)
+    if request.rating < 0:
+        print(
+            f"[FEEDBACK-] query={request.query!r} faithfulness={entry['faithfulness']}"
+        )
+    return {"status": "ok"}
+
+
 @app.get("/api/metrics/ragas")
 async def get_ragas_scores():
     """Return the last RAGAS evaluation scores (computed async after each query)"""
