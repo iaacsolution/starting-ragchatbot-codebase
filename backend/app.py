@@ -16,6 +16,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 
 from config import config
+from query_rewriter import rewrite as rewrite_query
 from rag_system import RAGSystem
 from ragas_evaluator import evaluate_async, last_scores
 
@@ -143,8 +144,20 @@ async def query_stream(request: QueryRequest):
     async def generate():
         history = rag_system.session_manager.get_conversation_history(session_id)
         loop = asyncio.get_event_loop()
+
+        # Rewrite query to improve semantic search recall
+        course_titles = [
+            c["title"] for c in rag_system.vector_store.get_all_courses_metadata()
+        ]
+        search_query = await loop.run_in_executor(
+            None,
+            lambda: rewrite_query(
+                request.query, config.ANTHROPIC_API_KEY, course_titles
+            ),
+        )
+
         search_results = await loop.run_in_executor(
-            None, lambda: rag_system.search_tool.execute(query=request.query)
+            None, lambda: rag_system.search_tool.execute(query=search_query)
         )
         sources = rag_system.search_tool.last_sources[:]
         rag_system.search_tool.last_sources = []
