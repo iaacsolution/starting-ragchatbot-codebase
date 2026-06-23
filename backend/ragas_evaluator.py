@@ -71,5 +71,9 @@ def _run_ragas(question: str, answer: str, contexts: list, api_key: str, model: 
 def evaluate_async(
     question: str, answer: str, contexts: list, api_key: str, model: str
 ):
+    global last_scores
+    last_scores = {"faithfulness": None, "relevancy": None, "ready": False}
     if contexts:
         _executor.submit(_run_ragas, question, answer, contexts, api_key, model)
+    else:
+        last_scores = {"faithfulness": None, "relevancy": None, "ready": True}
