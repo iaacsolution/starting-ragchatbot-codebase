@@ -192,7 +192,28 @@ async def query_stream(request: QueryRequest):
     )
 
 
-_feedback_log: list = []
+_FEEDBACK_FILE = Path("../feedback_log.json")
+
+
+def _load_feedback() -> list:
+    if _FEEDBACK_FILE.exists():
+        try:
+            return json.loads(_FEEDBACK_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            return []
+    return []
+
+
+def _save_feedback(log: list) -> None:
+    try:
+        _FEEDBACK_FILE.write_text(
+            json.dumps(log, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+    except Exception as e:
+        print(f"[FEEDBACK] save error: {e}")
+
+
+_feedback_log: list = _load_feedback()
 
 
 class FeedbackRequest(BaseModel):
@@ -204,19 +225,56 @@ class FeedbackRequest(BaseModel):
 @app.post("/api/feedback")
 async def post_feedback(request: FeedbackRequest):
     import ragas_evaluator
+    import time
 
     entry = {
+        "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "session_id": request.session_id,
         "rating": request.rating,
         "query": request.query,
         "faithfulness": ragas_evaluator.last_scores.get("faithfulness"),
     }
     _feedback_log.append(entry)
+    _save_feedback(_feedback_log)
     if request.rating < 0:
         print(
             f"[FEEDBACK-] query={request.query!r} faithfulness={entry['faithfulness']}"
         )
     return {"status": "ok"}
+
+
+@app.get("/api/feedback/summary")
+async def get_feedback_summary():
+    if not _feedback_log:
+        return {
+            "total": 0,
+            "positive": 0,
+            "negative": 0,
+            "accept_rate": None,
+            "low_quality": [],
+        }
+
+    positive = sum(1 for e in _feedback_log if e["rating"] > 0)
+    negative = sum(1 for e in _feedback_log if e["rating"] < 0)
+    total = len(_feedback_log)
+    accept_rate = round(positive / total, 2) if total else None
+
+    # Queries with negative rating AND low faithfulness (< 0.6) — priority to fix
+    low_quality = [
+        {"query": e["query"], "faithfulness": e["faithfulness"], "ts": e.get("ts")}
+        for e in _feedback_log
+        if e["rating"] < 0
+        and e.get("faithfulness") is not None
+        and e["faithfulness"] < 0.6
+    ]
+
+    return {
+        "total": total,
+        "positive": positive,
+        "negative": negative,
+        "accept_rate": accept_rate,
+        "low_quality": low_quality[-10:],  # dernières 10 entrées critiques
+    }
 
 
 @app.get("/api/metrics/ragas")
