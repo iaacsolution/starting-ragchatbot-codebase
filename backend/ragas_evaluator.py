@@ -28,8 +28,17 @@ def _run_ragas(question: str, answer: str, contexts: list, api_key: str, model: 
     global last_scores
     last_scores = {"faithfulness": None, "relevancy": None, "ready": False}
     try:
+        # Stub missing Google Cloud optional dep before ragas imports it
+        import sys
+        import types
+
+        if "langchain_community.chat_models.vertexai" not in sys.modules:
+            _stub = types.ModuleType("langchain_community.chat_models.vertexai")
+            _stub.ChatVertexAI = type("ChatVertexAI", (), {})
+            sys.modules["langchain_community.chat_models.vertexai"] = _stub
+
         from ragas import evaluate, EvaluationDataset, SingleTurnSample
-        from ragas.metrics import Faithfulness, AnswerRelevancy
+        from ragas.metrics import Faithfulness
         from ragas.llms import LangchainLLMWrapper
         from langchain_anthropic import ChatAnthropic
 
@@ -42,19 +51,16 @@ def _run_ragas(question: str, answer: str, contexts: list, api_key: str, model: 
         dataset = EvaluationDataset(samples=[sample])
         result = evaluate(
             dataset=dataset,
-            metrics=[Faithfulness(llm=llm), AnswerRelevancy(llm=llm)],
+            metrics=[Faithfulness(llm=llm)],
         )
         scores = result.to_pandas()
         f = float(scores["faithfulness"].iloc[0])
-        r = float(scores["answer_relevancy"].iloc[0])
 
         faithfulness_gauge.set(f)
-        relevancy_gauge.set(r)
         faithfulness_hist.observe(f)
-        relevancy_hist.observe(r)
         last_scores = {
             "faithfulness": round(f, 2),
-            "relevancy": round(r, 2),
+            "relevancy": None,
             "ready": True,
         }
     except Exception as e:

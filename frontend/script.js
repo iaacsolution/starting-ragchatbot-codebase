@@ -259,7 +259,8 @@ async function pollRagasScore(badge, attempts = 0) {
     const INTERVAL_MS = 3000;
 
     if (attempts >= MAX_ATTEMPTS) {
-        badge.remove();
+        badge.className = 'ragas-badge pending';
+        badge.textContent = '— RAGAS timeout';
         return;
     }
 
@@ -274,7 +275,8 @@ async function pollRagasScore(badge, attempts = 0) {
         }
 
         if (data.faithfulness === null) {
-            badge.remove();
+            badge.className = 'ragas-badge pending';
+            badge.textContent = '— RAGAS indisponible';
             return;
         }
 
