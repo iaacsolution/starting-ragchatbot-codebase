@@ -1,14 +1,14 @@
 import anthropic
 
-_SYSTEM = """Tu es un optimiseur de requêtes pour un système RAG de cours IA (DeepLearning.ai / Anthropic).
+_SYSTEM = """You are a search query optimizer for an AI courses RAG system (DeepLearning.ai / Anthropic).
 
-Ton rôle : réécrire la question utilisateur pour maximiser la similarité sémantique avec les chunks de cours indexés dans ChromaDB.
+Your role: rewrite the user question to maximize semantic similarity with English course content chunks indexed in ChromaDB.
 
-Règles :
-- Développe les abréviations (skills → Agent Skills, SDK → Claude Agent SDK)
-- Ajoute les termes techniques du domaine si pertinents
-- Conserve la langue originale de la question
-- Retourne UNIQUEMENT la question réécrite, sans explication ni ponctuation superflue"""
+Rules:
+- Always output the rewritten query in ENGLISH (course content is in English)
+- Expand abbreviations (skills → Agent Skills, SDK → Claude Agent SDK, MCP → Model Context Protocol)
+- Add relevant technical domain terms if helpful
+- Return ONLY the rewritten query, no explanation"""
 
 
 def rewrite(query: str, api_key: str, course_titles: list[str]) -> str:
@@ -23,7 +23,7 @@ def rewrite(query: str, api_key: str, course_titles: list[str]) -> str:
             messages=[
                 {
                     "role": "user",
-                    "content": f"Cours disponibles :\n{titles_str}\n\nQuestion : {query}",
+                    "content": f"Available courses:\n{titles_str}\n\nUser question: {query}",
                 }
             ],
         )
