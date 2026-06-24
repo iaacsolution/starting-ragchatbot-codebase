@@ -328,6 +328,18 @@ async def health():
     }
 
 
+@app.get("/api/debug/search")
+async def debug_search(q: str = "hooks PostToolUse Claude Code"):
+    loop = asyncio.get_event_loop()
+    raw = await loop.run_in_executor(
+        None, lambda: rag_system.search_tool.execute(query=q)
+    )
+    sources = rag_system.search_tool.last_sources[:]
+    rag_system.search_tool.last_sources = []
+    chunks_preview = [raw[:2000]] if raw else []
+    return {"query": q, "sources": sources, "result_preview": chunks_preview}
+
+
 @app.get("/api/courses", response_model=CourseStats)
 async def get_course_stats():
     """Get course analytics and statistics"""
