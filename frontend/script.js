@@ -97,6 +97,7 @@ async function sendMessage() {
 
                 if (data.error) {
                     contentDiv.textContent = `Erreur : ${data.error}`;
+                    continue;
                 }
 
                 if (data.text) {
@@ -112,7 +113,13 @@ async function sendMessage() {
 
                 if (data.done) {
                     if (!currentSessionId) currentSessionId = data.session_id;
-                    contentDiv.innerHTML = marked.parse(fullText);
+                    try {
+                        contentDiv.innerHTML = typeof marked !== 'undefined'
+                            ? marked.parse(fullText)
+                            : fullText.replace(/\n/g, '<br>');
+                    } catch (_) {
+                        contentDiv.textContent = fullText;
+                    }
                     if (data.sources && data.sources.length > 0) {
                         const sourcesEl = document.createElement('details');
                         sourcesEl.className = 'sources-collapsible';
