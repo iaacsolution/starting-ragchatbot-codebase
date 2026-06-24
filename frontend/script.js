@@ -2,7 +2,7 @@
 const API_URL = '/api';
 
 // Global state
-let currentSessionId = null;
+let currentSessionId = localStorage.getItem('rag_session_id') || null;
 
 // DOM elements
 let chatMessages, chatInput, sendButton, totalCourses, courseTitles, themeToggle;
@@ -112,7 +112,10 @@ async function sendMessage() {
                 }
 
                 if (data.done) {
-                    if (!currentSessionId) currentSessionId = data.session_id;
+                    if (!currentSessionId) {
+                        currentSessionId = data.session_id;
+                        localStorage.setItem('rag_session_id', currentSessionId);
+                    }
                     try {
                         contentDiv.innerHTML = typeof marked !== 'undefined'
                             ? marked.parse(fullText)
