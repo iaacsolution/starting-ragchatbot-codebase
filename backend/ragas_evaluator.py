@@ -25,6 +25,37 @@ _executor = ThreadPoolExecutor(max_workers=1)
 # Last computed scores — read by GET /api/metrics/ragas
 last_scores: dict = {"faithfulness": None, "relevancy": None, "ready": False}
 
+# Rolling history for auto-tuning (last 10 faithfulness scores)
+_score_history: list[float] = []
+_HISTORY_SIZE = 10
+_MIN_RESULTS = 2
+_MAX_RESULTS_CAP = 10
+
+
+def _auto_tune(f: float) -> None:
+    """Adjust MAX_RESULTS based on rolling faithfulness average."""
+    global _score_history
+    _score_history.append(f)
+    if len(_score_history) > _HISTORY_SIZE:
+        _score_history.pop(0)
+
+    if len(_score_history) < _HISTORY_SIZE:
+        return
+
+    from config import config
+
+    avg = sum(_score_history) / _HISTORY_SIZE
+    if avg < 0.6 and config.MAX_RESULTS < _MAX_RESULTS_CAP:
+        config.MAX_RESULTS += 1
+        print(
+            f"[AUTO-TUNE↑] avg_faithfulness={avg:.2f} → MAX_RESULTS={config.MAX_RESULTS}"
+        )
+    elif avg > 0.85 and config.MAX_RESULTS > _MIN_RESULTS:
+        config.MAX_RESULTS -= 1
+        print(
+            f"[AUTO-TUNE↓] avg_faithfulness={avg:.2f} → MAX_RESULTS={config.MAX_RESULTS}"
+        )
+
 
 def _evaluate_faithfulness(
     question: str, answer: str, contexts: list, api_key: str, model: str
@@ -71,6 +102,7 @@ def _run_ragas(question: str, answer: str, contexts: list, api_key: str, model: 
         faithfulness_gauge.set(f)
         faithfulness_hist.observe(f)
         last_scores = {"faithfulness": round(f, 2), "relevancy": None, "ready": True}
+        _auto_tune(f)
     except Exception as e:
         print(f"RAGAS evaluation error: {e}")
         last_scores = {"faithfulness": None, "relevancy": None, "ready": True}

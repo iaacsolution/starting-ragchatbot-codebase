@@ -16,6 +16,7 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 
 from config import config
+from query_rewriter import rewrite as rewrite_query
 from rag_system import RAGSystem
 from ragas_evaluator import evaluate_async, last_scores
 
@@ -150,8 +151,20 @@ async def query_stream(request: QueryRequest):
     async def generate():
         history = rag_system.session_manager.get_conversation_history(session_id)
         loop = asyncio.get_event_loop()
+
+        # Rewrite query to improve semantic search recall
+        course_titles = [
+            c["title"] for c in rag_system.vector_store.get_all_courses_metadata()
+        ]
+        search_query = await loop.run_in_executor(
+            None,
+            lambda: rewrite_query(
+                request.query, config.ANTHROPIC_API_KEY, course_titles
+            ),
+        )
+
         search_results = await loop.run_in_executor(
-            None, lambda: rag_system.search_tool.execute(query=request.query)
+            None, lambda: rag_system.search_tool.execute(query=search_query)
         )
         sources = rag_system.search_tool.last_sources[:]
         rag_system.search_tool.last_sources = []
@@ -199,7 +212,28 @@ async def query_stream(request: QueryRequest):
     )
 
 
-_feedback_log: list = []
+_FEEDBACK_FILE = Path("../feedback_log.json")
+
+
+def _load_feedback() -> list:
+    if _FEEDBACK_FILE.exists():
+        try:
+            return json.loads(_FEEDBACK_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            return []
+    return []
+
+
+def _save_feedback(log: list) -> None:
+    try:
+        _FEEDBACK_FILE.write_text(
+            json.dumps(log, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+    except Exception as e:
+        print(f"[FEEDBACK] save error: {e}")
+
+
+_feedback_log: list = _load_feedback()
 
 
 class FeedbackRequest(BaseModel):
@@ -211,14 +245,17 @@ class FeedbackRequest(BaseModel):
 @app.post("/api/feedback")
 async def post_feedback(request: FeedbackRequest):
     import ragas_evaluator
+    import time
 
     entry = {
+        "ts": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "session_id": request.session_id,
         "rating": request.rating,
         "query": request.query,
         "faithfulness": ragas_evaluator.last_scores.get("faithfulness"),
     }
     _feedback_log.append(entry)
+    _save_feedback(_feedback_log)
     if request.rating < 0:
         print(
             f"[FEEDBACK-] query={request.query!r} faithfulness={entry['faithfulness']}"
@@ -226,12 +263,53 @@ async def post_feedback(request: FeedbackRequest):
     return {"status": "ok"}
 
 
+@app.get("/api/feedback/summary")
+async def get_feedback_summary():
+    if not _feedback_log:
+        return {
+            "total": 0,
+            "positive": 0,
+            "negative": 0,
+            "accept_rate": None,
+            "low_quality": [],
+        }
+
+    positive = sum(1 for e in _feedback_log if e["rating"] > 0)
+    negative = sum(1 for e in _feedback_log if e["rating"] < 0)
+    total = len(_feedback_log)
+    accept_rate = round(positive / total, 2) if total else None
+
+    # Queries with negative rating AND low faithfulness (< 0.6) — priority to fix
+    low_quality = [
+        {"query": e["query"], "faithfulness": e["faithfulness"], "ts": e.get("ts")}
+        for e in _feedback_log
+        if e["rating"] < 0
+        and e.get("faithfulness") is not None
+        and e["faithfulness"] < 0.6
+    ]
+
+    return {
+        "total": total,
+        "positive": positive,
+        "negative": negative,
+        "accept_rate": accept_rate,
+        "low_quality": low_quality[-10:],  # dernières 10 entrées critiques
+    }
+
+
 @app.get("/api/metrics/ragas")
 async def get_ragas_scores():
-    """Return the last RAGAS evaluation scores (computed async after each query)"""
+    """Return the last RAGAS evaluation scores + auto-tune state"""
     import ragas_evaluator
 
-    return ragas_evaluator.last_scores
+    history = ragas_evaluator._score_history
+    avg = round(sum(history) / len(history), 2) if history else None
+    return {
+        **ragas_evaluator.last_scores,
+        "avg_faithfulness": avg,
+        "history_size": len(history),
+        "max_results": config.MAX_RESULTS,
+    }
 
 
 @app.get("/api/courses", response_model=CourseStats)
