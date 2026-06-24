@@ -95,6 +95,10 @@ async function sendMessage() {
                 let data;
                 try { data = JSON.parse(line.slice(6)); } catch { continue; }
 
+                if (data.error) {
+                    contentDiv.textContent = `Erreur : ${data.error}`;
+                }
+
                 if (data.text) {
                     if (firstChunk) {
                         contentDiv.innerHTML = '';

@@ -149,61 +149,65 @@ async def query_stream(request: QueryRequest):
     session_id = request.session_id or rag_system.session_manager.create_session()
 
     async def generate():
-        history = rag_system.session_manager.get_conversation_history(session_id)
-        loop = asyncio.get_event_loop()
+        try:
+            history = rag_system.session_manager.get_conversation_history(session_id)
+            loop = asyncio.get_event_loop()
 
-        # Rewrite query to improve semantic search recall
-        course_titles = [
-            c["title"] for c in rag_system.vector_store.get_all_courses_metadata()
-        ]
-        search_query = await loop.run_in_executor(
-            None,
-            lambda: rewrite_query(
-                request.query, config.ANTHROPIC_API_KEY, course_titles
-            ),
-        )
-
-        search_results = await loop.run_in_executor(
-            None, lambda: rag_system.search_tool.execute(query=search_query)
-        )
-        sources = rag_system.search_tool.last_sources[:]
-        rag_system.search_tool.last_sources = []
-        rag_system.last_contexts = [search_results] if search_results else []
-
-        if search_results and "No results found" not in search_results:
-            prompt = (
-                f"Use the following course content to answer the question.\n\n"
-                f"Course content:\n{search_results}\n\n"
-                f"Question: {request.query}\n\n"
-                f"Answer based only on the course content above. "
-                f"If the content does not answer the question, say so."
-            )
-        else:
-            prompt = (
-                f"Answer this question about AI/ML courses: {request.query}\n\n"
-                f"No specific course content was found. Give a brief general answer "
-                f"and suggest the user try a more specific question."
+            # Rewrite query to improve semantic search recall
+            course_titles = [
+                c["title"] for c in rag_system.vector_store.get_all_courses_metadata()
+            ]
+            search_query = await loop.run_in_executor(
+                None,
+                lambda: rewrite_query(
+                    request.query, config.ANTHROPIC_API_KEY, course_titles
+                ),
             )
 
-        full_response = ""
-        async for chunk in rag_system.ai_generator.generate_stream(
-            query=prompt, conversation_history=history
-        ):
-            full_response += chunk
-            yield f"data: {json.dumps({'text': chunk})}\n\n"
-            await asyncio.sleep(0)
+            search_results = await loop.run_in_executor(
+                None, lambda: rag_system.search_tool.execute(query=search_query)
+            )
+            sources = rag_system.search_tool.last_sources[:]
+            rag_system.search_tool.last_sources = []
+            rag_system.last_contexts = [search_results] if search_results else []
 
-        rag_system.session_manager.add_exchange(
-            session_id, request.query, full_response
-        )
-        evaluate_async(
-            question=request.query,
-            answer=full_response,
-            contexts=rag_system.last_contexts,
-            api_key=config.ANTHROPIC_API_KEY,
-            model=config.ANTHROPIC_MODEL,
-        )
-        yield f"data: {json.dumps({'sources': sources, 'session_id': session_id, 'done': True})}\n\n"
+            if search_results and "No results found" not in search_results:
+                prompt = (
+                    f"Use the following course content to answer the question.\n\n"
+                    f"Course content:\n{search_results}\n\n"
+                    f"Question: {request.query}\n\n"
+                    f"Answer based only on the course content above. "
+                    f"If the content does not answer the question, say so."
+                )
+            else:
+                prompt = (
+                    f"Answer this question about AI/ML courses: {request.query}\n\n"
+                    f"No specific course content was found. Give a brief general answer "
+                    f"and suggest the user try a more specific question."
+                )
+
+            full_response = ""
+            async for chunk in rag_system.ai_generator.generate_stream(
+                query=prompt, conversation_history=history
+            ):
+                full_response += chunk
+                yield f"data: {json.dumps({'text': chunk})}\n\n"
+                await asyncio.sleep(0)
+
+            rag_system.session_manager.add_exchange(
+                session_id, request.query, full_response
+            )
+            evaluate_async(
+                question=request.query,
+                answer=full_response,
+                contexts=rag_system.last_contexts,
+                api_key=config.ANTHROPIC_API_KEY,
+                model=config.ANTHROPIC_MODEL,
+            )
+            yield f"data: {json.dumps({'sources': sources, 'session_id': session_id, 'done': True})}\n\n"
+        except Exception as e:
+            print(f"[STREAM ERROR] {type(e).__name__}: {e}")
+            yield f"data: {json.dumps({'error': str(e), 'done': True, 'sources': [], 'session_id': session_id})}\n\n"
 
     return StreamingResponse(
         generate(),
