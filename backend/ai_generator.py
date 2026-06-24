@@ -33,8 +33,8 @@ Provide only the direct answer to what was asked.
 """
 
     def __init__(self, api_key: str, model: str):
-        self.client = anthropic.Anthropic(api_key=api_key)
-        self.async_client = anthropic.AsyncAnthropic(api_key=api_key)
+        self.client = anthropic.Anthropic(api_key=api_key or None)
+        self.async_client = anthropic.AsyncAnthropic(api_key=api_key or None)
         self.model = model
 
         # Pre-build base API parameters

@@ -15,7 +15,7 @@ def rewrite(query: str, api_key: str, course_titles: list[str]) -> str:
     """Rewrite user query to improve semantic search recall. Returns original on failure."""
     try:
         titles_str = "\n".join(f"- {t}" for t in course_titles)
-        client = anthropic.Anthropic(api_key=api_key)
+        client = anthropic.Anthropic(api_key=api_key or None)
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
             max_tokens=120,
