@@ -332,6 +332,10 @@ async def get_course_stats():
 @app.on_event("startup")
 async def startup_event():
     """Load initial documents on startup"""
+    if not config.ANTHROPIC_API_KEY:
+        print(
+            "[WARNING] ANTHROPIC_API_KEY is not set — API calls will fail. Set it as an env var or HF secret."
+        )
     print(f"Using Anthropic model: {config.ANTHROPIC_MODEL}")
     docs_path = "../docs"
     if os.path.exists(docs_path):
