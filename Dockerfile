@@ -15,9 +15,17 @@ COPY docs/ ./docs/
 
 RUN mkdir -p backend/chroma_db
 
-COPY entrypoint.sh /entrypoint.sh
+# Pre-index courses at build time (sentence-transformers only, no API key needed)
+RUN cd /app/backend && uv run python -c "\
+from vector_store import VectorStore; \
+from config import config; \
+vs = VectorStore(config); \
+vs.add_course_folder('../docs'); \
+print('Pre-indexing complete')"
+
+COPY entrypoint_hf.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 8000
+EXPOSE 7860
 
 ENTRYPOINT ["/entrypoint.sh"]

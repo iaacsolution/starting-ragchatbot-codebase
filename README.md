@@ -1,3 +1,13 @@
+---
+title: Course RAG Chatbot
+emoji: 🎓
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Course RAG Chatbot
 
 > Assistant conversationnel sur des cours IA DeepLearning.ai — réponses sourcées, évaluation continue, stack d'observabilité complète.
