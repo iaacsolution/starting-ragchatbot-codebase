@@ -4,6 +4,8 @@
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.116-green) ![Claude](https://img.shields.io/badge/Anthropic-Claude%20Haiku-orange) ![RAGAS](https://img.shields.io/badge/RAGAS-faithfulness%2093%25-brightgreen) ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
 
+![Demo](demo.gif)
+
 ---
 
 ## Ce que ça fait
