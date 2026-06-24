@@ -316,6 +316,18 @@ async def get_ragas_scores():
     }
 
 
+@app.get("/api/health")
+async def health():
+    import os
+
+    key = os.environ.get("ANTHROPIC_API_KEY", "")
+    return {
+        "status": "ok",
+        "anthropic_key_configured": bool(key),
+        "anthropic_key_preview": f"{key[:8]}..." if key else "NOT SET",
+    }
+
+
 @app.get("/api/courses", response_model=CourseStats)
 async def get_course_stats():
     """Get course analytics and statistics"""
