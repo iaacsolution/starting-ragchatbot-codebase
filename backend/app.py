@@ -21,10 +21,17 @@ from ragas_evaluator import evaluate_async, last_scores
 
 # Phoenix tracing setup (no-op if Phoenix is unreachable)
 try:
+    import socket
+    import urllib.parse
     from phoenix.otel import register
     from openinference.instrumentation.anthropic import AnthropicInstrumentor
 
     _phoenix_endpoint = os.getenv("PHOENIX_ENDPOINT", "http://localhost:6006/v1/traces")
+    _parsed = urllib.parse.urlparse(_phoenix_endpoint)
+    _phoenix_host = _parsed.hostname or "localhost"
+    _phoenix_port = _parsed.port or 6006
+    with socket.create_connection((_phoenix_host, _phoenix_port), timeout=1.0):
+        pass
     _tracer_provider = register(project_name="rag-chatbot", endpoint=_phoenix_endpoint)
     AnthropicInstrumentor().instrument(tracer_provider=_tracer_provider)
 except Exception:

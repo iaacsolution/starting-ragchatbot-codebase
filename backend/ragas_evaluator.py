@@ -1,5 +1,7 @@
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as _FutureTimeout
 from prometheus_client import Gauge, Histogram
+
+_RAGAS_TIMEOUT = 60
 
 faithfulness_gauge = Gauge(
     "ragas_faithfulness", "RAGAS faithfulness score (last query)"
@@ -24,45 +26,51 @@ _executor = ThreadPoolExecutor(max_workers=1)
 last_scores: dict = {"faithfulness": None, "relevancy": None, "ready": False}
 
 
+def _evaluate_faithfulness(
+    question: str, answer: str, contexts: list, api_key: str, model: str
+) -> float:
+    """Run ragas.evaluate() and return faithfulness score. Blocking — call in a thread."""
+    import sys
+    import types
+
+    if "langchain_community.chat_models.vertexai" not in sys.modules:
+        _stub = types.ModuleType("langchain_community.chat_models.vertexai")
+        _stub.ChatVertexAI = type("ChatVertexAI", (), {})
+        sys.modules["langchain_community.chat_models.vertexai"] = _stub
+
+    from ragas import evaluate, EvaluationDataset, SingleTurnSample
+    from ragas.metrics import Faithfulness
+    from ragas.llms import LangchainLLMWrapper
+    from langchain_anthropic import ChatAnthropic
+
+    llm = LangchainLLMWrapper(ChatAnthropic(model=model, api_key=api_key))
+    sample = SingleTurnSample(
+        user_input=question, response=answer, retrieved_contexts=contexts
+    )
+    dataset = EvaluationDataset(samples=[sample])
+    result = evaluate(dataset=dataset, metrics=[Faithfulness(llm=llm)])
+    scores = result.to_pandas()
+    return float(scores["faithfulness"].iloc[0])
+
+
 def _run_ragas(question: str, answer: str, contexts: list, api_key: str, model: str):
     global last_scores
     last_scores = {"faithfulness": None, "relevancy": None, "ready": False}
     try:
-        # Stub missing Google Cloud optional dep before ragas imports it
-        import sys
-        import types
-
-        if "langchain_community.chat_models.vertexai" not in sys.modules:
-            _stub = types.ModuleType("langchain_community.chat_models.vertexai")
-            _stub.ChatVertexAI = type("ChatVertexAI", (), {})
-            sys.modules["langchain_community.chat_models.vertexai"] = _stub
-
-        from ragas import evaluate, EvaluationDataset, SingleTurnSample
-        from ragas.metrics import Faithfulness
-        from ragas.llms import LangchainLLMWrapper
-        from langchain_anthropic import ChatAnthropic
-
-        llm = LangchainLLMWrapper(ChatAnthropic(model=model, api_key=api_key))
-        sample = SingleTurnSample(
-            user_input=question,
-            response=answer,
-            retrieved_contexts=contexts,
-        )
-        dataset = EvaluationDataset(samples=[sample])
-        result = evaluate(
-            dataset=dataset,
-            metrics=[Faithfulness(llm=llm)],
-        )
-        scores = result.to_pandas()
-        f = float(scores["faithfulness"].iloc[0])
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            future = pool.submit(
+                _evaluate_faithfulness, question, answer, contexts, api_key, model
+            )
+            try:
+                f = future.result(timeout=_RAGAS_TIMEOUT)
+            except _FutureTimeout:
+                print(f"[RAGAS] evaluation timed out after {_RAGAS_TIMEOUT}s")
+                last_scores = {"faithfulness": None, "relevancy": None, "ready": True}
+                return
 
         faithfulness_gauge.set(f)
         faithfulness_hist.observe(f)
-        last_scores = {
-            "faithfulness": round(f, 2),
-            "relevancy": None,
-            "ready": True,
-        }
+        last_scores = {"faithfulness": round(f, 2), "relevancy": None, "ready": True}
     except Exception as e:
         print(f"RAGAS evaluation error: {e}")
         last_scores = {"faithfulness": None, "relevancy": None, "ready": True}
