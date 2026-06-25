@@ -153,36 +153,12 @@ async def query_stream(request: QueryRequest):
             history = rag_system.session_manager.get_conversation_history(session_id)
             loop = asyncio.get_event_loop()
 
-            # Rewrite query to improve semantic search recall
-            course_titles = [
-                c["title"] for c in rag_system.vector_store.get_all_courses_metadata()
-            ]
-            search_query = await loop.run_in_executor(
-                None,
-                lambda: rewrite_query(
-                    request.query, config.ANTHROPIC_API_KEY, course_titles
-                ),
-            )
-            print(f"[SEARCH] original='{request.query}' rewritten='{search_query}'")
-
+            # Search with the raw user query — multilingual model handles French/English.
+            # The rewriter was removed: it changed technical terms like PostToolUse and
+            # caused the wrong chunks to rank higher than the correct ones.
             search_results = await loop.run_in_executor(
-                None, lambda: rag_system.search_tool.execute(query=search_query)
+                None, lambda: rag_system.search_tool.execute(query=request.query)
             )
-
-            # Fallback: if rewriter changed the query and results look empty, retry with original
-            if search_query != request.query and (
-                not search_results or "No results found" in search_results
-            ):
-                print(
-                    f"[SEARCH] rewritten query yielded no results, retrying with original"
-                )
-                search_results = await loop.run_in_executor(
-                    None,
-                    lambda: rag_system.search_tool.execute(query=request.query),
-                )
-                rag_system.search_tool.last_sources = (
-                    rag_system.search_tool.last_sources
-                )
             sources = rag_system.search_tool.last_sources[:]
             rag_system.search_tool.last_sources = []
             rag_system.last_contexts = [search_results] if search_results else []
