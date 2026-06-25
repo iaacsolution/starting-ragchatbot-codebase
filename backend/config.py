@@ -27,8 +27,10 @@ class Config:
     MAX_RESULTS: int = 8  # Maximum search results to return
     MAX_HISTORY: int = 2  # Number of conversation messages to remember
 
-    # Database paths — bump version suffix to force full re-index on deployment
-    CHROMA_PATH: str = "./chroma_db_v2"  # ChromaDB storage location
+    # Database paths
+    CHROMA_PATH: str = "./chroma_db"  # ChromaDB storage location
+    # Bump this whenever the chunking algorithm or docs change to trigger auto re-index
+    INDEX_VERSION: str = "v2"
 
 
 config = Config()

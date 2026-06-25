@@ -13,7 +13,7 @@ COPY backend/ ./backend/
 COPY frontend/ ./frontend/
 COPY docs/ ./docs/
 
-RUN mkdir -p backend/chroma_db_v2
+RUN mkdir -p backend/chroma_db
 
 # Pre-download embedding model at build time so container starts instantly
 RUN uv run python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2'); print('Model cached.')"

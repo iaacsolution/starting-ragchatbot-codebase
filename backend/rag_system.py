@@ -21,7 +21,9 @@ class RAGSystem:
         self.vector_store = VectorStore(
             config.CHROMA_PATH, config.EMBEDDING_MODEL, config.MAX_RESULTS
         )
-        self.ai_generator = AIGenerator(config.ANTHROPIC_API_KEY, config.ANTHROPIC_MODEL)
+        self.ai_generator = AIGenerator(
+            config.ANTHROPIC_API_KEY, config.ANTHROPIC_MODEL
+        )
         self.session_manager = SessionManager(config.MAX_HISTORY)
 
         # Initialize search tools
@@ -72,7 +74,24 @@ class RAGSystem:
         total_courses = 0
         total_chunks = 0
 
-        # Clear existing data if requested
+        # Auto-detect schema version mismatch → force re-index to avoid stale embeddings
+        version_file = os.path.join(self.config.CHROMA_PATH, ".index_version")
+        current_version = getattr(self.config, "INDEX_VERSION", "v1")
+        if not clear_existing:
+            if os.path.exists(version_file):
+                stored = open(version_file).read().strip()
+                if stored != current_version:
+                    print(
+                        f"[INDEX] Schema version mismatch ({stored} → {current_version}), re-indexing..."
+                    )
+                    clear_existing = True
+            else:
+                print(
+                    f"[INDEX] No version file found, re-indexing with version {current_version}..."
+                )
+                clear_existing = True
+
+        # Clear existing data if requested or version mismatch detected
         if clear_existing:
             print("Clearing existing data for fresh rebuild...")
             self.vector_store.clear_all_data()
@@ -111,6 +130,11 @@ class RAGSystem:
                         print(f"Course already exists: {course.title} - skipping")
                 except Exception as e:
                     print(f"Error processing {file_name}: {e}")
+
+        # Persist version so next startup skips re-index unless version changes
+        os.makedirs(self.config.CHROMA_PATH, exist_ok=True)
+        with open(version_file, "w") as f:
+            f.write(current_version)
 
         return total_courses, total_chunks
 
@@ -154,7 +178,6 @@ class RAGSystem:
             query=prompt,
             conversation_history=history,
         )
-
 
         # Update conversation history
         if session_id:
