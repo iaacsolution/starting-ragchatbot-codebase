@@ -15,6 +15,9 @@ COPY docs/ ./docs/
 
 RUN mkdir -p backend/chroma_db
 
+# Pre-download embedding model at build time so container starts instantly
+RUN uv run python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2'); print('Model cached.')"
+
 COPY entrypoint_hf.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
