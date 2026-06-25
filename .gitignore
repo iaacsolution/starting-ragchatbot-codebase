@@ -14,8 +14,18 @@ venv/
 env/
 ENV/
 
-# ChromaDB
+# ChromaDB (all local DB dirs)
 backend/chroma_db/
+backend/chroma_db_*/
+
+# Demo artifacts
+demo_frames/
+make_demo_gif.py
+*.gif
+
+# Env copies
+"*.example"
+.env*
 
 # Git worktrees
 .trees/
