@@ -539,18 +539,12 @@ Bash
 > ⚠️ **Avertissement de Sécurité Crucial :** L'activation de commandes shell arbitraires via les hooks requiert une vigilance absolue. Vous devez valider scrupuleusement les scripts exécutés pour éviter tout effet de bord ou faille de sécurité au sein de votre environnement de développement.
 > 
 
-L'architecture permet de se brancher sur de multiples points de synchronisation de l'agent :
+### Événements Hooks Claude Code : BeforeToolUse et PostToolUse
+
+L'architecture des hooks Claude Code permet de se brancher sur de multiples points de synchronisation du cycle de vie de l'agent :
 
 - `BeforeToolUse` : S'exécute avant l'appel d'un outil (permet d'interdire ou de conditionner l'usage d'une commande selon le contexte).
-
-- 
-
-- 
-
-- 
-
 - `PostToolUse` : S'exécute immédiatement après l'utilisation réussie d'un outil.
-
 - Événements liés aux notifications, aux soumissions d'invites ou avant la conclusion de la réponse d'un sous-agent.
 
 ### Implémentation d'un Hook `PostToolUse`

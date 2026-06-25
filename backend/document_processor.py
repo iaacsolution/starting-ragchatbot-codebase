@@ -22,14 +22,27 @@ class DocumentProcessor:
                 return file.read()
 
     def chunk_text(self, text: str) -> List[str]:
-        """Split text into sentence-based chunks with overlap using config settings"""
+        """Split text into sentence-based chunks with overlap using config settings.
 
+        Respects markdown section headers (##, ###) as hard chunk boundaries so
+        that semantically distinct sections never get merged into one embedding.
+        """
+        # Split on markdown headers first (before whitespace normalization)
+        sections = re.split(r"\n(?=#{1,3}\s)", text)
+        all_chunks: List[str] = []
+        for section in sections:
+            all_chunks.extend(self._chunk_section(section))
+        return all_chunks
+
+    def _chunk_section(self, text: str) -> List[str]:
+        """Chunk a single section using sentence-based splitting."""
         # Clean up the text
         text = re.sub(r"\s+", " ", text.strip())  # Normalize whitespace
 
+        if not text:
+            return []
+
         # Better sentence splitting that handles abbreviations
-        # This regex looks for periods followed by whitespace and capital letters
-        # but ignores common abbreviations
         sentence_endings = re.compile(
             r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\!|\?)\s+(?=[A-Z])"
         )
