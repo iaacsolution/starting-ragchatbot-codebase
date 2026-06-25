@@ -317,6 +317,33 @@ async def get_feedback_summary():
     }
 
 
+@app.get("/api/index-status")
+async def index_status():
+    """Show what's actually in ChromaDB — for remote debugging."""
+    titles = rag_system.vector_store.get_existing_course_titles()
+    results = rag_system.vector_store.search(
+        "les hooks PostToolUse dans Claude Code", limit=5
+    )
+    top = [
+        {
+            "rank": i + 1,
+            "lesson": meta.get("lesson_number"),
+            "distance": round(dist, 3),
+            "hook": "PostTool" in doc or "hook" in doc.lower(),
+            "preview": doc[:120].replace("\n", " "),
+        }
+        for i, (doc, meta, dist) in enumerate(
+            zip(results.documents, results.metadata, results.distances)
+        )
+    ]
+    return {
+        "index_version": config.INDEX_VERSION,
+        "courses_count": len(titles),
+        "courses": titles,
+        "hooks_query_top5": top,
+    }
+
+
 @app.get("/api/metrics/ragas")
 async def get_ragas_scores():
     """Return the last RAGAS evaluation scores + auto-tune state"""
