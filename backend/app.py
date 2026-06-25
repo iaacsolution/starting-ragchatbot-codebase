@@ -373,6 +373,24 @@ async def startup_event():
         except Exception as e:
             print(f"Error loading documents: {e}")
 
+    # Startup diagnostic — printed to HF logs for remote debugging
+    try:
+        all_titles = rag_system.vector_store.get_existing_course_titles()
+        print(f"[DIAG] {len(all_titles)} courses in ChromaDB: {all_titles}")
+        results = rag_system.vector_store.search(
+            "les hooks PostToolUse dans Claude Code", limit=3
+        )
+        print(f"[DIAG] Top 3 for hooks query:")
+        for doc, meta, dist in zip(
+            results.documents, results.metadata, results.distances
+        ):
+            hook = "HOOK" if ("PostTool" in doc or "hook" in doc.lower()) else ""
+            print(
+                f"  L{meta.get('lesson_number')} dist={dist:.3f} {hook} | {doc[:80].replace(chr(10), ' ')}"
+            )
+    except Exception as e:
+        print(f"[DIAG] error: {e}")
+
 
 class DevStaticFiles(StaticFiles):
     async def get_response(self, path: str, scope):
