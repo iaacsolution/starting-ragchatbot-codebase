@@ -283,21 +283,21 @@ async def get_feedback_summary():
     total = len(_feedback_log)
     accept_rate = round(positive / total, 2) if total else None
 
-    # Queries with negative rating AND low faithfulness (< 0.6) — priority to fix
-    low_quality = [
-        {"query": e["query"], "faithfulness": e["faithfulness"], "ts": e.get("ts")}
+    # Count low-quality interactions (negative + faithfulness < 0.6) — no query content exposed
+    low_quality_count = sum(
+        1
         for e in _feedback_log
         if e["rating"] < 0
         and e.get("faithfulness") is not None
         and e["faithfulness"] < 0.6
-    ]
+    )
 
     return {
         "total": total,
         "positive": positive,
         "negative": negative,
         "accept_rate": accept_rate,
-        "low_quality": low_quality[-10:],  # dernières 10 entrées critiques
+        "low_quality_count": low_quality_count,
     }
 
 
@@ -318,26 +318,11 @@ async def get_ragas_scores():
 
 @app.get("/api/health")
 async def health():
-    import os
-
     key = os.environ.get("ANTHROPIC_API_KEY", "")
     return {
         "status": "ok",
         "anthropic_key_configured": bool(key),
-        "anthropic_key_preview": f"{key[:8]}..." if key else "NOT SET",
     }
-
-
-@app.get("/api/debug/search")
-async def debug_search(q: str = "hooks PostToolUse Claude Code"):
-    loop = asyncio.get_event_loop()
-    raw = await loop.run_in_executor(
-        None, lambda: rag_system.search_tool.execute(query=q)
-    )
-    sources = rag_system.search_tool.last_sources[:]
-    rag_system.search_tool.last_sources = []
-    chunks_preview = [raw[:2000]] if raw else []
-    return {"query": q, "sources": sources, "result_preview": chunks_preview}
 
 
 @app.get("/api/courses", response_model=CourseStats)
