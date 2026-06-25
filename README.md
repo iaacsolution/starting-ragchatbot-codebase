@@ -12,33 +12,30 @@ pinned: false
 
 > Assistant conversationnel sur des cours IA DeepLearning.ai — réponses sourcées, évaluation continue, stack d'observabilité complète.
 
-![Python](https://img.shields.io/badge/Python-3.11+-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.116-green) ![Claude](https://img.shields.io/badge/Anthropic-Claude%20Haiku-orange) ![RAGAS](https://img.shields.io/badge/RAGAS-faithfulness%2093%25-brightgreen) ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
-
-![Demo](demo.gif)
+![Python](https://img.shields.io/badge/Python-3.13+-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.116-green) ![Claude](https://img.shields.io/badge/Anthropic-Claude%20Haiku-orange) ![RAGAS](https://img.shields.io/badge/RAGAS-faithfulness%2093%25-brightgreen) ![Docker](https://img.shields.io/badge/Docker-Compose-blue) ![HF Spaces](https://img.shields.io/badge/HuggingFace-Spaces-yellow)
 
 ---
 
 ## Ce que ça fait
 
-Tu poses une question en langage naturel sur des cours IA (Anthropic Claude, MCP, RAG, Agent Skills...). Le système retrouve les passages pertinents dans les transcriptions, génère une réponse sourcée en streaming, et affiche un score de fidélité en temps réel.
+Tu poses une question en langage naturel sur des cours IA (Anthropic Claude, MCP, RAG, Agent Skills, Claude Code...). Le système retrouve les passages pertinents dans les transcriptions via recherche vectorielle multilingue, génère une réponse sourcée en streaming, et évalue la fidélité en temps réel.
 
 ```
 "Comment fonctionne le tool use dans Claude ?"
-→ [REWRITE] query optimisée pour ChromaDB
-→ recherche vectorielle (all-MiniLM-L6-v2)
-→ Claude Haiku synthétise avec les sources
-→ RAGAS faithfulness : 0.93 ✅
+→ recherche vectorielle multilingue (paraphrase-multilingual-MiniLM-L12-v2)
+→ Claude Haiku synthétise avec les sources (tool use, max 2 rounds)
+→ RAGAS faithfulness : 0.93 ✅  →  auto-tune MAX_RESULTS
 ```
 
 ---
 
 ## Fonctionnalités
 
-### RAG Pipeline — 3 niveaux d'amélioration
+### RAG Pipeline — améliorations progressives
 
 | Niveau | Feature | Impact |
 |--------|---------|--------|
-| 1 | **Query rewriting** — Claude Haiku réécrit la question avant la recherche pour maximiser le recall ChromaDB | +recall sémantique |
+| 1 | **Chunking sémantique** — split sur headers markdown (`###`) avant normalisation, chaque section devient son propre vecteur | recall exact sur termes techniques |
 | 2 | **Auto-tune MAX_RESULTS** — ajuste automatiquement le nombre de chunks selon la moyenne glissante RAGAS (10 dernières requêtes) | fidélité stable |
 | 3 | **Multi-round tool calling** — jusqu'à 2 recherches séquentielles par requête pour les comparaisons cross-cours | questions complexes résolues |
 
@@ -47,7 +44,13 @@ Tu poses une question en langage naturel sur des cours IA (Anthropic Claude, MCP
 - **RAGAS faithfulness** calculé en arrière-plan sur chaque requête, badge coloré inline dans le chat (vert ≥80%, orange ≥60%, rouge <60%)
 - **Prometheus** scrape `/metrics` toutes les 15s — distributions de scores, latences
 - **Grafana** dashboards préconfigurés (port 3001)
-- **Phoenix OTEL** traces de chaque appel LLM Anthropic (port 6007)
+- **Phoenix OTEL** traces de chaque appel LLM Anthropic (port 6006)
+
+### Guardrails qualité
+
+- **INDEX_VERSION** — version de schéma persistée dans ChromaDB ; bump automatique du ré-index si la version change (chunking ou docs mis à jour)
+- **Scope restriction** — le system prompt refuse les questions hors cours et les tentatives de prompt injection
+- **Pre-indexing build-time** — ChromaDB baked dans l'image Docker, démarrage instantané (0 indexation à chaud)
 
 ### UX
 
@@ -74,14 +77,14 @@ Tu poses une question en langage naturel sur des cours IA (Anthropic Claude, MCP
 
 ```
 Frontend    Vanilla JS + SSE streaming
-Backend     FastAPI · uvicorn · Python 3.11
-LLM         Anthropic Claude Haiku (tool use + query rewriting)
+Backend     FastAPI · uvicorn · Python 3.13
+LLM         Anthropic Claude Haiku (tool use, max 2 rounds)
 Fallback    Ollama llama3.2:1b (inférence locale)
-Vector DB   ChromaDB (persisté sur volume Docker)
-Embeddings  all-MiniLM-L6-v2 (sentence-transformers)
+Vector DB   ChromaDB (pré-indexé au build, persisté sur volume Docker)
+Embeddings  paraphrase-multilingual-MiniLM-L12-v2 (FR + EN)
 Evals       RAGAS faithfulness (LangchainLLMWrapper + ChatAnthropic)
 Observ.     Prometheus · Grafana · Arize Phoenix (OTEL)
-Deploy      Docker Compose (6 services)
+Deploy      HF Spaces (Docker) · Docker Compose local (6 services)
 ```
 
 ---
@@ -93,8 +96,6 @@ Utilisateur
     │
     ▼
 FastAPI /api/query/stream
-    │
-    ├─ query_rewriter.py    ← Claude Haiku one-shot → query enrichie
     │
     ├─ RAGSystem.query()
     │       ├─ AIGenerator  (tool use, max 2 rounds)
@@ -109,9 +110,17 @@ FastAPI /api/query/stream
 
 ---
 
-## Démarrage rapide
+## Déploiement
 
-### Docker (recommandé)
+### HF Spaces (production)
+
+Le Space est déployé sur [HuggingFace Spaces](https://huggingface.co/spaces/Krebs/claude-courses-assistant) — ChromaDB pré-indexé dans l'image, démarrage en ~30s.
+
+```bash
+git push origin main && git push hf main
+```
+
+### Docker local (dev complet avec observabilité)
 
 ```bash
 cp .env.example .env
@@ -125,10 +134,10 @@ docker compose up           # lancements suivants
 |---------|-----|
 | Chatbot | http://localhost:8000 |
 | Grafana | http://localhost:3001 · admin/admin |
-| Phoenix | http://localhost:6007 |
+| Phoenix | http://localhost:6006 |
 | Prometheus | http://localhost:9091 |
 
-### Local (dev)
+### Local sans Docker (dev rapide)
 
 ```bash
 uv sync
@@ -140,13 +149,16 @@ cd backend && uv run uvicorn app:app --reload --port 8000
 
 ## Ajouter un cours
 
-Déposer un `.txt` dans `docs/` au format suivant et redémarrer — indexation automatique et idempotente :
+Déposer un `.txt` dans `docs/` au format suivant, bumper `INDEX_VERSION` dans `config.py`, et redémarrer — indexation automatique et idempotente :
 
 ```
 Course Title: <titre>
 Course Instructor: <nom>
 
-Lesson 1: <titre>
+### Lesson 1: <titre>
+<contenu>...
+
+### Lesson 2: <titre>
 <contenu>...
 ```
 
@@ -156,7 +168,7 @@ Lesson 1: <titre>
 
 ```bash
 cd backend && uv run pytest tests/ -v
-# 5 tests comportementaux sur AIGenerator (multi-round tool calling)
+# Tests comportementaux sur AIGenerator (multi-round tool calling)
 ```
 
 ---
@@ -179,4 +191,5 @@ cd backend && uv run pytest tests/ -v
 | Facade | `RAGSystem` | Interface unique `query()` sur VectorStore + AIGenerator |
 | Strategy | `AIGenerator` / `OllamaGenerator` | Swap LLM provider sans changer le code métier |
 | Observer | `ragas_evaluator` + Prometheus | Métriques découplées des requêtes |
-| Template Method | `RAGSystem.query()` | Séquence fixe : rewrite → retrieve → generate → eval |
+| Template Method | `RAGSystem.query()` | Séquence fixe : retrieve → generate → eval |
+| Singleton | `config` | Un seul objet Config partagé par tous les composants |
