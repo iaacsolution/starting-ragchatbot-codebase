@@ -163,10 +163,26 @@ async def query_stream(request: QueryRequest):
                     request.query, config.ANTHROPIC_API_KEY, course_titles
                 ),
             )
+            print(f"[SEARCH] original='{request.query}' rewritten='{search_query}'")
 
             search_results = await loop.run_in_executor(
                 None, lambda: rag_system.search_tool.execute(query=search_query)
             )
+
+            # Fallback: if rewriter changed the query and results look empty, retry with original
+            if search_query != request.query and (
+                not search_results or "No results found" in search_results
+            ):
+                print(
+                    f"[SEARCH] rewritten query yielded no results, retrying with original"
+                )
+                search_results = await loop.run_in_executor(
+                    None,
+                    lambda: rag_system.search_tool.execute(query=request.query),
+                )
+                rag_system.search_tool.last_sources = (
+                    rag_system.search_tool.last_sources
+                )
             sources = rag_system.search_tool.last_sources[:]
             rag_system.search_tool.last_sources = []
             rag_system.last_contexts = [search_results] if search_results else []

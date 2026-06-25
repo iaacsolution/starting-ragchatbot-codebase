@@ -9,16 +9,19 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
 
+# Download embedding model BEFORE copying app code so this 470MB layer
+# stays cached across backend code changes — only re-downloads when
+# pyproject.toml changes (i.e. when packages change).
+RUN uv run python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2'); print('Model cached.')"
+
+COPY docs/ ./docs/
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
-COPY docs/ ./docs/
 
 RUN mkdir -p backend/chroma_db
 
-# Pre-download embedding model and pre-index all courses at build time.
-# This bakes the ChromaDB directly into the image so startup is instant
-# and retrieval is guaranteed correct regardless of runtime environment.
-RUN uv run python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2'); print('Model cached.')"
+# Pre-index all courses at build time — bakes ChromaDB into the image.
+# Re-runs only when docs/ or backend/ change.
 RUN uv run python backend/preindex.py
 
 COPY entrypoint_hf.sh /entrypoint.sh
