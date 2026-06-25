@@ -27,8 +27,8 @@ class Config:
     MAX_RESULTS: int = 8  # Maximum search results to return
     MAX_HISTORY: int = 2  # Number of conversation messages to remember
 
-    # Database paths
-    CHROMA_PATH: str = "./chroma_db"  # ChromaDB storage location
+    # Database paths — bump version suffix to force full re-index on deployment
+    CHROMA_PATH: str = "./chroma_db_v2"  # ChromaDB storage location
 
 
 config = Config()
