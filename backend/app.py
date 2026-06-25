@@ -16,7 +16,6 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel
 
 from config import config
-from query_rewriter import rewrite as rewrite_query
 from rag_system import RAGSystem
 from ragas_evaluator import evaluate_async, last_scores
 
@@ -293,33 +292,6 @@ async def get_feedback_summary():
     }
 
 
-@app.get("/api/index-status")
-async def index_status():
-    """Show what's actually in ChromaDB — for remote debugging."""
-    titles = rag_system.vector_store.get_existing_course_titles()
-    results = rag_system.vector_store.search(
-        "les hooks PostToolUse dans Claude Code", limit=5
-    )
-    top = [
-        {
-            "rank": i + 1,
-            "lesson": meta.get("lesson_number"),
-            "distance": round(dist, 3),
-            "hook": "PostTool" in doc or "hook" in doc.lower(),
-            "preview": doc[:120].replace("\n", " "),
-        }
-        for i, (doc, meta, dist) in enumerate(
-            zip(results.documents, results.metadata, results.distances)
-        )
-    ]
-    return {
-        "index_version": config.INDEX_VERSION,
-        "courses_count": len(titles),
-        "courses": titles,
-        "hooks_query_top5": top,
-    }
-
-
 @app.get("/api/metrics/ragas")
 async def get_ragas_scores():
     """Return the last RAGAS evaluation scores + auto-tune state"""
@@ -375,24 +347,6 @@ async def startup_event():
             print(f"Loaded {courses} courses with {chunks} chunks")
         except Exception as e:
             print(f"Error loading documents: {e}")
-
-    # Startup diagnostic — printed to HF logs for remote debugging
-    try:
-        all_titles = rag_system.vector_store.get_existing_course_titles()
-        print(f"[DIAG] {len(all_titles)} courses in ChromaDB: {all_titles}")
-        results = rag_system.vector_store.search(
-            "les hooks PostToolUse dans Claude Code", limit=3
-        )
-        print(f"[DIAG] Top 3 for hooks query:")
-        for doc, meta, dist in zip(
-            results.documents, results.metadata, results.distances
-        ):
-            hook = "HOOK" if ("PostTool" in doc or "hook" in doc.lower()) else ""
-            print(
-                f"  L{meta.get('lesson_number')} dist={dist:.3f} {hook} | {doc[:80].replace(chr(10), ' ')}"
-            )
-    except Exception as e:
-        print(f"[DIAG] error: {e}")
 
 
 class DevStaticFiles(StaticFiles):
