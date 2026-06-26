@@ -168,11 +168,9 @@ class VectorStore:
             metadatas=[
                 {
                     "title": course.title,
-                    "instructor": course.instructor,
-                    "course_link": course.course_link,
-                    "lessons_json": json.dumps(
-                        lessons_metadata
-                    ),  # Serialize as JSON string
+                    "instructor": course.instructor or "",
+                    "course_link": course.course_link or "",
+                    "lessons_json": json.dumps(lessons_metadata),
                     "lesson_count": len(course.lessons),
                 }
             ],
