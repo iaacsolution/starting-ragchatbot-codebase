@@ -188,7 +188,9 @@ class VectorStore:
         metadatas = [
             {
                 "course_title": chunk.course_title,
-                "lesson_number": chunk.lesson_number,
+                "lesson_number": (
+                    chunk.lesson_number if chunk.lesson_number is not None else -1
+                ),
                 "chunk_index": chunk.chunk_index,
             }
             for chunk in chunks
