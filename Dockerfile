@@ -14,6 +14,7 @@ RUN uv sync --frozen --no-dev
 # pyproject.toml changes (i.e. when packages change).
 RUN uv run python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2'); print('Model cached.')"
 
+# courses: v3 — course8 (RAG Production) + course9 (Recherche Information)
 COPY docs/ ./docs/
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
