@@ -1,0 +1,207 @@
+Course Title: Bases de Récupération d'Informations et de Recherche
+Course Instructor: DeepLearning.ai
+
+### Lesson 1: Introduction — Le retriever et la recherche d'information
+
+Le travail d'un retriever est assez simple à énoncer : trouver dans la base de connaissances les documents qui peuvent aider un LLM à répondre à une requête. Mais en y regardant de plus près, c'est une tâche très complexe.
+
+Les utilisateurs ne soumettent pas de requêtes SQL bien structurées à votre système RAG. Ils discutent avec votre LLM comme ils parleraient à une autre personne. Pendant ce temps, les documents de votre base de connaissances peuvent être très variés : des emails personnels, des notes internes d'entreprise, ou encore des articles de revues médicales.
+
+D'une manière ou d'une autre, le retriever doit gérer toute cette information non structurée et renvoyer rapidement les éléments les plus pertinents, le tout en une fraction de seconde.
+
+Dans ce module, vous allez découvrir les principales techniques qu'un retriever utilise pour accomplir cette tâche. Vous développerez une compréhension théorique de leur fonctionnement, explorerez leurs forces et leurs faiblesses relatives, et verrez comment un retriever les combine pour offrir les meilleurs résultats possibles.
+
+### Lesson 2: Vue d'ensemble de l'architecture d'un retriever
+
+Lorsqu'un système RAG reçoit une requête, celle-ci est d'abord envoyée au retriever. Le retriever a accès à la base de connaissances, que l'on peut imaginer comme un ensemble de fichiers texte stockés dans une base de données. Le retriever doit rapidement déterminer quels documents sont les plus pertinents pour la requête, puis les renvoyer pour qu'ils soient transmis au LLM.
+
+La plupart des retrievers modernes utilisent deux techniques de recherche différentes dans ce processus.
+
+La première est une recherche par mots-clés plus traditionnelle. Cela signifie que le retriever recherche les documents contenant exactement les mêmes mots que ceux présents dans la requête. Cette approche a fait ses preuves et alimente les systèmes de recherche d'information depuis des décennies.
+
+La deuxième approche est la recherche sémantique. Cela signifie que le retriever recherche les documents dont le sens est similaire à celui de la requête. Cette méthode rend le retriever plus flexible, car elle lui permet de trouver des documents pertinents qui ne contiennent pas nécessairement les mêmes mots que ceux utilisés par l'utilisateur.
+
+Chaque technique de recherche renvoie un ensemble de documents, souvent entre 20 et 50 chacun. Souvent, plusieurs documents apparaissent dans les deux listes, mais comme le style de recherche est différent, leur ordre de classement peut varier d'une liste à l'autre.
+
+À ce stade, chaque liste est filtrée selon les métadonnées. Par exemple, certains documents de votre base de connaissances peuvent concerner les membres de l'équipe d'ingénierie, tandis que d'autres sont destinés au service RH. Le système connaît l'équipe à laquelle appartient l'utilisateur et applique un filtre de métadonnées pour ne conserver que les documents pertinents pour ce département.
+
+Le retriever dispose maintenant de deux listes filtrées : l'une issue de la recherche par mots-clés, et l'autre de la recherche sémantique. Ces deux listes sont ensuite fusionnées pour créer un classement final des documents les plus pertinents. Le retriever renvoie les documents les mieux classés de cette liste finale, et à ce stade, le processus de récupération est terminé. Les documents sont alors transmis pour être intégrés dans le prompt augmenté.
+
+Ce style de recherche est appelé recherche hybride car il repose sur plusieurs techniques combinées pour produire le classement final des documents.
+
+Chaque technique apporte des avantages complémentaires :
+- La recherche par mots-clés garantit que le système reste sensible aux mots exacts utilisés par l'utilisateur.
+- La recherche sémantique offre plus de flexibilité en trouvant des documents dont le sens correspond à la requête, même si les mots diffèrent.
+- Le filtrage par métadonnées permet d'exclure des documents selon des critères précis, ce qu'aucune des deux autres approches ne permet.
+
+Concevoir un retriever performant consiste donc à comprendre les forces relatives de chacune de ces techniques, puis à ajuster l'équilibre entre elles pour répondre aux besoins spécifiques du projet.
+
+### Lesson 3: Filtrage par métadonnées
+
+Le filtrage par métadonnées est la technique la plus simple utilisée dans un retriever. Il repose sur des critères rigides pour restreindre les documents renvoyés, en se basant sur les métadonnées des documents : titre, auteur, date de création, droits d'accès, etc.
+
+Supposons que vous travailliez pour un journal et que vous souhaitiez construire un retriever pour tous les articles publiés dans l'histoire de votre média. La base de connaissances contiendrait des milliers d'articles différents, chacun étiqueté avec plusieurs métadonnées : titre, date de publication, auteur, rubrique, etc.
+
+Interroger ce type d'index ressemble beaucoup à écrire une requête SQL. Vous pourriez filtrer sur une seule métadonnée — tous les articles publiés à une date donnée ou écrits par un auteur spécifique — ou rédiger des requêtes plus complexes filtrant sur plusieurs métadonnées à la fois. Par exemple : trouver tous les articles publiés dans la rubrique Opinion entre juin et juillet 2024 par un journaliste spécifique.
+
+Dans un système RAG typique, vous n'utiliserez pas le filtrage par métadonnées pour effectuer la récupération initiale, mais plutôt pour affiner les résultats renvoyés par d'autres techniques de recherche. Les filtres eux-mêmes ne sont généralement pas déterminés par le contenu de la requête utilisateur, mais par d'autres attributs liés à l'utilisateur qui effectue la demande.
+
+Par exemple, certains articles peuvent être librement accessibles sur Internet, tandis que d'autres sont réservés aux abonnés payants. Lorsque l'utilisateur effectue une recherche, le système détecte s'il est connecté en tant qu'abonné. S'il ne l'est pas, un filtre de métadonnées exclut les articles payants des résultats.
+
+Le filtrage par métadonnées présente plusieurs avantages : il est conceptuellement simple, rapide, éprouvé et bien optimisé. Et surtout, c'est la seule approche permettant de définir strictement quels documents doivent ou non être inclus dans la recherche.
+
+Cependant, il a des limites importantes : ce n'est pas vraiment une technique de recherche, mais plutôt un outil pour affiner les résultats des autres. Il est trop rigide, ignore le contenu des documents, et ne propose aucun mécanisme de classement entre eux. Un retriever reposant uniquement sur ce type de filtrage serait quasiment inutile. Le filtrage par métadonnées doit être associé à d'autres techniques de recherche pour apporter une réelle valeur.
+
+### Lesson 4: Recherche par mots-clés — TF-IDF
+
+La recherche par mots-clés consiste à retrouver des documents en fonction des mots qu'ils partagent avec la requête. Plus un document contient de mots présents dans la requête, plus il est probable qu'il soit pertinent.
+
+La requête et chaque document sont traités comme un sac de mots (bag of words). L'ordre des mots n'a aucune importance : ce qui compte, c'est quels mots apparaissent et combien de fois. Ces occurrences sont enregistrées dans un vecteur comportant un emplacement pour chaque mot du vocabulaire du système — des dizaines de milliers d'emplacements possibles. Comme la majorité des emplacements contiennent des zéros, on appelle cela un vecteur creux (sparse vector).
+
+Pour préparer la base de connaissances à la recherche, un vecteur creux est généré pour chaque document. Tous ces vecteurs sont organisés dans une grille appelée matrice terme-document (term-document matrix). On appelle aussi cette structure un index inversé (inverted index), car elle permet de partir d'un mot et de trouver tous les documents qui le contiennent.
+
+Quand une requête est envoyée au retriever, un vecteur creux est généré pour cette requête. On attribue des points aux documents qui contiennent les mots de la requête — chaque mot de la requête est appelé un mot-clé. Pour tenir compte des occurrences multiples, on augmente le score à chaque occurrence. Pour éviter de favoriser les documents longs, on divise le score par le nombre total de mots dans le document.
+
+Cette méthode donne le même poids à tous les mots-clés, qu'il s'agisse de mots très courants comme "the" ou de mots rares comme "pizza", qui sont de bien meilleurs indicateurs de pertinence. Pour résoudre ce problème, on utilise la fréquence inverse de document (Inverse Document Frequency, IDF).
+
+Pour chaque mot, on calcule combien de documents le contiennent et on divise par le nombre total de documents. Comme on veut récompenser les mots rares, on inverse cette fraction, puis on prend le logarithme pour lisser l'effet. Les mots rares conservent un poids supérieur mais moins exagéré.
+
+On met à jour l'index inversé en multipliant chaque nombre par le score IDF correspondant, obtenant ainsi une matrice TF-IDF (Term Frequency – Inverse Document Frequency). Les documents les mieux notés sont ceux qui utilisent fréquemment les mots-clés, en particulier les mots rares dans la base de connaissances.
+
+Bien que TF-IDF soit une approche fondamentale, les systèmes modernes utilisent souvent une version améliorée appelée BM25.
+
+### Lesson 5: Recherche par mots-clés — BM25
+
+BM25, abréviation de Best Matching 25, est la 25ème variante d'une série de fonctions de score proposées par ses concepteurs. C'est aujourd'hui l'algorithme de recherche par mots-clés par défaut dans la plupart des retrievers modernes.
+
+BM25 fonctionne de manière très similaire à TF-IDF, mais avec des améliorations importantes.
+
+La première amélioration est la saturation de la fréquence des termes. Avec TF-IDF, un document contenant un mot 20 fois est jugé deux fois plus pertinent qu'un document le contenant 10 fois. BM25 corrige cela : les occurrences multiples d'un mot-clé rapportent des gains décroissants. Un document qui mentionne "pizza" 20 fois n'est pas deux fois plus pertinent qu'un autre qui le mentionne 10 fois.
+
+La deuxième amélioration est la normalisation de la longueur du document. BM25 pénalise les documents longs de manière plus douce que TF-IDF : les pénalités diminuent à mesure que la longueur augmente. Ainsi, un long document peut encore obtenir un bon score s'il contient une forte densité de mots-clés.
+
+BM25 introduit également deux hyperparamètres réglables : l'un contrôle le niveau de saturation des termes, l'autre la force de la normalisation de longueur. En environnement de production, ces paramètres sont ajustés pour correspondre aux caractéristiques de votre base de connaissances.
+
+Forces de la recherche par mots-clés : elle est simple et intuitive, efficace dans la pratique et sert souvent de référence de comparaison, et garantit que les documents récupérés contiennent bien les mots de la requête — particulièrement utile quand les utilisateurs utilisent des termes techniques ou des noms exacts de produits.
+
+Limite principale : BM25 reste dépendant des mots exacts utilisés. Si la requête a le même sens qu'un document mais emploie d'autres mots, BM25 ne fera pas le lien sémantique.
+
+### Lesson 6: Recherche sémantique et embeddings
+
+La recherche sémantique permet d'associer des documents et des requêtes en se basant sur le sens partagé des mots. Par exemple, une recherche par mots-clés ne fera pas le lien entre les mots "happy" et "glad" (synonymes), et pourrait à tort associer "Python" le langage de programmation et "Python" le serpent.
+
+À un niveau global, la recherche sémantique ressemble à la recherche par mots-clés : chaque document est représenté par un vecteur, la requête également, et ces vecteurs sont comparés pour générer des scores. La grande différence réside dans la façon dont les vecteurs sont construits.
+
+Dans la recherche par mots-clés, on compte combien de fois chaque mot apparaît. Dans la recherche sémantique, on passe le texte dans un modèle d'embedding (embedding model).
+
+Les modèles d'embedding associent chaque texte à une position dans un espace vectoriel. La partie qui semble presque magique : le modèle place les mots ayant un sens similaire à proximité. Ainsi, "food" et "cuisine" seront proches, tandis que "trombone" et "cat" seront éloignés. Les axes n'ont pas de signification simple — il faut imaginer des points flottant dans l'espace où les mots ayant un sens voisin forment des amas cohérents.
+
+Dans la pratique, les modèles d'embedding utilisent des vecteurs à centaines ou milliers de dimensions, ce qui donne une flexibilité énorme pour organiser les concepts. Il existe des modèles d'embedding pour des mots, des phrases et des documents entiers. Chaque modèle reçoit un texte en entrée et renvoie un seul vecteur représentant sa position dans l'espace.
+
+Pour mesurer la similarité entre vecteurs, plusieurs méthodes existent. La distance euclidienne est la distance classique de géométrie, mais dans les espaces de très haute dimension, tous les points finissent par être éloignés, ce qui la rend moins utile. La similarité cosinus est la plus utilisée : elle mesure l'angle entre deux vecteurs, peu importe leur distance réelle. Deux vecteurs pointant dans la même direction ont une similarité cosinus de 1, des directions opposées donnent -1. Le produit scalaire mesure la projection d'un vecteur sur un autre — deux vecteurs proches en direction et en longueur auront un produit scalaire élevé.
+
+Utilisation dans la recherche sémantique : tous les documents sont convertis en vecteurs par le modèle d'embedding, les documents ayant un sens proche sont regroupés dans le même voisinage, la requête est elle aussi convertie en vecteur, on mesure la distance entre le vecteur de la requête et chacun des vecteurs des documents, et les documents les plus proches sont considérés comme les plus pertinents. Grâce au modèle d'embedding, ces documents ne partagent pas forcément les mêmes mots, mais bien le même sens.
+
+### Lesson 7: Modèles d'embedding — entraînement et fonctionnement
+
+Le travail d'un modèle d'embedding est de placer les textes similaires dans des vecteurs proches, et les textes différents dans des vecteurs éloignés.
+
+On peut comprendre son fonctionnement à travers la notion de paires positives et négatives. Une paire positive correspond à deux textes au sens similaire ("good morning" et "hello") — ils doivent être proches dans l'espace vectoriel. Une paire négative ("good morning" et "that's a noisy trombone") a un sens très différent — les vecteurs doivent être éloignés.
+
+La première étape de l'entraînement consiste à rassembler des millions de paires positives et négatives. Au départ, le modèle associe chaque texte à un vecteur aléatoire — ces vecteurs n'ont aucun sens. Ensuite, le modèle examine toutes les paires : il évalue à quel point les paires positives sont rapprochées et à quel point les paires négatives sont éloignées. Comme il s'appuie sur le contraste entre ces deux types de paires, cette méthode s'appelle l'apprentissage contrastif (contrastive training).
+
+En fonction de ses performances, le modèle ajuste ses paramètres internes : il rapproche les paires positives et éloigne les paires négatives. Ce processus se répète des milliers de fois, repoussant et attirant les vecteurs jusqu'à ce que l'espace reflète correctement les relations de sens.
+
+Après de nombreuses itérations, les vecteurs reflètent le sens des textes : les mots ou phrases ayant des significations proches se retrouvent dans des zones voisines, les mots sans lien sémantique sont éloignés.
+
+Ce qu'il faut retenir sur les vecteurs sémantiques : avant l'entraînement, les positions n'ont aucune signification ; après l'entraînement, elles en acquièrent une car les mots similaires se sont regroupés en clusters de sens. Les emplacements exacts des clusters n'ont pas d'importance absolue — si on relançait l'entraînement avec d'autres paramètres initiaux, ces clusters se reformeraient à d'autres emplacements. On ne compare que des vecteurs issus du même modèle d'embedding : chaque modèle a été entraîné sur des données et des dimensions différentes, comparer des vecteurs de deux modèles différents n'a aucun sens mathématique.
+
+### Lesson 8: Lab — Embeddings en pratique avec RAG
+
+Les vecteurs d'embedding sont utilisés dans RAG pour capturer le sens des textes et comparer leur similarité. Ils convertissent les mots et les phrases en positions dans un espace vectoriel qui capture leur sens. Lorsqu'un prompt est reçu, il est converti en son propre vecteur d'embedding, puis la similarité entre ce vecteur et les autres vecteurs de la base est calculée pour identifier les textes les plus proches en signification.
+
+La similarité cosinus évalue la proximité de deux vecteurs selon leur angle : une valeur proche de 1 indique que les vecteurs sont très similaires. La distance euclidienne calcule la distance en ligne droite entre deux vecteurs : des distances plus petites suggèrent des contenus plus étroitement liés. Ces deux métriques évaluent des aspects différents — la similarité cosinus mesure l'angle, la distance euclidienne mesure la distance réelle.
+
+Un modèle d'embedding comme BAAI/bge-base-en-v1.5 génère des vecteurs de 768 dimensions. La phrase "RAG is awesome" est convertie en un point dans un espace vectoriel à 768 dimensions, où diverses métriques peuvent être utilisées pour mesurer la distance entre les phrases. Les vecteurs proches correspondent à des phrases sémantiquement similaires.
+
+En pratique, pour le mot "apple", la similarité cosinus avec "fruit" (0.7461) est plus élevée qu'avec "car" (0.5749), ce qui confirme que le modèle capture bien les relations sémantiques. Les deux métriques donnent le même classement général mais évaluent des aspects différents.
+
+La fenêtre de contexte des modèles d'embedding est limitée (typiquement 512 tokens). Tout texte dépassant cette limite est tronqué et les informations excédentaires sont perdues, ce qui peut altérer la précision de l'embedding. C'est pourquoi le découpage en chunks (chunking) est essentiel dans un système RAG : il garantit que chaque chunk reste dans la fenêtre de contexte du modèle d'embedding.
+
+### Lesson 9: Recherche hybride — combiner mots-clés, sémantique et métadonnées
+
+La recherche hybride combine les trois techniques pour tirer parti de leurs forces complémentaires.
+
+Le filtrage par métadonnées utilise des critères rigides pour réduire les résultats : rapide, simple à interpréter, et seule technique fournissant un filtre strict oui/non. La recherche par mots-clés classe les documents selon les mots-clés partagés avec le prompt : efficace pour les termes techniques et noms exacts, mais incapable de retrouver des documents exprimant le même sens avec des mots différents. La recherche sémantique classe les documents selon leur signification similaire au prompt : plus flexible mais plus coûteuse en calcul.
+
+Dans un pipeline de recherche hybride, le retriever effectue à la fois une recherche par mots-clés et une recherche sémantique. Les deux résultent en deux listes classées de documents. Ces listes sont ensuite filtrées par métadonnées pour supprimer les documents non pertinents. Puis les deux listes filtrées sont combinées en un classement unique.
+
+L'algorithme le plus souvent utilisé pour combiner les classements est le Reciprocal Rank Fusion (RRF). Chaque document obtient un score selon sa position dans chaque liste : le score est l'inverse de son rang. Par exemple, 2ème rang donne 1/2 = 0.5 point, 10ème rang donne 1/10 = 0.1 point. Les scores des deux listes s'additionnent pour donner un score total.
+
+Le paramètre K de RRF contrôle l'influence du document le mieux classé. Quand K = 0, le document en tête domine immédiatement. En augmentant K (par exemple à 50), on équilibre davantage les scores — être premier reste avantageux, mais sans dominer totalement. RRF ne tient compte que du rang, non des scores initiaux.
+
+Un second hyperparamètre bêta (β) permet de pondérer l'importance donnée à la recherche sémantique ou par mots-clés. Par exemple β = 0.8 attribue 80% d'importance à la recherche sémantique et 20% aux mots-clés. Un rapport 70/30 (sémantique/mots-clés) est souvent un bon point de départ. Pour les applications où la correspondance exacte est cruciale, on donne plus de poids aux mots-clés. Quand la similarité de sens est prioritaire, on privilégie davantage la recherche sémantique.
+
+Le retriever renvoie les K documents les plus similaires issus du classement hybride final — c'est le top K. La recherche hybride offre de nombreuses possibilités d'ajustement : paramètres BM25, métadonnées utilisées pour filtrer, pondération entre sémantique et mots-clés.
+
+### Lesson 10: Évaluation d'un retriever — précision, rappel, MAP, MRR
+
+La plupart des métriques de qualité d'un retriever reposent sur trois éléments : le prompt lui-même, la liste classée de documents renvoyée par le retriever, et une vérité terrain listant tous les documents pertinents dans la base de connaissances.
+
+La précision (precision) se calcule en divisant le nombre de documents pertinents retrouvés par le nombre total de documents renvoyés. Le rappel (recall) se calcule en divisant le nombre de documents pertinents retrouvés par le nombre total de documents pertinents dans la base.
+
+Exemple : si la base contient 10 documents pertinents et que le retriever renvoie 12 documents dont 8 pertinents → précision = 8/12 = 66%, rappel = 8/10 = 80%. Si on ajuste les paramètres et que le retriever renvoie 15 documents dont 9 pertinents → précision = 9/15 = 60%, rappel = 9/10 = 90%. On a échangé un peu de précision contre plus de rappel. La précision pénalise les résultats non pertinents (fiabilité), le rappel pénalise les résultats pertinents manquants (complétude).
+
+Les métriques à "Top K" standardisent l'évaluation : précision@5, rappel@10, etc. Les Top 5 à Top 15 sont souvent utilisés comme plage d'évaluation équilibrée.
+
+La MAP (Mean Average Precision) évalue la précision moyenne des documents pertinents parmi les K premiers résultats. Pour calculer l'Average Precision@K : on liste les K documents les mieux classés, on calcule la précision à chaque position de document pertinent, on fait la moyenne. Un MAP élevé indique que le retriever place bien les documents pertinents en haut du classement.
+
+Le MRR (Mean Reciprocal Rank) mesure la position du premier document pertinent. Si le premier document pertinent est en 2ème position → 1/2 = 0.5 ; en 4ème → 1/4 = 0.25. Le MRR est la moyenne de ces valeurs sur plusieurs prompts. Il indique à quelle vitesse on trouve un document pertinent dans les résultats.
+
+Comment combiner les métriques : le rappel (Recall@K) est la métrique de base la plus citée car elle mesure l'objectif premier du retriever. La précision et la MAP précisent si le retriever inclut trop de bruit ou s'il classe bien les résultats. Le MRR est utile pour juger les performances du haut de classement. Ces métriques nécessitent un jeu de vérité terrain — une liste manuelle de documents pertinents pour chaque prompt.
+
+### Lesson 11: Lab — Métriques de récupération en pratique
+
+Pour évaluer efficacement un retriever, vous avez besoin d'un jeu de données annoté — un ensemble pour lequel les réponses aux requêtes sont connues — permettant de comparer ces résultats avec ceux générés par votre système.
+
+En pratique, le compromis précision/rappel se manifeste clairement selon la valeur de K choisie.
+
+À K=5, la précision est très élevée (0.80 à 1.00) : presque tous les documents récupérés sont pertinents, mais le rappel est très faible (~1%), ce qui signifie qu'on ne capture qu'environ 1% des documents pertinents.
+
+À K=20, la précision commence à diminuer légèrement pour certaines requêtes, tandis que le rappel triple pour atteindre environ 3%.
+
+À K=50, la précision diminue encore (0.60 à 1.00 selon les requêtes) et le rappel atteint 5 à 8%.
+
+Observations clés issues de l'expérimentation sur le jeu de données 20 Newsgroups : lorsque K augmente, on récupère davantage de documents pertinents (rappel plus élevé), mais au prix d'un ajout de documents non pertinents (précision plus faible). Certaines requêtes sont plus difficiles que d'autres — les requêtes sémantiquement ambiguës ou dont la catégorie est difficile à distinguer des catégories voisines affichent une précision plus faible.
+
+Pour les systèmes RAG, une valeur de K comprise entre 5 et 20 est souvent optimale : ces valeurs offrent une haute précision tout en maintenant une taille de contexte gérable pour le LLM. Même si le rappel reste faible, l'objectif est de trouver les documents les plus pertinents, pas tous les documents pertinents. Le rappel reste relativement faible même à K=50 car chaque catégorie peut contenir plusieurs centaines de documents — pour obtenir un rappel élevé, il faudrait des valeurs de K dans les centaines, ce qui réduirait fortement la précision et serait peu pratique.
+
+### Lesson 12: Lab — Implémentation de BM25, recherche sémantique et RRF dans un système RAG
+
+Ce lab illustre concrètement comment implémenter les trois méthodes de récupération dans un système RAG et les combiner.
+
+La recherche sémantique utilise des techniques avancées pour comprendre le sens des mots dans une requête. Au lieu de se limiter à la correspondance exacte, elle considère le contexte et les relations entre les mots grâce aux embeddings vectoriels. BM25 est un algorithme classique mais performant qui attribue un score aux documents selon leur correspondance avec la requête, prenant en compte la fréquence des mots, leur rareté et la longueur du document. En résumé, la recherche sémantique comprend le sens, tandis que BM25 offre un classement efficace basé sur les mots-clés.
+
+Pour implémenter BM25, on tokenise le corpus (titre + description de chaque article), on construit un index inversé, puis on tokenise la requête et on récupère les top_k documents. La bibliothèque bm25s facilite cette implémentation.
+
+Pour la recherche sémantique, on encode la requête avec le modèle d'embedding (BAAI/bge-base-en-v1.5), on compare le vecteur obtenu aux embeddings pré-calculés des documents via la similarité cosinus, et on retourne les indices des top_k documents les plus similaires.
+
+La Reciprocal Rank Fusion (RRF) combine les résultats BM25 et sémantique. La formule est : Score(d) = somme de 1/(K + rang_i(d)) pour chaque liste i. Où K est une constante d'échelle (souvent 60). Les documents bien classés dans plusieurs listes obtiennent un score plus élevé. On trie par score décroissant et on retourne les top_k indices.
+
+Pour le prompt augmenté final, on récupère les top_k documents pertinents via la méthode choisie, on les formate (titre, description, date, URL), et on construit un prompt qui intègre ces informations comme contexte supplémentaire pour le LLM. Le LLM doit utiliser ces informations en complément de ses connaissances générales, sans s'y limiter exclusivement.
+
+En expérimentant avec les quatre configurations (sémantique, BM25, RRF, sans RAG), on observe que : la recherche sémantique excelle pour les requêtes conceptuelles, BM25 pour les termes techniques exacts, et RRF combine les avantages des deux. Sans RAG, le LLM manque d'informations récentes ou spécifiques au domaine.
+
+### Lesson 13: Conclusion — Principes de la recherche d'information dans un système RAG
+
+Les récupérateurs recherchent généralement des documents en utilisant une combinaison de trois techniques : la recherche par mots-clés, la recherche sémantique et le filtrage par métadonnées.
+
+La recherche par mots-clés classe les documents en fonction de la fréquence à laquelle ils contiennent les mots-clés du prompt. C'est une approche mature qui garantit que les documents contiennent exactement les mots-clés trouvés dans le prompt.
+
+La recherche sémantique classe les documents en fonction de leur similarité de sens avec le prompt, rendue possible grâce à un modèle d'embedding qui convertit des morceaux de texte en vecteurs mathématiques. Les textes ayant un sens similaire sont représentés par des vecteurs proches les uns des autres dans l'espace vectoriel. La recherche sémantique offre une flexibilité que la recherche par mots-clés n'a pas.
+
+Le filtrage par métadonnées exclut les documents selon des critères stricts capturés dans leurs métadonnées, généralement pour garantir que les résultats sont pertinents pour un utilisateur spécifique.
+
+La recherche hybride combine ces techniques en effectuant une recherche par mots-clés et une recherche sémantique dans la base de connaissances, en filtrant les résultats à l'aide d'un filtre de métadonnées, puis en combinant les documents des deux listes pour former une liste unique classée à partir de laquelle les meilleures correspondances sont renvoyées.
+
+Des métriques courantes comme la précision, le rappel, la MAP et le MRR permettent d'évaluer la qualité de la recherche et de déterminer si elle augmente ou diminue en réponse à l'ajustement des hyperparamètres du pipeline de recherche hybride.
