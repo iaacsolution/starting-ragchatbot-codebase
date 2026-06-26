@@ -1,0 +1,346 @@
+Course Title: RAG en Production
+Course Instructor: DeepLearning.ai
+
+### Lesson 1: Introduction — Préparer votre système RAG pour la production
+
+À ce stade, vous maîtrisez toutes les compétences nécessaires pour concevoir et construire votre propre système RAG.
+
+Une fois que vous serez prêt à mettre cette application en production, cependant, de nouvelles considérations apparaîtront.
+
+Dans ce module, vous apprendrez à préparer votre système RAG pour la production.
+
+Pour commencer, vous passerez en revue une variété de stratégies d'évaluation pour les systèmes RAG, ainsi que des plateformes permettant d'exécuter ces évaluations.
+
+Que vous évaluiez des composants individuels ou votre système global, vous aurez besoin de la capacité d'observer les performances de votre système.
+
+Vous explorerez également comment la journalisation peut vous aider à retracer les appels individuels vers votre système RAG et à identifier la cause des réponses de mauvaise qualité.
+
+Pour conclure cette partie sur les évaluations, vous apprendrez à créer des ensembles de données personnalisés à partir du trafic réel de votre application, afin de tester les modifications apportées à votre système RAG en utilisant des données réelles provenant des utilisateurs.
+
+Dans la section suivante, vous explorerez une variété de compromis que l'on rencontre souvent lorsque l'on conçoit ou modifie un système RAG.
+
+Que vous cherchiez à contrôler le coût, l'empreinte mémoire ou la latence, vous étudierez des stratégies permettant d'aligner un système RAG avec les besoins de votre projet sans perte significative de qualité de réponse.
+
+Enfin, vous étudierez des approches de pointe pour intégrer des données multimodales dans les systèmes RAG, permettant à vos systèmes de puiser dans une base de connaissances contenant également des images ou des PDF, en plus du texte.
+
+### Lesson 2: Ce qui rend la production difficile
+
+Les environnements de production imposent des contraintes entièrement nouvelles à votre système RAG, et relever ces défis nécessite un ensemble de compétences différent de celles requises lors du prototypage.
+
+Le premier ensemble de défis que vous rencontrerez en production provient simplement du passage à l'échelle.
+
+Un plus grand nombre d'utilisateurs met sous tension le débit de votre système, que ce soit en termes de nombre de requêtes qu'il peut gérer simultanément ou de latence entre la réception d'une requête et l'envoi d'une réponse.
+
+Un volume plus élevé de requêtes implique également une utilisation accrue de la mémoire et des ressources de calcul, ce qui se traduit finalement par des coûts plus élevés.
+
+Maintenir de bonnes performances à grande échelle peut être difficile.
+
+Une deuxième catégorie de défis provient de la variété et de l'imprévisibilité des requêtes que votre système recevra une fois qu'il sera entre les mains des utilisateurs.
+
+Même avec des tests approfondis, il est difficile de prévoir tous les types de requêtes que votre système RAG recevra.
+
+Vous pouvez constater que votre système rencontre des difficultés avec certaines de ces nouvelles requêtes, même s'il fonctionnait bien lors des tests précédant le lancement.
+
+Un autre défi en production concerne le fait que les données du monde réel sont souvent désordonnées.
+
+Il n'est pas rare que les données soient fragmentées, mal formatées, ou dépourvues de métadonnées.
+
+De nombreuses données ne sont même pas sous forme de texte, mais plutôt contenues dans des images, des PDF ou des présentations.
+
+Si vous souhaitez inclure ces données dans votre base de connaissances, vous devrez disposer d'un moyen d'y accéder.
+
+Les questions de sécurité et de confidentialité constituent également une préoccupation majeure.
+
+De nombreux systèmes RAG sont déployés précisément parce que les données de leur base de connaissances sont privées ou propriétaires.
+
+Garantir que ces données restent confidentielles tout en permettant aux utilisateurs autorisés d'y accéder lors de l'utilisation du système RAG est une fonctionnalité essentielle.
+
+En plus de tous ces défis, le principal enjeu de la production est que les erreurs peuvent avoir un impact commercial réel, qu'il soit financier ou lié à la réputation.
+
+Lorsque Google a lancé pour la première fois sa fonctionnalité de résumés de recherche basés sur l'IA, le système a répondu à certaines requêtes en conseillant aux utilisateurs de manger des pierres pour leurs prétendus bienfaits nutritionnels.
+
+Lorsque le système a récupéré des informations pour répondre à cette question, de nombreux articles ou discussions de forums trouvés étaient humoristiques, mais le système n'a pas reconnu ce caractère humoristique.
+
+Des chatbots de compagnies aériennes ont promis par erreur des réductions à des clients, alors que ces offres n'existaient pas réellement.
+
+Des acteurs malveillants tenteront de tromper votre système RAG pour obtenir gratuitement votre produit ou pour révéler des informations confidentielles.
+
+La production est tout simplement un environnement difficile dans lequel opérer pour un système RAG.
+
+Il est donc essentiel de disposer de mécanismes permettant d'anticiper les problèmes avant qu'ils ne surviennent, de les détecter lorsqu'ils apparaissent, et de vérifier que les changements apportés conduisent réellement à des améliorations.
+
+### Lesson 3: Mise en oeuvre de stratégies d'évaluation RAG
+
+Une bonne première étape pour relever les défis de la production consiste à construire un système d'observabilité robuste.
+
+Une plateforme d'observabilité doit suivre plusieurs types d'informations.
+
+Tout d'abord, elle doit surveiller les métriques classiques de performance logicielle telles que la latence, le débit, l'utilisation de la mémoire et des ressources de calcul.
+
+Comme pour presque tous les systèmes logiciels en production, vous voudrez savoir combien de requêtes votre système traite, combien de temps cela prend et combien de ressources il consomme.
+
+Ensuite, vous devrez suivre toute une variété de métriques de qualité.
+
+La qualité peut ici signifier beaucoup de choses, allant de la satisfaction des utilisateurs vis-à-vis des réponses finales qu'ils reçoivent, jusqu'au rappel de votre composant de récupération.
+
+Votre système doit capturer des statistiques agrégées dans le temps afin de vous aider à suivre des tendances de performance à haut niveau et à identifier rapidement des régressions.
+
+Séparément, le système doit enregistrer des journaux détaillés.
+
+Ces journaux vous permettront de retracer le parcours de requêtes individuelles à travers votre pipeline RAG, ce qui est particulièrement utile lorsque vous essayez de comprendre l'origine de réponses de mauvaise qualité.
+
+Enfin, votre système d'évaluation devrait idéalement permettre l'expérimentation.
+
+Si vous envisagez de passer à un nouveau modèle de langage, d'ajuster une invite système ou de modifier les paramètres de votre retriever, vous voudrez pouvoir soit exécuter des expériences personnalisées dans un environnement sécurisé, soit effectuer des tests A/B avec des utilisateurs en production.
+
+Un bon cadre pour réfléchir aux métriques repose sur deux dimensions : la portée et le type d'évaluateur.
+
+La portée indique si une évaluation cible un composant spécifique de votre système RAG ou le système dans son ensemble.
+
+Le type d'évaluateur précise si l'évaluation est basée sur du code, utilise un LLM comme juge, ou s'appuie sur un retour humain.
+
+Les évaluations au niveau du système servent généralement à résumer la performance globale du système ou à fournir une vue d'ensemble de son bon fonctionnement.
+
+Les évaluations au niveau des composants, en revanche, vous aident à déboguer l'origine de problèmes spécifiques.
+
+Par exemple, vous pouvez constater que la latence globale de votre système est trop élevée. Pour identifier la source de ce problème, vous aurez besoin d'évaluations au niveau des composants afin de déterminer si le retriever, le LLM ou un autre composant est à l'origine du dysfonctionnement.
+
+Les évaluations basées sur le code sont les moins coûteuses, les plus simples et les plus faciles à mettre en œuvre.
+
+Cela peut aller de l'enregistrement du nombre de requêtes traitées par seconde à l'exécution de tests unitaires pour vérifier que votre LLM produit un JSON valide.
+
+L'élément clé ici est que ces évaluations peuvent être exécutées automatiquement, sont déterministes et coûtent presque rien à exécuter.
+
+À l'autre extrémité du spectre se trouvent les évaluations basées sur le retour humain.
+
+Un exemple courant est lorsque les utilisateurs de votre application évaluent les réponses avec un pouce levé ou un pouce baissé.
+
+Certaines évaluations peuvent être exécutées automatiquement mais reposent initialement sur une intervention humaine.
+
+Par exemple, vous pouvez demander à des humains de constituer à l'avance des jeux de données contenant des requêtes et les documents pertinents qui devraient être récupérés.
+
+Une fois ce jeu de données constitué, vous pouvez rapidement calculer des métriques classiques comme la précision et le rappel.
+
+L'approche « LLM comme juge » cherche à se situer entre les deux, en utilisant un modèle de langage pour évaluer différents aspects de la performance de votre système.
+
+Par exemple, un LLM peut déterminer si les documents récupérés par un retriever sont réellement pertinents par rapport à la requête de l'utilisateur.
+
+Cette approche est plus flexible que les évaluations basées sur le code et moins coûteuse que le retour humain.
+
+Cependant, l'utilisation d'un LLM comme juge doit être abordée avec prudence.
+
+Les modèles peuvent avoir des biais et favoriser des réponses générées par des modèles de leur propre famille.
+
+Ils ont également besoin de critères d'évaluation clairs et fonctionnent généralement mieux avec des catégories discrètes, comme pertinent ou non pertinent, plutôt qu'avec une note sur une échelle de 0 à 100.
+
+Une bonne approche consiste à collecter à la fois des métriques de performance logicielle et des métriques de qualité pour chaque composant majeur, ainsi que pour le système global.
+
+Les métriques de performance système, telles que la latence, le débit, l'utilisation de la mémoire ou le nombre de tokens générés par seconde, sont des évaluations basées sur le code, ce qui les rend peu coûteuses et faciles à collecter.
+
+Pour les métriques de qualité, vous devrez généralement vous appuyer sur des techniques utilisant l'annotation humaine ou des LLM comme juges.
+
+À l'échelle du système, vous pouvez permettre aux utilisateurs de donner un pouce levé ou un pouce baissé sur les réponses générées, ce qui fournit un retour sur la qualité globale des réponses.
+
+Pour évaluer un retriever, vous pouvez consacrer du temps à constituer un jeu de données de test annoté par des humains, composé de requêtes et de documents attendus, afin de calculer des métriques courantes comme le rappel et la précision.
+
+Pour évaluer la qualité du LLM, vous utiliserez généralement des évaluations basées sur des LLM, comme celles proposées par la bibliothèque Ragas, afin de mesurer des critères tels que la pertinence des réponses, la qualité des citations ou la capacité du LLM à ignorer des informations récupérées non pertinentes.
+
+Une approche de ce type vous offre une visibilité à la fois sur les performances et la qualité de votre système global et de ses composants individuels.
+
+Elle permet également de trouver un bon équilibre entre des évaluations peu coûteuses, comme la latence, et des métriques plus coûteuses reposant sur l'annotation humaine ou des appels à des LLM.
+
+### Lesson 4: L'exploitation des journaux, la surveillance et l'observabilité
+
+Une fois que vous savez quelles métriques vous souhaitez collecter sur votre système RAG, vous devez effectivement construire le système permettant de collecter ces données.
+
+Il existe de nombreuses plateformes d'observabilité dédiées aux applications basées sur des LLM.
+
+Elles sont conçues pour prendre en charge des tâches d'évaluation courantes, comme la capture de métriques à l'échelle du système ou au niveau des composants, l'enregistrement du trafic du système, ainsi que l'expérimentation avec de nouveaux paramètres.
+
+Utiliser une telle plateforme signifie que vous passez moins de temps à concevoir et à implémenter votre propre système d'observabilité, et davantage de temps à surveiller les performances de votre système RAG et à expérimenter des moyens de l'améliorer.
+
+À titre d'exemple, examinons une plateforme open source d'observabilité et d'évaluation appelée Phoenix, développée par l'entreprise Arize.
+
+Elle fournit un ensemble d'outils qui vous aident à évaluer les performances de votre système RAG.
+
+Une trace vous permet de suivre le parcours d'une requête à travers l'ensemble du pipeline RAG et d'observer comment elle est transformée par chaque composant du système.
+
+Par exemple, vous pouvez voir l'invite textuelle initiale, la requête envoyée au retriever, les segments que le retriever a retournés, la manière dont ces segments ont été traités par un re-ranker, l'invite finale envoyée au modèle de langage, ainsi que la réponse finale générée.
+
+Des informations utiles, comme la latence de chaque étape, peuvent également être enregistrées.
+
+Le suivi des traces est un outil courant pour évaluer un système RAG, qu'il s'agisse d'un prototype précoce ou d'un système déjà en production.
+
+Par exemple, si vous savez qu'une requête a mal fonctionné dans votre système RAG, vous pouvez retracer son parcours et tenter d'identifier l'étape qui est à l'origine de l'erreur.
+
+La plateforme Phoenix facilite également la collecte de nombreuses évaluations courantes.
+
+Par exemple, elle s'intègre à la bibliothèque RAGAS, que vous avez utilisée pour différentes métriques d'évaluation.
+
+Ainsi, si vous souhaitez mesurer la pertinence de la recherche de votre retriever ou vérifier si votre LLM cite correctement les sources récupérées, il est facile d'ajouter ces étapes d'évaluation.
+
+Une fois qu'un pipeline d'évaluation de base est en place, vous pouvez commencer à mener des expériences simples.
+
+Par exemple, vous pouvez tester de manière itérative vos propres invites et observer comment elles sont traitées par votre pipeline RAG.
+
+Vous pouvez également tester des modifications de votre système afin de voir comment elles affectent ses performances.
+
+Des fonctionnalités comme celles-ci vous aident à déterminer si une nouvelle invite système améliore réellement la qualité des réponses, ou à évaluer les gains de performance obtenus en ajoutant un re-ranker.
+
+Bien que le traçage vous donne accès à des informations de bas niveau, vous aurez également besoin de statistiques agrégées de haut niveau pour suivre les performances globales du système.
+
+Phoenix est capable de fournir des rapports quotidiens sur des indicateurs clés, allant de la précision du retriever au taux d'hallucination du modèle.
+
+Bien que Phoenix et d'autres plateformes d'observabilité pour les LLM couvrent la majorité des évaluations que vous souhaiterez collecter sur votre système RAG, certaines lacunes subsistent.
+
+Par exemple, ce n'est pas l'outil idéal pour surveiller l'utilisation du calcul et de la mémoire de votre base de données vectorielle.
+
+Dans ces cas-là, vous pouvez recourir à des outils plus classiques de supervision et d'observabilité, comme Datadog ou Grafana.
+
+Un bon pipeline d'observabilité conduit finalement à un cercle vertueux d'amélioration continue du système.
+
+En observant comment votre système gère le trafic réel en production, vous êtes en mesure d'identifier des bogues ou des axes d'amélioration, puis d'en mesurer l'impact après modification.
+
+Au fil du temps, cela vous permet d'ajuster chaque composant de votre système afin qu'il corresponde au mieux à l'usage réel de vos utilisateurs.
+
+Un outil particulièrement précieux dans ce processus est la capacité à créer des jeux de données personnalisés à partir d'invites que votre système RAG a déjà traitées.
+
+En enregistrant puis en réexécutant ces invites dans votre système, vous pouvez observer l'impact des changements sur des requêtes réelles déjà reçues par votre application.
+
+### Lesson 5: Lab — Traçage d'un système RAG avec Phoenix et Weaviate
+
+Un système RAG est un système distribué, pas juste un prompt.
+
+Une requête utilisateur traverse plusieurs composants : le retriever (Weaviate), le formatage du contexte, la construction du prompt, et l'appel LLM. Chacune de ces étapes peut échouer, être lente, ou produire des données de mauvaise qualité. Sans traçage, un RAG est une boîte noire. Comprendre où ça casse évite de tuner le prompt à l'aveugle.
+
+La télémétrie transforme un RAG en système observable.
+
+Chaque étape devient un span, relié dans une trace. On voit le chemin exact de la requête, les inputs et outputs intermédiaires, et les erreurs réelles. On ne pilote bien que ce qu'on peut observer. La télémétrie permet un diagnostic rapide : est-ce le retrieval, le prompt ou le LLM qui pose problème ? C'est la base indispensable pour la qualité et la confiance.
+
+En télémétrie, un span représente une opération ou une tâche unique au sein du système. Il capture le moment de début et de fin d'une action, ainsi que des informations contextuelles importantes : événements, attributs, erreurs. Les spans permettent de mesurer la durée des opérations et d'identifier les points problématiques du système.
+
+Une trace est un ensemble de spans liés représentant le parcours complet d'une requête à travers le système. Elle permet de comprendre comment les différentes étapes s'enchaînent dans un pipeline : récupération de documents, formatage, augmentation du prompt, génération de la réponse.
+
+Phoenix (Arize) rend le RAG lisible pour un humain.
+
+Phoenix transforme des traces illisibles en chronologie claire, graphes exploitables et vues orientées LLM/RAG. Les concepts deviennent concrets : chains, spans spécialisés (retriever, llm, chain). L'observabilité n'a de valeur que si elle est compréhensible. Phoenix est accessible aux devs, ML, PO et formateurs, et constitue un support parfait pour les ateliers, revues et post-mortems.
+
+Phoenix repose sur OpenTelemetry. Il suffit d'enregistrer un tracer provider via Phoenix afin d'envoyer automatiquement les traces vers l'interface. Phoenix peut définir ce tracer comme tracer global par défaut.
+
+Une chain représente un point de connexion logique entre différentes étapes d'une application LLM. Elle permet de structurer les appels successifs (retriever, formatage, prompt, génération) de manière claire et lisible dans les traces. L'annotation @tracer.chain permet de transformer automatiquement une fonction en étape traçable de la chaîne.
+
+Tracer, c'est la base de l'évaluation et de l'amélioration continue.
+
+Une fois tracé, vous pouvez mesurer la latence par étape, comparer les documents réellement utilisés, et relier réponse, contexte et retrieval. C'est la base pour l'évaluation RAG, le monitoring qualité et l'industrialisation. Pas d'évaluation sérieuse sans traçage. Cela permet le passage du "ça a l'air bien" au "on sait pourquoi c'est bien", et constitue un prérequis pour le passage à l'échelle, la sécurité et la conformité.
+
+Dans le lab, un scénario réaliste est mis en place à partir d'une FAQ de boutique de vêtements. Un pipeline RAG est construit pour répondre à des questions clients à partir d'une base vectorielle Weaviate. Le retriever Weaviate est instrumenté avec Phoenix afin de tracer la requête utilisateur, les documents récupérés et leurs métadonnées. Les appels LLM sont automatiquement tracés grâce à l'auto-instrumentation de Phoenix, sans span manuel.
+
+Ce que l'on voit dans Phoenix après exécution : la trace complète par requête, la durée par étape, les erreurs visibles immédiatement, la comparaison entre requêtes réussies et échouées, et un audit complet du pipeline RAG.
+
+### Lesson 6: Évaluation personnalisée — Créer des jeux de données à partir du trafic réel
+
+La création d'un jeu de données personnalisé d'invites que votre système a déjà reçues vous permet de comprendre en profondeur comment votre système a fonctionné par le passé, puis de mener des expériences pour voir comment une refonte de votre système pourrait modifier ses performances sur des invites issues du monde réel.
+
+Un jeu de données personnalisé est simplement une collection d'invites que votre système a traitées auparavant, accompagnées de toutes les informations que vous choisissez d'enregistrer sur le parcours de ces invites à travers votre système.
+
+Vous pouvez choisir d'enregistrer uniquement l'invite initiale et la réponse finale, ou bien ajouter une grande quantité d'informations supplémentaires : les documents récupérés par votre base de données vectorielle, la manière dont ces documents ont été classés avant et après un re-ranker, la sortie d'un module de réécriture de requête, etc.
+
+La question clé lors de la construction d'un jeu de données personnalisé est : quelles données stocker ? La réponse simple est : qu'est-ce que vous voulez évaluer ?
+
+Vous voudrez presque toujours enregistrer l'invite soumise par l'utilisateur ainsi que la réponse finale générée par votre système RAG. Ces deux informations de base donnent déjà un aperçu des performances globales du système et permettent de suivre l'évolution des réponses lorsque vous modifiez vos invites ou votre pipeline.
+
+Cependant, ces données ne suffisent que pour une évaluation de bout en bout. Si vous souhaitez effectuer des évaluations au niveau des composants — pour comprendre les performances de votre retriever, de votre re-ranker ou de votre module de réécriture de requêtes — vous devrez enregistrer les entrées et sorties de chacun de ces composants.
+
+En pratique, les tables utilisées pour journaliser les appels vers un système RAG peuvent facilement contenir des dizaines de colonnes : l'identifiant du client ayant effectué la requête, les fragments de texte transmis au re-ranker, les sorties de chaque routeur LLM dans un workflow agentique.
+
+Stocker une grande variété de données vous permet d'analyser chaque composant du système individuellement et d'examiner les performances selon de nombreuses dimensions.
+
+Par exemple, si vous développez un chatbot de service client, vous pouvez filtrer les données par type de question et constater que les questions sur les remboursements reçoivent des réponses de bonne qualité, tandis que celles concernant les retards de produits fonctionnent beaucoup moins bien.
+
+En enquêtant sur les raisons de ces mauvaises performances, vous pourriez découvrir dans les journaux que votre retriever ne parvient pas à trouver suffisamment de documents pertinents. Il se peut alors que vous deviez enrichir votre base de connaissances avec des informations plus adaptées.
+
+Un exemple concret : un système RAG capable de générer du texte, des images, ainsi que des graphiques et diagrammes à partir de code Mermaid.js recevait des plaintes sur la qualité de certains diagrammes. En analysant les journaux, il est apparu que ces problèmes survenaient lorsque les utilisateurs demandaient explicitement de dessiner un diagramme. Le routeur LLM interprétait mal ces requêtes et les envoyait au modèle texte-image, qui est bon pour générer des photos mais mauvais pour produire des graphiques structurés. Une fois la cause identifiée, il a suffi de mettre à jour l'invite système du routeur pour que ces requêtes déclenchent la génération de graphiques basés sur du code.
+
+Parfois, vous voudrez analyser des invites individuelles peu performantes. Mais lorsque vous accumulez beaucoup de données, vous souhaiterez souvent les visualiser afin d'identifier des tendances globales.
+
+Par exemple, vous pouvez visualiser l'ensemble des invites qui traversent votre système et utiliser un algorithme de regroupement pour identifier les grands thèmes abordés par vos utilisateurs. Si vous pouvez différencier ces catégories d'invites, vous pourrez exécuter votre pipeline d'évaluation spécifiquement sur certains types de questions et identifier les cas où votre système sous-performe.
+
+Les jeux de données personnalisés sont un outil essentiel pour adapter votre application RAG aux usages réels de vos utilisateurs. Les intégrer dans votre processus d'évaluation est l'un des meilleurs moyens d'améliorer la qualité des réponses fournies aux véritables questions posées par vos utilisateurs.
+
+### Lesson 7: Quantification — Compresser les LLM et les embeddings pour la production
+
+La quantification est une forme de compression appliquée aux LLM et aux vecteurs générés par les modèles d'embedding. Elle remplace les poids internes d'un LLM ou les valeurs d'un vecteur d'embedding par des types de données compressés et de moindre précision. Cela rend les modèles ou les vecteurs plus petits, moins coûteux et plus rapides à exécuter, souvent sans sacrifier de manière significative la pertinence de la récupération ou la qualité des réponses.
+
+Une bonne analogie est la compression d'image. Une image de haute qualité utilise 24 bits par pixel. Compressée à 12 ou 6 bits, elle fait la moitié ou le quart de la taille originale, avec une perte de qualité qui peut valoir les économies de mémoire selon l'usage. La quantification applique exactement la même logique aux LLM et aux vecteurs d'embedding.
+
+Pour les LLM, les paramètres utilisent généralement 16 bits de mémoire chacun. Avec des modèles de un milliard à un trillion de paramètres, ils nécessitent beaucoup de mémoire et des GPU puissants. Les modèles quantifiés compressent ces paramètres de 16 bits vers 8 bits, voire 4 bits, réduisant considérablement la mémoire GPU nécessaire au prix d'une légère baisse des performances.
+
+Pour les vecteurs d'embedding, un vecteur typique de 768 dimensions utilise 768 nombres à virgule flottante en 32 bits, soit environ 3 kilo-octets par vecteur. Stocker des millions de ces vecteurs représente des volumes massifs, qui doivent souvent être chargés dans une RAM coûteuse pour permettre une recherche rapide.
+
+La quantification entière est une approche courante. Elle remplace les nombres à virgule flottante 32 bits par des entiers sur 8 bits. Les vecteurs deviennent immédiatement quatre fois plus petits. Le processus consiste à trouver les valeurs minimale et maximale de chaque dimension, diviser cette plage en 256 intervalles correspondant aux 256 valeurs représentables en 8 bits, puis remplacer chaque valeur flottante par l'entier de l'intervalle correspondant. En stockant la valeur minimale et la largeur des intervalles, on peut reconstruire une approximation de la valeur originale. Malgré la compression, la quantification entière en 8 bits fonctionne remarquablement bien : sur des métriques comme le Recall@K, on n'observe souvent qu'une baisse de quelques points de pourcentage.
+
+Les vecteurs binaires (quantification sur 1 bit) gagnent également en popularité. Cette approche compresse la taille d'un vecteur d'un facteur 32, chaque dimension indiquant simplement si la valeur originale était positive ou négative. Les performances peuvent chuter de manière notable, mais la récupération devient beaucoup plus rapide. Cette approche peut être combinée avec d'autres techniques : récupération rapide avec des vecteurs 1 bit, puis re-scoring avec les vecteurs complets en 32 bits.
+
+Les modèles d'embedding Matryoshka, nommés d'après les poupées russes, constituent une autre méthode pour réduire la taille des vecteurs. Ces modèles permettent l'utilisation d'un sous-ensemble des dimensions lors du calcul de similarité. Pour un vecteur de 1000 dimensions, on peut n'utiliser que les 500 ou les 100 premières. Dans un modèle Matryoshka, les premières dimensions concentrent davantage d'information, tandis que les suivantes en contiennent moins, ce qui rend leur suppression moins pénalisante. Ces vecteurs peuvent être utilisés de plusieurs façons : utiliser uniquement les premières dimensions pour économiser de l'espace, ou effectuer une récupération initiale avec un sous-ensemble de dimensions puis re-coter avec le vecteur complet stocké dans une mémoire moins coûteuse.
+
+L'essentiel à retenir : il faut expérimenter avec des LLM et des modèles d'embedding quantifiés. La plupart des fournisseurs proposent aujourd'hui des modèles quantifiés en 8 bits ou 4 bits. Les économies de coûts et d'espace peuvent être significatives, tandis que les pertes de qualité restent généralement faibles.
+
+### Lesson 8: Coût par rapport à la qualité de la réponse
+
+Lorsque vous faites évoluer votre système RAG à des centaines, des milliers ou des millions de requêtes, les considérations de coûts deviennent de plus en plus importantes.
+
+Les deux postes de coût les plus importants dans une application RAG typique sont la base de données vectorielle et les LLM.
+
+Pour réduire les coûts liés aux LLM, plusieurs stratégies existent.
+
+La première consiste à expérimenter avec des modèles plus petits. Qu'il s'agisse du LLM principal ou des LLM de routage dans un système agentique, il est souvent possible d'obtenir une qualité globale similaire avec des modèles plus petits et moins coûteux. Les modèles peuvent être plus petits parce qu'ils contiennent moins de paramètres, ou parce que leurs paramètres ont été quantifiés en 8 bits. Affiner un petit modèle peut conduire à de très bons résultats à faible coût.
+
+La deuxième approche consiste à limiter le nombre de tokens d'entrée et de sortie. Les prompts RAG peuvent rapidement devenir volumineux lorsque de nombreux passages longs sont récupérés. Il est utile de réduire le top-k et de modifier les prompts système pour encourager des réponses concises, ou de définir une limite stricte de tokens.
+
+Une autre approche est d'héberger les LLM sur du matériel dédié. Les endpoints d'inférence pratiques des fournisseurs cloud sont idéaux pour un prototype, mais à grande échelle, il peut être plus économique d'exécuter les modèles sur du matériel dédié loué à l'heure. Les endpoints dédiés offrent également une meilleure fiabilité car le matériel ne sert que votre trafic.
+
+Pour la base de données vectorielle, la plupart proposent plusieurs types de stockage : la RAM (la plus rapide, la plus chère), le stockage disque (intermédiaire) et le stockage objet cloud (le plus lent, le moins coûteux). La RAM est souvent plusieurs fois plus chère par gigaoctet que le disque, qui est lui-même plusieurs fois plus cher que le stockage objet.
+
+Pour réduire les coûts, il faut ne conserver en stockage rapide et coûteux que les données qui en ont réellement besoin. Par exemple, l'index HNSW doit être conservé en RAM pour assurer une recherche vectorielle rapide, mais le contenu des documents n'a généralement pas besoin de l'être. Les documents fréquemment consultés peuvent être sur disque, et les documents rarement consultés dans le stockage objet cloud.
+
+Un cas d'usage typique est la multi-tenance : séparation des documents par utilisateur ou organisation. Ce modèle facilite le chargement des données d'un locataire en mémoire rapide uniquement lorsque cela est nécessaire, par exemple au moment de la connexion. Dans les deux cas, vous déplacez simplement les données vers ou depuis la mémoire coûteuse selon les besoins.
+
+L'idée centrale : en tant qu'ingénieur, vous devez comprendre l'origine de vos coûts et vous assurer qu'ils sont justifiés par les performances obtenues. Pour les LLM, les leviers principaux sont l'utilisation de modèles plus petits et de prompts plus courts. Pour les bases de données vectorielles, il s'agit de stocker moins de données dans les niveaux coûteux et de déplacer intelligemment les données entre la RAM, le disque et le stockage objet.
+
+### Lesson 9: Latence par rapport à la qualité de réponse
+
+Un équilibre important à prendre en compte pour une application RAG en production est le temps de réponse (latence) par rapport à la qualité de la réponse.
+
+Le simple fait d'ajouter un retriever à votre système augmente la latence. À mesure que vous ajoutez davantage de composants — un re-ranker, des systèmes d'agents plus complexes — la latence continue d'augmenter.
+
+L'importance de la latence dépend fortement du contexte d'utilisation. Les clients d'un site e-commerce ont peu de patience pour des temps de réponse lents : vous optimiserez pour une latence très faible, quitte à ne pas proposer l'article parfaitement optimal. À l'inverse, un système RAG aidant des médecins à diagnostiquer des maladies rares sera optimisé pour la qualité des réponses, même si elles prennent plus de temps.
+
+Presque toute la latence provient de l'exécution d'un transformeur. Le principal responsable sera donc généralement vos appels aux LLM. La récupération et certaines techniques de re-ranking basées sur des transformeurs ajoutent également de la latence, mais les bases de données vectorielles modernes sont très rapides.
+
+Si vous souhaitez réduire la latence, le meilleur point de départ est votre LLM principal. Utiliser un modèle plus petit ou quantifié est efficace : ils s'exécutent toujours plus vite sur le même matériel. Une autre approche est d'utiliser un routeur LLM plus petit pour examiner l'invite et décider si un modèle plus petit ou plus grand est le plus adapté. Les requêtes simples sont envoyées vers des modèles plus petits et plus rapides, la latence plus élevée n'étant acceptée que lorsque cela est nécessaire.
+
+Pour les systèmes recevant fréquemment des requêtes très similaires, la mise en cache peut améliorer la latence. L'idée consiste à conserver un cache des invites fréquemment soumises et de leurs réponses. Lorsqu'une nouvelle invite arrive, on calcule rapidement des scores de similarité avec celles du cache. Si une correspondance suffisamment proche est trouvée, on renvoie immédiatement la réponse mise en cache, en évitant entièrement le processus de génération. Si l'on souhaite conserver une personnalisation, on peut fournir à un LLM plus petit et plus rapide à la fois la réponse mise en cache et l'invite utilisateur pour l'ajuster légèrement.
+
+Une fois le LLM principal optimisé, l'étape suivante consiste à examiner les autres composants basés sur des transformeurs : réécriteur de requêtes, re-ranker, routeur LLM. La recommandation est de mesurer à la fois la latence ajoutée par chaque composant et le gain réel en qualité de réponse. On pourrait par exemple constater que le réécriteur de requêtes n'apporte que peu de bénéfices et décider de le supprimer.
+
+Pour la récupération, utiliser des embeddings quantifiés binaires simplifie les calculs de distance vectorielle et accélère la recherche. Diviser de grandes bases de données en instances séparées peut également réduire la latence des requêtes.
+
+Il existe presque toujours un compromis entre latence et qualité dans un système RAG. La première étape consiste à comprendre quelle latence votre système peut tolérer. Si vous devez réduire la latence, commencez par votre LLM principal, puis examinez les autres composants. Avec un système d'observabilité robuste, vous pourrez visualiser l'impact de vos modifications et réduire la latence de manière itérative.
+
+### Lesson 10: Sécurité des systèmes RAG en production
+
+Une raison courante de construire un système RAG est la présence d'informations privées ou propriétaires. Ces informations ont volontairement été maintenues hors du web ouvert. Même après avoir mis en place un système RAG, vous souhaiterez probablement conserver ces données privées.
+
+Il existe plusieurs manières par lesquelles les informations de votre base de connaissances pourraient être divulguées. Une invite bien formulée pourrait convaincre un LLM de citer directement des informations issues des morceaux récupérés. Même avec des garde-fous en place, il est raisonnable de supposer que les utilisateurs pourront au moins accéder indirectement au contenu de votre base de connaissances.
+
+La première solution consiste à authentifier les utilisateurs de manière appropriée en fonction des informations auxquelles ils sont autorisés à accéder. Si votre base de connaissances contient des données d'entreprise privées, s'assurer que seuls les employés authentifiés peuvent interroger votre système est un bon point de départ.
+
+La deuxième approche importante est de partitionner les données entre plusieurs locataires en fonction d'un contrôle d'accès basé sur les rôles (RBAC). Quand une invite utilisateur déclenche une récupération, l'utilisateur ne devrait avoir accès qu'aux documents correspondant à son rôle et à ses privilèges. En théorie, il serait possible de conserver tous les documents dans un seul locataire et d'utiliser des filtres de métadonnées, mais cette technique est trop sujette aux erreurs. Le filtrage par métadonnées est mieux adapté à la personnalisation qu'à la sécurité. Pour la sécurité, stocker les données dans des locataires séparés est beaucoup plus fiable.
+
+Une autre source de fuite concerne l'envoi d'invites augmentées à un fournisseur de LLM externe. L'invite contient des fragments de texte récupérés depuis votre base de connaissances, et à ce moment-là vous perdez le contrôle sur la sécurité de ces informations. Si ce risque est inacceptable, il est possible d'exécuter un système RAG entièrement en local, sur site, en hébergeant à la fois le LLM et la base de données vectorielle sur votre propre infrastructure.
+
+Les bases de données vectorielles posent des défis spécifiques pour le chiffrement. Pour que les algorithmes de recherche ANN fonctionnent, les représentations vectorielles denses des documents doivent être stockées en mémoire en clair. Le texte des morceaux peut être stocké chiffré, puis déchiffré au moment de la construction de l'invite. Certains fournisseurs proposent cette fonctionnalité, ou vous pouvez gérer vous-même le chiffrement. Cela ajoute de la complexité et potentiellement de la latence.
+
+Les vecteurs denses qui doivent rester non chiffrés présentent un risque supplémentaire. Des recherches récentes ont montré qu'il est possible de reconstruire approximativement le texte original à partir de représentations vectorielles denses. Autrement dit, même si les morceaux de texte sont chiffrés, un attaquant qui obtient un accès direct à la base de données pourrait potentiellement reconstruire leur contenu à partir des vecteurs. Des techniques sont explorées pour limiter ce risque : ajout de bruit aux vecteurs, application de transformations, réduction de dimensionnalité. Chacune ajoute de la complexité et tend à réduire les performances.
+
+Le point clé à retenir : votre base de connaissances contient probablement des informations privées, et vous devez comprendre et contrôler précisément la manière dont ces informations sont accessibles. Combiner les techniques évoquées ici avec un ensemble plus large de bonnes pratiques en cybersécurité contribuera à renforcer la sécurité de votre système RAG en production.
