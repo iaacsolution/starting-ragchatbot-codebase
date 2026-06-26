@@ -30,7 +30,7 @@ class Config:
     # Database paths
     CHROMA_PATH: str = "./chroma_db"  # ChromaDB storage location
     # Bump this whenever the chunking algorithm or docs change to trigger auto re-index
-    INDEX_VERSION: str = "v3"
+    INDEX_VERSION: str = "v4"
 
 
 config = Config()
