@@ -180,9 +180,9 @@ class DocumentProcessor:
         while i < len(lines):
             line = lines[i]
 
-            # Check for lesson markers (e.g., "Lesson 0: Introduction")
+            # Check for lesson markers (e.g., "Lesson 0: Title" or "### Lesson 1: Title")
             lesson_match = re.match(
-                r"^Lesson\s+(\d+):\s*(.+)$", line.strip(), re.IGNORECASE
+                r"^(?:#{1,3}\s*)?Lesson\s+(\d+):\s*(.+)$", line.strip(), re.IGNORECASE
             )
 
             if lesson_match:
