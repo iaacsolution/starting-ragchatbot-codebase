@@ -1,0 +1,277 @@
+Course Title: Cours sur le RAG - DeepLearning.ai
+Course Instructor: DeepLearning.ai
+
+Lesson 1: Introduction — Récupération d'information avec des bases de données vectorielles
+
+Maintenant que vous avez une solide base en recherche d'information, il est temps de mettre toute cette théorie en production.
+Vous pourriez utiliser une base de données relationnelle traditionnelle pour implémenter la plupart des techniques de recherche que vous venez de voir,
+mais dès que vous devez rechercher parmi des millions, voire des milliards de documents, certaines de ces opérations — en particulier les opérations vectorielles sous-jacentes à la recherche sémantique — deviendront considérablement plus lentes.
+À ce stade, vous voudrez probablement passer à une base de données vectorielle.
+
+Les bases de données vectorielles sont des bases de données optimisées pour stocker et rechercher dans d'énormes quantités de données vectorielles,
+et, en conséquence, elles sont devenues presque synonymes des systèmes RAG.
+Dans ce module, vous apprendrez pourquoi les bases de données vectorielles sont si optimisées pour la recherche vectorielle,
+et vous les utiliserez concrètement pour exécuter une variété de recherches différentes.
+Vous verrez également un ensemble de techniques utilisées dans les systèmes RAG en production,
+comme le découpage de documents, l'analyse de requêtes et le reclassement,
+qui sont employées dans les environnements de production pour améliorer encore la performance d'un récupérateur.
+
+Lesson 2: La recherche des k plus proches voisins (KNN)
+
+Alors que la recherche par mots-clés et la recherche sémantique constituent la base d'un récupérateur en production, de nouveaux problèmes apparaissent à mesure que ces techniques passent à l'échelle.
+
+Si elle est implémentée de manière naïve, la recherche vectorielle, en particulier, évolue mal, nécessitant des ressources de calcul importantes et ajoutant de la latence à votre système.
+
+La forme la plus simple de recherche vectorielle s'appelle la recherche des k plus proches voisins (k-nearest neighbors).
+
+D'abord, vous créez un vecteur d'embedding pour chaque document dans votre base de connaissances, ainsi que pour votre prompt.
+Ensuite, vous calculez la distance entre le vecteur du prompt et chaque vecteur de document.
+Vous triez ensuite les documents en fonction de leur distance par rapport au vecteur du prompt.
+L'utilisateur peut alors choisir un nombre k, qui correspond simplement au nombre de documents les plus proches à renvoyer.
+
+k-nearest neighbors est facile à comprendre et à implémenter. Le problème est qu'il ne passe pas bien à l'échelle.
+Le nombre de calculs nécessaires à chaque recherche croît linéairement avec le nombre de documents dans la base de connaissances.
+Si vous avez mille documents, chaque recherche doit calculer mille distances vectorielles.
+Mais si vous avez un milliard de documents, vous devez calculer un milliard de distances vectorielles.
+Cette deuxième recherche sera un million de fois plus lente que la première.
+
+Pour améliorer k-nearest neighbors, les récupérateurs utilisent une famille d'algorithmes appelée approximate nearest neighbors (ANN).
+Ces algorithmes utilisent des structures de données ingénieuses pour permettre des recherches beaucoup plus rapides.
+Pour y parvenir, ils font un petit sacrifice sur la qualité des résultats : ils ne garantissent pas de trouver les documents absolument les plus proches dans la base de connaissances, mais ils trouveront tout de même des documents très proches.
+
+Un algorithme ANN typique s'appelle navigable small world. Avant toute recherche, l'algorithme crée une structure de données appelée graphe de proximité.
+Pour cela, il calcule d'abord la distance entre chaque vecteur et tous les autres vecteurs.
+Dans ce graphe de proximité, vous ajoutez un nœud pour chaque document.
+Enfin, vous créez une arête entre chaque document et quelques-uns des autres documents auxquels il est le plus proche.
+
+Lorsqu'un prompt est reçu, il est vectorisé pour créer un vecteur de requête.
+L'algorithme choisit au hasard un point d'entrée appelé vecteur candidat.
+Il examine chacun des voisins du vecteur candidat actuel et calcule lequel est le plus proche du vecteur du prompt.
+Celui qui est le plus proche devient le nouveau candidat. Le processus se répète jusqu'à ce qu'aucun des voisins ne soit plus proche que le candidat actuel.
+
+Bien que l'algorithme navigable small world soit déjà plus efficace que KNN, une légère variation appelée hierarchical navigable small world (HNSW) ajoute une amélioration supplémentaire.
+
+HNSW repose sur un graphe de proximité hiérarchique avec plusieurs couches.
+Pour une base de connaissances de mille documents :
+- La couche 1 contient les 1000 vecteurs avec le graphe de proximité complet.
+- Dans la couche 2, on élimine aléatoirement tous les vecteurs sauf 100, et on crée un nouveau graphe de proximité pour ces cent vecteurs.
+- Dans la couche 3, on élimine aléatoirement tous les vecteurs sauf 10, et on construit un graphe de proximité pour les dix restants.
+
+Les recherches commencent dans la couche 3 (la couche supérieure), puis descendent progressivement jusqu'à la couche 1 qui contient tous les vecteurs.
+Cette approche hiérarchique est très efficace car dans les couches supérieures, l'algorithme fait de grands sauts pour atteindre le voisinage approximatif du vecteur du prompt.
+
+Le temps d'exécution de HNSW est approximativement logarithmique, tandis que celui de KNN est linéaire.
+C'est ce qui permet à la recherche vectorielle de passer à l'échelle jusqu'à des milliards de vecteurs tout en ne nécessitant que quelques centaines de millisecondes de latence.
+
+Les algorithmes ANN sont beaucoup plus rapides que k-nearest neighbors, ce qui rend la recherche vectorielle possible à grande échelle.
+Bien qu'ils trouvent généralement des documents proches des vecteurs du prompt, ils ne peuvent pas garantir qu'ils trouveront les meilleures correspondances absolues.
+Tout le processus dépend de la construction d'un bon graphe de proximité, un processus assez coûteux en calcul, mais qui peut être pré-calculé avant de recevoir des prompts.
+
+Lesson 3: Bases de données vectorielles
+
+Dans un système RAG de production, vous stockez et récupérerez généralement des vecteurs à partir d'une base de données spécialisée appelée base de données vectorielle.
+
+Une base de données vectorielle est une base de données conçue à partir de zéro pour stocker des données vectorielles haute dimension et mettre en œuvre des algorithmes orientés vecteurs, comme l'algorithme des plus proches voisins approximatifs. Elles ont gagné en popularité au début des années 2020 avec la disponibilité généralisée des grands modèles de langage et l'explosion des techniques d'intégration vectorielle comme la recherche sémantique.
+
+Les bases de données relationnelles standard fonctionnent mal pour la recherche sémantique, où leur performance se rapproche beaucoup trop de l'algorithme très inefficace des K-Nearest Neighbors. Les bases de données vectorielles sont optimisées pour des tâches comme la construction du graphe de proximité utilisé par HNSW et le calcul des distances vectorielles.
+
+La base de données vectorielle utilisée dans ce cours s'appelle Weaviate. C'est une base de données vectorielle open source populaire que vous pouvez exécuter localement ou dans le cloud. L'objectif est de comprendre les workflows communs à n'importe quel projet RAG.
+
+Plusieurs étapes sont nécessaires avant de pouvoir traiter des requêtes :
+1. Configurer la base de données
+2. Charger les documents
+3. Créer les vecteurs clairsemés (pour la recherche par mot-clé)
+4. Créer les vecteurs denses (pour la recherche sémantique)
+5. Construire l'index ANN (par ex. HNSW)
+
+La première étape consiste à créer une instance de base de données ou à se connecter à une instance existante.
+
+Ensuite, vous devez créer une collection pour stocker vos données. Par exemple, une collection nommée article peut contenir un titre et un corps. Ce code spécifie également le type de chaque champ et surtout le modèle d'intégration utilisé pour générer les vecteurs sémantiques.
+
+Les données sont ajoutées via l'API batch avec batch.addObject() qui ajoute l'objet à la collection en gardant trace des erreurs.
+
+Pour la recherche vectorielle, une requête spécifie la collection et une requête textuelle. Une demande de métadonnées comme la distance peut être ajoutée. La distance renvoyée est la distance entre le vecteur de la requête et le vecteur de l'objet dans la base.
+
+Weaviate crée automatiquement un index inversé indiquant quels mots apparaissent dans chaque document et à quelle fréquence. Vous pouvez ensuite faire une requête BM25 simple pour obtenir les meilleurs documents.
+
+Vous pouvez combiner la recherche vectorielle sémantique et la recherche par mot-clé. Elles sont exécutées en parallèle, puis combinées via un paramètre alpha. Par exemple alpha = 0,25 signifie 25 % de poids à la recherche vectorielle et 75 % à la recherche par mot-clé. C'est ce mode hybride que la majorité des entreprises utilisent en production, car il équilibre la compréhension sémantique et la précision lexicale.
+
+Vous pouvez également appliquer des filtres sur des propriétés spécifiques pour retourner uniquement les documents dont une propriété correspond à une certaine valeur.
+
+Le pipeline complet dans une base de données vectorielle est : configurer la base de données, charger et indexer les données, puis exécuter des requêtes hybrides avec ou sans filtres.
+
+Lesson 4: Chunking — Découper les documents
+
+Dans la plupart des systèmes RAG de production, vous voudrez ajouter quelques adaptations supplémentaires à la récupération vectorielle pour optimiser les performances globales de votre système. Le chunking consiste à découper des documents texte plus longs de votre base de connaissances en morceaux de texte plus petits.
+
+La raison est triple. Premièrement, de nombreux modèles d'intégration ont des limites concernant la quantité de texte qu'ils peuvent transformer en vecteurs. Deuxièmement, le chunking peut améliorer les mesures de pertinence de recherche pour votre retriever. Et troisièmement, il garantit que vous n'envoyez au LLM que le texte le plus pertinent d'un document.
+
+Pour comprendre la valeur du chunking, imaginez que vous avez une base de connaissances de mille livres. Si vous indexez cette base, chaque livre sera vectorisé par un modèle d'intégration, et vous obtiendrez mille vecteurs représentant chacun le contenu d'un livre. Le problème est que vous compressez le sens d'un livre entier en un seul vecteur. Ces vecteurs ne peuvent pas représenter clairement un sujet spécifique abordé dans un chapitre ou une page, et ils effectuent une sorte de moyenne globale. Résultat : la pertinence de la recherche sera médiocre.
+
+C'est pourquoi vous découpez généralement les livres en morceaux plus petits, comme des pages, des paragraphes, ou des phrases. Soudain, votre base peut contenir un million de paragraphes au lieu de mille livres.
+
+La première question est : quelle taille utiliser ? Trop gros entraîne le même problème que le livre (moyennage, manque de précision). Trop petits entraîne une perte du contexte.
+
+Une solution simple consiste à utiliser une taille fixe : par exemple 250 caractères.
+- Chunk 1 = caractères 1–250
+- Chunk 2 = 251–500
+- Chunk 3 = 501–750
+
+Les coupures n'ont aucune raison de tomber à des endroits naturels : souvent en plein milieu d'un mot ou d'une idée. Pour éviter ça, on utilise un overlap (chevauchement). Par exemple avec un overlap de 10 % (~25 caractères) :
+- Chunk 1 = 1–250
+- Chunk 2 = 226–475
+- Chunk 3 = 451–700
+
+Avantages de l'overlap : les mots en bordure existent dans deux chunks, le contexte est mieux préservé, la pertinence sémantique augmente. Inconvénient : plus de vecteurs, donc plus de stockage (mais acceptable en pratique).
+
+Une méthode plus avancée est le recursive character text splitting. Elle consiste à diviser sur un caractère particulier comme un saut de ligne. Cela crée des chunks de taille variable qui respectent la structure naturelle du document. Par exemple, diviser du HTML sur les balises p ou h2, diviser du code Python sur def, ou diviser du texte simple sur le saut de ligne.
+
+Si vos documents sont variés, vous pouvez utiliser différentes stratégies selon leur type. Les chunks héritent des métadonnées du document d'origine, avec éventuellement des informations supplémentaires comme le numéro de page ou le numéro de chunk.
+
+Pour un bon compromis dans la majorité des cas : taille des chunks d'environ 500 caractères, avec un overlap de 50 à 100 caractères. C'est ce qui donne souvent les meilleurs résultats en RAG.
+
+Lesson 5: Laboratoire — Stratégies de chunking en pratique
+
+Ce laboratoire explore plusieurs méthodes de chunking et leur impact dans un pipeline RAG. Il utilise un chapitre du livre Pro Git comme source de données.
+
+Le chunking joue un rôle clé dans la récupération d'informations. Un livre entier vectorisé en un seul vecteur capture des thèmes globaux mais peu de détails. La granularité fine au niveau du paragraphe ou de la phrase donne une meilleure précision de recherche. La fenêtre de contexte limitée du LLM oblige à découper pour que le LLM puisse traiter le document.
+
+Stratégie 1 — Taille fixe : découper le texte en blocs de N mots. Simple et efficace. Exemple : get_chunks_fixed_size(text, chunk_size=100) produit des blocs de 100 mots.
+
+Stratégie 2 — Taille fixe avec chevauchement : chaque chunk partage une partie du contenu avec le chunk précédent. Par exemple chunk=100 mots, overlap=20% signifie 20 mots en commun. Cela évite de couper une phrase ou une idée importante.
+
+Stratégie 3 — Taille variable par marqueurs structurels : diviser sur les sauts de paragraphe (\n\n) ou les titres de section (\n==). L'avantage est de suivre la structure naturelle du document. L'inconvénient est que parfois un titre devient un chunk trop court et inutile.
+
+Stratégie 4 — Méthode mixte : couper d'abord avec un marqueur structurel, puis fusionner les chunks trop petits (minimum 25 mots). C'est la stratégie la plus réaliste pour un RAG en production.
+
+Pour chaque chunk on ajoute des métadonnées : titre du chapitre, nom du fichier, index du chunk, stratégie utilisée.
+
+Résultats de recherche selon la stratégie — Pour une requête large comme "historique de git", les chunks longs (paragraphe, mixte) fournissent meilleur contexte. Pour une requête précise comme "comment ajouter l'URL d'un dépôt distant", les chunks courts (25 mots) fonctionnent mieux car ils capturent exactement la commande Git pertinente.
+
+Intégration dans un système RAG : on compense la taille des chunks en ajustant le nombre récupéré. Pour les chunks courts on en récupère 8, pour les chunks longs on en récupère 2. Les chunks longs donnent des réponses plus contextuelles et narratives. Les chunks courts donnent des réponses plus directes et techniques.
+
+Lesson 6: Techniques avancées de chunking
+
+Le chunking de base (taille fixe et fractionnement récursif) peut briser le texte d'une manière qui perd un contexte pertinent. Considérez la phrase "Cette nuit-là, elle a rêvé, comme elle le faisait souvent, qu'elle était enfin championne olympique." Selon l'endroit où le fractionnement est placé, le morceau pourrait donner l'impression que la rêveuse est déjà médaillée d'or, et non pas en train de rêver.
+
+Technique 1 — Chunking sémantique : essaie de regrouper les phrases par signification similaire. L'algorithme parcourt le document une phrase à la fois. Pour chaque phrase, il décide si elle est suffisamment similaire aux phrases précédentes et appartient donc au même chunk, ou est différente. Le contenu du chunk actuel et de la phrase suivante sont vectorisés. Si les deux vecteurs sont en dessous d'un certain seuil de distance, ils ont des significations similaires et les phrases sont ajoutées au même chunk. Quand l'écart franchit le seuil, un nouveau chunk est créé. Le résultat est des morceaux de taille variable qui suivent le train de pensée de l'auteur. Le chunking sémantique peut être coûteux en calcul car on calcule des vecteurs pour chaque phrase de la base de connaissances. En échange, on obtient souvent une récupération de haute qualité mesurée par la précision et le rappel.
+
+Technique 2 — Chunking basé sur un LLM : on donne le document à un modèle de langage avec des instructions sur les types de morceaux à créer. Par exemple, séparer les morceaux en fonction du sens, garder des concepts similaires ensemble, et séparer quand de nouveaux sujets sont abordés. Le LLM génère des morceaux comme il génère n'importe quel autre texte. C'est une approche boîte noire mais très performante. À mesure que les coûts des LLM diminuent, le chunking basé sur LLM devient plus viable économiquement.
+
+Technique 3 — Chunking conscient du contexte : utiliser un LLM pour ajouter du contexte à chaque morceau. Par exemple, si un morceau est une longue liste de noms (comme des remerciements en fin d'article de blog), le LLM ajoute du texte expliquant le contexte de ce morceau dans le document plus large. Ce texte ajouté améliore à la fois la vectorisation du morceau (meilleure pertinence de recherche) et la compréhension du LLM lors de la récupération. Le chunking conscient du contexte nécessite un prétraitement coûteux car un LLM doit parcourir toute la base de connaissances. Les avantages sont des recherches plus pertinentes sans impact sur la vitesse de recherche.
+
+Recommandations pratiques : la taille fixe et le fractionnement récursif des caractères sont de bons points de départ lors du prototypage. Le chunking sémantique et basé sur LLM peut conduire à de meilleures performances mais sont coûteux et difficiles à régler. Il est logique d'expérimenter sur un petit sous-ensemble de données pour vérifier si ces techniques avancées améliorent réellement la pertinence. Le chunking contextuel peut être appliqué au-dessus de n'importe quelle stratégie et est souvent la meilleure première amélioration à explorer au-delà des techniques de taille fixe.
+
+Lesson 7: Analyse de requête (Query Analysis)
+
+Une étape importante dans un système RAG de production consiste à nettoyer les invites soumises par les utilisateurs. Les systèmes RAG sont souvent déployés dans des contextes conversationnels, et les invites écrites par les humains font de mauvaises requêtes de recherche. Le retriever peut analyser l'invite pour identifier son intention et modifier, réécrire ou transformer entièrement l'invite pour l'optimiser pour la récupération.
+
+Technique 1 — Réécriture de requête : utiliser un LLM pour réécrire la requête avant qu'elle soit soumise au retriever. Par exemple pour une base médicale, le prompt de réécriture instruit le LLM de clarifier les phrases ambiguës, utiliser la terminologie médicale, ajouter des synonymes qui augmentent les chances de trouver des documents correspondants, et supprimer les informations inutiles ou distrayantes. Un patient pourrait soumettre "j'étais en train de promener mon chien quand elle a tiré sur la laisse et depuis mon épaule est engourdie". Après réécriture : "a subi une traction soudaine sur l'épaule, entraînant un engourdissement persistant de l'épaule et des doigts pendant trois jours. Quelles sont les causes potentielles telles que la neuropathie ou un impingement nerveux ?" Les avantages de la réécriture de requête sont substantiels et justifient facilement le coût de l'appel LLM supplémentaire.
+
+Technique 2 — Reconnaissance d'entités nommées (NER) : identifier des catégories d'informations dans la requête, comme les lieux, les personnes, les dates, les personnages fictifs. Ces informations peuvent être utilisées pour informer la recherche vectorielle ou le filtrage des métadonnées. Le modèle Gliner est un exemple de modèle général de NER. On lui donne un texte et une liste de types d'entités à identifier. Le modèle analyse la requête et renvoie une requête étiquetée avec les identifications de catégories. Inclure cette étape ajoute un peu de latence supplémentaire mais la qualité de la récupération peut être considérablement améliorée.
+
+Technique 3 — Intégrations de documents hypothétiques (HyDE) : affiner une requête de recherche en générant un document hypothétique qui serait le résultat idéal du processus de recherche. Par exemple pour une question médicale, un LLM génère un document hypothétique sur l'épaule et un engourdissement de la main résultant d'une traction rapide. Ce document hypothétique est ensuite intégré et sa représentation vectorielle est utilisée pour la recherche. L'idée est que le retriever comprend non seulement l'intention de l'invite mais à quoi ressemblerait un résultat de haute qualité. Normalement le retriever doit faire correspondre des invites à des documents (pommes aux oranges). Avec HyDE il compare un document hypothétique aux documents réels (comparaison plus homogène). HyDE apporte des améliorations de performance au prix d'une latence supplémentaire et de ressources de calcul pour le LLM qui génère les documents hypothétiques.
+
+Recommandations pratiques : avoir une sorte d'analyse de requête est un élément clé de tout système RAG. Dans presque tous les cas, la réécriture de requête de base — utiliser un LLM bien invité pour retoucher les invites soumises par l'utilisateur — est la bonne approche. Des techniques plus avancées comme NER, HyDE et d'autres peuvent fournir des avantages supplémentaires mais sont plus complexes à exécuter et ne donneront pas nécessairement de meilleurs résultats. Il faut expérimenter avec ces techniques avancées et laisser les résultats décider de la façon dont le projet doit évoluer.
+
+Lesson 8: Encodeurs croisés et ColBERT
+
+Les techniques de recherche sémantique vues jusqu'à présent utilisent toutes une architecture vanille appelée bi-encodeur. Chaque document et invite se voient attribuer un seul vecteur, qui est comparé pour trouver des documents semblables à l'invite. Le terme bi-encodeur fait référence au fait que les documents et l'invite sont intégrés séparément. Cela permet de pré-calculer les vecteurs de tous les documents à l'avance, et seule l'invite doit être intégrée après sa réception, ce qui accélère considérablement la recherche.
+
+L'encodeur croisé peut fournir des classements de documents de qualité nettement supérieure. Pour noter un document, un encodeur croisé concatène le document avec l'invite, puis passe le texte combiné dans un modèle d'intégration spécialisé. Puisque l'invite et le document sont dans l'entrée, cela permet au modèle de comprendre les interactions contextuelles profondes entre l'invite et le texte du document qu'un bi-encodeur pourrait manquer. L'encodeur croisé produit directement un score de pertinence, généralement un nombre compris entre 0 et 1, représentant la probabilité d'une correspondance positive.
+
+Exemple : pour l'invite "De bons endroits pour manger à New York", l'encodeur croisé concatène l'invite à l'avant de chaque document et génère un score de pertinence pour chaque paire. Un encodeur croisé bien entraîné donnera un score de 0,7 (70%) pour un document très pertinent.
+
+Un encodeur croisé fournira presque toujours de meilleurs résultats de recherche qu'un bi-encodeur. Le principal problème est qu'il évolue terriblement. Pour des millions ou milliards de documents, il faudrait exécuter autant de paires document-invite à travers l'encodeur croisé. On ne peut pas non plus faire de prétraitement car on n'a pas l'invite avant qu'un utilisateur la soumette. Les encodeurs croisés sont donc inefficaces comme technique de recherche par défaut, mais excellents pour améliorer les résultats d'autres techniques, notamment via le re-ranking.
+
+ColBERT (Contextualised Late Interaction over BERT) divise la différence entre la vitesse des bi-encodeurs et la qualité des encodeurs croisés. L'idée est de générer des vecteurs de documents à l'avance comme dans un bi-encodeur, mais de capturer plus profondément les interactions entre l'invite et chaque document comme un encodeur croisé.
+
+Dans ColBERT, chaque document est intégré en générant un vecteur sémantique pour chaque token dans le document (et non un seul vecteur pour tout le document). Un document de mille tokens sera converti en mille vecteurs denses. Lorsqu'une invite arrive, elle est intégrée de la même manière avec un vecteur dense par token.
+
+Pour la notation dans ColBERT, chaque token de l'invite essaie de trouver son token le plus similaire dans le document. L'algorithme calcule la distance vectorielle entre chaque paire de tokens document-invite. Si l'invite a 10 tokens et le document 100, le résultat est une grille de 1000 paires de scores de similarité. Chaque token d'invite obtient le score maximum de similarité avec les tokens du document. Ces scores maximums sont résumés pour obtenir le score de pertinence du document (score de similarité maximale).
+
+ColBERT fournit à la fois l'évolutivité d'un bi-encodeur et une grande partie de l'interaction riche entre invites et documents d'un encodeur croisé. Le principal inconvénient est que le nombre de vecteurs à stocker augmente proportionnellement aux tokens des documents. Un document de 2000 tokens nécessite 2000 vecteurs, contre un seul dans un bi-encodeur.
+
+Comparaison des architectures : le bi-encodeur offre une qualité raisonnable, grande vitesse et stockage vectoriel minimal — architecture par défaut pour la recherche sémantique. L'encodeur croisé offre la meilleure qualité mais trop lent pour être utilisé seul. ColBERT offre presque la qualité d'un encodeur croisé à des vitesses proches du bi-encodeur, au prix d'un stockage vectoriel beaucoup plus important. De plus en plus, les bases de données vectorielles fournissent un support pour ColBERT, particulièrement pour les projets nécessitant précision et compréhension contextuelle profonde comme les domaines juridique ou médical.
+
+Lesson 9: Reclassement (Re-ranking)
+
+Une bonne façon d'obtenir le meilleur des deux mondes dans la recherche sémantique est d'utiliser plusieurs techniques de recherche ensemble. Le reclassement est un processus post-récupération dans lequel l'ensemble initial de documents renvoyé par une base de données vectorielle est reclassé à l'aide de modèles performants mais coûteux, afin de garantir le retour des documents les plus pertinents.
+
+Le reclassement améliore la qualité de la récupération après qu'une collection de documents a déjà été récupérée, mais avant qu'ils soient envoyés au LLM. Une fois que la base de données vectorielle renvoie des résultats, le re-ranker re-score puis reclasse les documents récupérés à l'aide de modèles plus performants. Comme seule une poignée de documents doit être re-scorée, il est possible d'utiliser des modèles coûteux impossibles à utiliser pour rechercher dans toute la base de connaissances.
+
+Exemple : pour l'invite "quelle est la capitale du Canada ?", la base vectorielle peut récupérer des documents sémantiquement liés mais qui ne répondent pas directement à la question, comme "Toronto est au Canada", "la capitale de la France est Paris", ou "le Canada est la capitale du sirop d'érable du monde". Le re-ranker re-score et reclasse ces résultats pour que seuls les documents vraiment pertinents soient retournés.
+
+Dans les systèmes qui utilisent un re-ranker, on récupère généralement entre 20 et 100 documents en utilisant une recherche hybride. Le re-ranker re-score ces documents ce qui conduit à un classement final. En fin de compte, on ne retourne qu'un sous-ensemble de 5 à 10 documents, mais grâce au re-ranker, ces documents reclassés sont beaucoup plus pertinents que sans re-ranking.
+
+Les re-rankers ont typiquement une architecture d'encodeur croisé. Les encodeurs croisés donnent de meilleurs résultats que les bi-encodeurs mais sont beaucoup plus lents. Si un bi-encodeur a déjà réduit la liste des documents à considérer, le compromis qualité-temps devient beaucoup plus favorable. Un encodeur croisé ajoutera un peu de latence même s'il ne reclasse que 20 à 100 documents, mais ce compromis en vaut presque toujours la peine.
+
+Le reclassement basé sur le LLM est également de plus en plus utilisé. Au lieu de fournir une paire invite-document à un encodeur croisé, elle est fournie directement à un LLM conçu pour évaluer la pertinence et répondre avec un score numérique. Cette approche reste aussi inefficace qu'un encodeur croisé et ne peut être utilisée qu'après qu'une recherche vectorielle ait réduit la liste des documents.
+
+Bien qu'un système RAG ne nécessite pas strictement un re-ranker, il est souvent facile à implémenter et offre de meilleures performances. Pour de nombreuses bases de données vectorielles, cela peut être aussi simple qu'ajouter une seule ligne à la requête de recherche. En général, récupérer 15 à 25 documents puis les reclasser donne une grande augmentation de la pertinence au prix d'une petite latence supplémentaire.
+
+Lesson 10: Synthèse — HYDE, NER, Re-ranking et pipeline RAG optimisé
+
+Trois techniques clés pour améliorer la pertinence d'un système RAG :
+
+HYDE (Hypothetical Document Embeddings) génère un document hypothétique représentant la meilleure réponse possible, l'encode, et utilise ce vecteur pour la recherche. Fonctionnement : le LLM génère un texte hypothétique idéal, ce texte est vectorisé, la base vectorielle récupère les documents proches de ce vecteur hypothétique. Avantages : très efficace si la requête est floue ou mal formulée, comprend l'intention profonde, améliore la qualité sans modifier la base. Inconvénients : appel LLM supplémentaire donc latence, risque d'hallucination si mal configuré. Idéal pour les questions longues, narratives, ambiguës, ou dans les domaines complexes.
+
+NER (Named Entity Recognition) détecte et extrait automatiquement les entités importantes dans la requête : personnes, dates, lieux, organisations, diagnostics. Ces informations informent la recherche vectorielle ou le filtrage des métadonnées. Avantages : très faible coût, améliore fortement les requêtes avec métadonnées, évite les documents "proches mais faux". Inconvénients : peut mal détecter des entités ambiguës, ne comprend pas l'intention globale. Idéal pour les bases structurées avec métadonnées.
+
+Re-ranking reclasse les documents déjà récupérés avec un modèle coûteux (cross-encoder). La recherche initiale récupère 20 à 50 documents avec un bi-encodeur, puis le re-ranker re-score ces documents et retourne les meilleurs 5 à 10. Avantages : qualité maximale, réduit fortement le bruit, améliore la précision même sur un RAG moyen. Inconvénients : ajoute de la latence, nécessite un pré-filtrage.
+
+Comparaison des techniques selon les critères : HYDE améliore très fortement la requête et les résultats, coût moyen, latence moyenne, idéal pour les requêtes floues. NER améliore modérément la requête et les résultats, coût faible, latence faible, idéal pour les bases structurées. Re-ranking n'améliore pas la requête mais améliore très fortement les résultats, coût élevé, latence haute, idéal pour la précision maximale.
+
+Pipeline RAG optimisé pour la production : 1) NER pour enrichir la requête et appliquer des filtres de métadonnées. 2) HyDE pour générer un vecteur amélioré pour la recherche. 3) Recherche vectorielle hybride (HNSW) pour obtenir les top 20-50 documents. 4) Re-ranking avec cross-encoder pour sélectionner les top 5-10. 5) Réponse finale du LLM avec les documents les plus pertinents. Ce pipeline offre qualité maximale et latence raisonnable.
+
+Lesson 11: Quiz du module 3 — Questions et réponses clés
+
+Question 1 : Dans la technique HyDE (Hypothetical Document Embeddings), quel est le rôle du document hypothétique ? Réponse : Il remplace l'invite d'origine pendant la recherche sémantique. HyDE génère un document hypothétique à l'aide d'un LLM, puis l'intègre pour servir de vecteur de requête, améliorant l'alignement sémantique entre l'invite et le contenu récupéré.
+
+Question 2 : Quelle est une vraie limitation des modèles NER dans l'analyse des requêtes ? Réponse : Les modèles NER n'extraient que les entités des catégories qu'ils sont spécifiquement configurés pour identifier. Les modèles NER, y compris des modèles avancés comme GLiNER, reposent sur un ensemble prédéfini de types d'entités (personne, organisation, date). Ils ne peuvent pas reconnaître des entités en dehors de ces catégories à moins d'avoir été spécifiquement configurés ou formés pour le faire.
+
+Question 3 : Quel est le principal inconvénient du chunking sémantique ou basé sur LLM ? Réponse : Ces méthodes nécessitent un prétraitement important et sont coûteuses sur le plan informatique. Elles produisent souvent des morceaux de meilleure qualité, mais nécessitent des ressources de calcul importantes en raison des comparaisons de vecteurs ou des appels LLM lors de la création de morceaux.
+
+Question 4 : Dans un algorithme HNSW, pourquoi le démarrage de la recherche à la couche supérieure avec moins de vecteurs améliore-t-il l'efficacité ? Réponse : Il permet de faire de grands sauts de navigation pour identifier rapidement le voisinage approximatif où la requête appartient. L'algorithme peut faire de grands sauts pour trouver rapidement la zone générale où se trouvent les vecteurs correspondants avant de raffiner les correspondances dans les couches inférieures.
+
+Question 5 : Quelle est l'attente la plus réaliste concernant l'analyse des requêtes dans un système RAG ? Réponse : L'analyse des requêtes améliorera la qualité de récupération et fonctionne bien en conjonction avec d'autres techniques telles que le découpage réfléchi et le reclassement. Elle améliore la récupération grâce à des techniques comme la réécriture des requêtes et l'extraction des entités, mais les modèles ne sont pas parfaits et les systèmes bénéficient d'une évaluation et amélioration continues.
+
+Question 6 : Quelle est la différence fondamentale entre kNN et ANN dans la recherche vectorielle ? Réponse : kNN calcule les distances à tous les vecteurs tandis que ANN utilise des structures optimisées pour éviter une recherche exhaustive. kNN effectue une recherche exhaustive en calculant les distances entre la requête et chaque vecteur, tandis que les algorithmes ANN utilisent des structures de données spécialisées comme les graphiques de proximité pour approcher les résultats sans examiner tous les vecteurs.
+
+Question 7 : Quelle est la caractérisation la plus précise des bi-encodeurs par rapport aux encodeurs croisés ? Réponse : Les bi-encodeurs sont efficaces pour capturer la similitude sémantique générale, mais manquent certaines interactions de requête-document nuancées. Les bi-encodeurs capturent efficacement les relations sémantiques, mais peuvent manquer certaines des interactions spécifiques entre requêtes et documents que les encodeurs croisés peuvent identifier.
+
+Question 8 : Que doivent comprendre les développeurs sur les résultats renvoyés par une base de données vectorielle ? Réponse : Les résultats ne sont peut-être pas toujours les voisins les plus proches, mais les recherches peuvent être effectuées beaucoup plus rapidement. Les bases de données vectorielles donnent la priorité à la vitesse de recherche en utilisant des algorithmes d'approximation qui peuvent ne pas trouver les voisins les plus proches mathématiquement parfaits, mais qui trouvent efficacement des correspondances très proches.
+
+Question 9 : Quelle est la caractéristique clé de la recherche hybride ? Réponse : La recherche hybride attribue des poids aux résultats des deux méthodes (vectorielle et mots-clés) et combine leurs classements à l'aide d'un paramètre alpha. Elle intègre les résultats sémantiques et de mots-clés en appliquant une pondération configurable.
+
+Question 10 : Pourquoi l'utilisation de très gros morceaux dans une base de données vectorielle pourrait-elle réduire la précision de la récupération ? Réponse : De gros morceaux créent des vecteurs qui ont une moyenne de nombreux sujets différents ensemble, diluant des concepts spécifiques. Lorsque de nombreux sujets sont compressés en un seul vecteur, cela devient une moyenne large plutôt qu'une représentation précise de concepts spécifiques, ce qui rend la récupération ciblée difficile.
+
+Lesson 12: Devoir du module 3 — Construire un système RAG avec Weaviate
+
+Dans ce devoir, on travaille avec l'API Weaviate pour construire un petit système RAG sur des données BBC News. Les données comportent les champs title, pubDate, guid, link, description, et article_content.
+
+Exercice 1 — Filtrage par métadonnées : créer une fonction filter_by_metadata qui filtre les objets de la collection selon une propriété et des valeurs données. Si une seule valeur, utiliser Filter.by_property(metadata_property).equal(values[0]). Si plusieurs valeurs, utiliser Filter.any_of avec une liste de conditions égales pour chaque valeur. Appliquer avec collection.query.fetch_objects(limit=limit, filters=filter_condition).
+
+Exercice 2 — Recherche sémantique : créer une fonction semantic_search_retrieve qui utilise collection.query.near_text(query=query, limit=top_k) pour récupérer les documents sémantiquement proches de la requête.
+
+Exercice 3 — Recherche BM25 : créer une fonction bm25_retrieve qui utilise collection.query.bm25(query=query, limit=top_k) pour une recherche par mots-clés.
+
+Exercice 4 — Recherche hybride : créer une fonction hybrid_retrieve avec le paramètre alpha pour pondérer entre recherche sémantique et BM25. Utiliser collection.query.hybrid(query=query, alpha=alpha, limit=top_k). Un alpha de 0.5 équilibre les deux méthodes.
+
+Exercice 5 — Recherche sémantique avec reranking : créer une fonction semantic_search_with_reranking qui utilise d'abord near_text pour récupérer les documents, puis applique un Rerank(prop=rerank_property, query=rerank_query) pour reclasser les résultats selon une propriété et une requête de reclassement spécifiques.
+
+Pipeline RAG complet : generate_final_prompt récupère les top-k documents via la fonction de récupération choisie, formate les données (titre, chunk, date, URL) et construit un prompt pour le LLM. llm_call orchestre le tout en appelant generate_final_prompt puis le LLM pour générer la réponse finale.
+
+Lesson 13: Conclusion du module 3
+
+Ce module a couvert les sujets essentiels suivants.
+
+Premièrement, l'algorithme des voisins les plus proches approximatifs (ANN) qui effectue une recherche vectorielle beaucoup plus rapidement qu'une recherche de force brute kNN, avec le compromis de ne pas toujours trouver les documents les mieux adaptés à la base de connaissances.
+
+Deuxièmement, les bases de données vectorielles, qui sont optimisées pour stocker des données vectorielles à haute dimension et effectuer des recherches approximatives des voisins les plus proches. C'est la base de données de référence lors de la mise à l'échelle d'un système RAG.
+
+Troisièmement, plusieurs techniques pour améliorer la récupération dans un système RAG de production. Le chunking des documents en morceaux plus petits permet aux vecteurs de capturer plus précisément la signification d'un passage de texte et utilise moins d'espace dans la fenêtre contextuelle du LLM. L'analyse des requêtes améliore les requêtes soumises par l'utilisateur pour qu'elles soient mieux optimisées pour la récupération. Le re-ranking utilise des architectures très performantes pour mieux identifier les documents pertinents parmi l'ensemble récupéré par une base de données vectorielle utilisant une recherche hybride standard.
+
+Pour chacune de ces techniques, il existe une approche standard applicable dans la plupart des projets, ainsi que des techniques plus avancées qui peuvent parfois booster encore davantage la performance du retriever.
+
+Après ce module sur le retriever, l'étape suivante est de tourner l'attention vers l'autre composante majeure d'un système RAG : le grand modèle de langage, qui traite tous les documents récupérés et génère la réponse finale.
