@@ -55,13 +55,14 @@ Tu poses une question en langage naturel sur des cours IA (Anthropic Claude, MCP
 ### UX
 
 - Streaming SSE — les tokens arrivent au fur et à mesure
+- **Bouton Copier** sur chaque réponse (clipboard → checkmark)
 - Thumbs up/down sur chaque réponse → feedback persisté en JSON + `/api/feedback/summary`
 - Toggle dark/light mode
 - Historique de session
 
 ---
 
-## Cours indexés (7 cours DeepLearning.ai / Anthropic)
+## Cours indexés (10 cours DeepLearning.ai / Anthropic)
 
 - Building Towards Computer Use with Anthropic
 - MCP: Build Rich-Context AI Apps with Anthropic
@@ -70,6 +71,9 @@ Tu poses une question en langage naturel sur des cours IA (Anthropic Claude, MCP
 - Agent Skills with Anthropic
 - Claude Code: A Highly Agentic Coding Assistant
 - Agent Skills Guide
+- RAG en Production
+- Bases de Récupération d'Informations et de Recherche (TF-IDF, BM25, RRF, embeddings)
+- Cours sur le RAG — DeepLearning.ai (HNSW, Weaviate, chunking, re-ranking, ColBERT)
 
 ---
 
