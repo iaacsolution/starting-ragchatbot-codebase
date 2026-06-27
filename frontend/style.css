@@ -861,6 +861,26 @@ details[open] .suggested-header::before {
 .thumb-btn:disabled { cursor: default; }
 .thumb-btn.active { opacity: 1; border-color: var(--border-color); }
 
+/* New Conversation button */
+.new-conversation-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.55rem 0.9rem;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.new-conversation-btn:hover { background: var(--primary-hover); }
+.new-conversation-btn:active { transform: scale(0.98); }
+.new-conversation-btn svg { flex-shrink: 0; }
+
 /* Copy button */
 .copy-btn {
     background: none;

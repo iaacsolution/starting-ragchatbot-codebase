@@ -34,6 +34,9 @@ function setupEventListeners() {
         if (e.key === 'Enter') sendMessage();
     });
 
+    // New conversation button
+    document.getElementById('newConversationBtn').addEventListener('click', createNewSession);
+
     // Suggested questions
     document.querySelectorAll('.suggested-item').forEach(button => {
         button.addEventListener('click', (e) => {
