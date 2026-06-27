@@ -861,6 +861,24 @@ details[open] .suggested-header::before {
 .thumb-btn:disabled { cursor: default; }
 .thumb-btn.active { opacity: 1; border-color: var(--border-color); }
 
+/* Copy button */
+.copy-btn {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 3px 6px;
+    margin-left: 0.3rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    opacity: 0.6;
+    transition: opacity 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.copy-btn:hover { opacity: 1; border-color: var(--border-color); color: var(--primary-color); }
+.copy-btn svg { pointer-events: none; }
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .main-content {
