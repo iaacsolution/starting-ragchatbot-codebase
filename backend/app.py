@@ -307,6 +307,39 @@ async def get_ragas_scores():
     }
 
 
+class SearchRequest(BaseModel):
+    query: str
+    max_results: int = 5
+
+
+@app.post("/api/search")
+async def search_documents(request: SearchRequest):
+    """Direct vector search — returns raw chunks without LLM generation"""
+    try:
+        n = max(1, min(request.max_results, 10))
+        loop = asyncio.get_event_loop()
+        results = await loop.run_in_executor(
+            None, lambda: rag_system.vector_store.search(query=request.query, limit=n)
+        )
+        if results.is_empty():
+            return {"query": request.query, "results": []}
+        hits = []
+        for doc, meta, dist in zip(
+            results.documents, results.metadata, results.distances
+        ):
+            hits.append(
+                {
+                    "content": doc,
+                    "course": meta.get("course_title", ""),
+                    "lesson": meta.get("lesson_number", -1),
+                    "score": round(1 / (1 + dist), 3),
+                }
+            )
+        return {"query": request.query, "results": hits}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/health")
 async def health():
     key = os.environ.get("ANTHROPIC_API_KEY", "")
