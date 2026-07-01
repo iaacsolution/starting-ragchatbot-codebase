@@ -27,6 +27,10 @@ class Config:
     MAX_RESULTS: int = 8  # Maximum search results to return
     MAX_HISTORY: int = 2  # Number of conversation messages to remember
 
+    # Hybrid retrieval settings
+    CROSS_ENCODER_MODEL: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    HYBRID_CANDIDATES: int = 20  # pool size before cross-encoder reranking
+
     # Database paths
     CHROMA_PATH: str = "./chroma_db"  # ChromaDB storage location
     # Bump this whenever the chunking algorithm or docs change to trigger auto re-index

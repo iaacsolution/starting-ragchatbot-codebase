@@ -235,6 +235,14 @@ class VectorStore:
             print(f"Error getting course count: {e}")
             return 0
 
+    def get_all_content(self) -> Dict[str, Any]:
+        """Return all documents and metadata from course_content for hybrid retrieval."""
+        try:
+            return self.course_content.get(include=["documents", "metadatas"])
+        except Exception as e:
+            print(f"Error fetching all content: {e}")
+            return {"documents": [], "metadatas": []}
+
     def get_all_courses_metadata(self) -> List[Dict[str, Any]]:
         """Get metadata for all courses in the vector store"""
         import json
