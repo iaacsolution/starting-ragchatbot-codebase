@@ -1,0 +1,26 @@
+Course Title: Introduction au RAG - Applications et Concepts Fondamentaux
+Course Instructor: DeepLearning.AI
+
+### Lesson 1: Qu'est-ce que le RAG et ses applications
+
+L'idée centrale du RAG (Retrieval-Augmented Generation) consiste à associer un LLM prêt à l'emploi avec une base de connaissances contenant des informations auxquelles il n'avait peut-être pas accès lors de son entraînement.
+
+De nombreux systèmes basés sur les LLM utilisent ce modèle. Voici les principales applications :
+
+**Génération de code**
+Une application importante du RAG concerne la génération de code. Bien que les modèles de langage aient été entraînés sur une grande quantité de code, générer un code correct pour un projet spécifique nécessite des informations spécialisées. Le LLM doit connaître les classes, fonctions et définitions du projet, ainsi que le style de code utilisé. Construire un système RAG qui utilise votre propre base de code comme base de connaissances permet de fournir ces informations au LLM.
+
+**Chatbots d'entreprise personnalisés**
+Chaque entreprise possède ses propres produits, politiques et directives de communication. Traiter ces documents internes comme une base de connaissances permet de déployer des LLMs de manière variée et utile. On peut créer un chatbot de service client capable de fournir des informations sur les produits, l'inventaire ou les étapes de dépannage. On peut aussi déployer un chatbot interne capable de répondre aux questions sur les politiques de l'entreprise.
+
+**Santé et droit**
+Le RAG a des applications importantes dans les domaines de la santé et du droit. La base de connaissances peut contenir des documents juridiques liés à une affaire particulière, des textes issus de journaux médicaux récents. Dans ces domaines où la précision est essentielle, une approche RAG peut être la seule façon de déployer un produit basé sur un LLM qui soit à la fois suffisamment précis et capable d'utiliser des données confidentielles.
+
+**Recherche web assistée par IA**
+Les moteurs de recherche modernes fournissent des résumés générés par IA des résultats web. Ces résumés sont en réalité des systèmes RAG dont la base de connaissances est l'ensemble d'Internet.
+
+**Assistants personnels**
+Les assistants personnels intégrés à vos messages, votre client mail, votre traitement de texte, votre calendrier peuvent vous aider à envoyer des messages, organiser votre emploi du temps, rédiger des documents. La base de connaissances peut être relativement petite : vos messages, vos contacts, vos e-mails ou un dossier de documents.
+
+**Conclusion**
+Le modèle RAG s'applique à une grande variété de contextes. Chaque fois que vous possédez des données auxquelles un grand modèle de langage n'a probablement pas eu accès lors de son entraînement, il existe un potentiel pour construire une application RAG utile.

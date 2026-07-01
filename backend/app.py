@@ -167,14 +167,20 @@ async def query_stream(request: QueryRequest):
                     f"Use the following course content to answer the question.\n\n"
                     f"Course content:\n{search_results}\n\n"
                     f"Question: {request.query}\n\n"
-                    f"Answer based only on the course content above. "
-                    f"If the content does not answer the question, say so."
+                    f"Answer primarily from the course content above. "
+                    f"For foundational AI/ML concepts (definitions, general principles) "
+                    f"that are clearly related to the course topics, you may supplement "
+                    f"with your general knowledge if the content is incomplete. "
+                    f"Only refuse if the question is completely unrelated to AI, ML, RAG, "
+                    f"LLMs, or the course topics."
                 )
             else:
                 prompt = (
                     f"Answer this question about AI/ML courses: {request.query}\n\n"
-                    f"No specific course content was found. Give a brief general answer "
-                    f"and suggest the user try a more specific question."
+                    f"No specific course content was found in the indexed courses. "
+                    f"If this is a foundational AI/ML concept (like a definition of RAG, "
+                    f"embeddings, LLMs, etc.), answer from your general knowledge. "
+                    f"Otherwise, suggest the user try a more specific question."
                 )
 
             full_response = ""
