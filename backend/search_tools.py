@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional, Protocol
+from typing import Dict, Any, List, Optional, Tuple
 from abc import ABC, abstractmethod
 from vector_store import VectorStore, SearchResults
 
@@ -114,6 +114,86 @@ class CourseSearchTool(Tool):
         # Store sources for retrieval
         self.last_sources = sources
 
+        return "\n\n".join(formatted)
+
+
+class HybridSearchTool(Tool):
+    """Search tool using BM25 + Euclidean similarity + cross-encoder reranking."""
+
+    def __init__(self, vector_store: VectorStore, hybrid_retriever) -> None:
+        self.store = vector_store
+        self.retriever = hybrid_retriever
+        self.last_sources: List[str] = []
+
+    def get_tool_definition(self) -> Dict[str, Any]:
+        return {
+            "name": "search_course_content",
+            "description": "Search course materials using hybrid retrieval (BM25 + semantic + reranking)",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "What to search for in the course content",
+                    },
+                    "course_name": {
+                        "type": "string",
+                        "description": "Course title (partial matches work, e.g. 'MCP', 'Introduction')",
+                    },
+                    "lesson_number": {
+                        "type": "integer",
+                        "description": "Specific lesson number to search within (e.g. 1, 2, 3)",
+                    },
+                },
+                "required": ["query"],
+            },
+        }
+
+    def execute(
+        self,
+        query: str,
+        course_name: Optional[str] = None,
+        lesson_number: Optional[int] = None,
+    ) -> str:
+        course_title = None
+        if course_name:
+            course_title = self.store._resolve_course_name(course_name)
+            if not course_title:
+                return f"No course found matching '{course_name}'."
+
+        results = self.retriever.search(
+            query=query,
+            k=self.store.max_results,
+            course_title=course_title,
+            lesson_number=lesson_number,
+        )
+
+        if not results:
+            filter_info = ""
+            if course_name:
+                filter_info += f" in course '{course_name}'"
+            if lesson_number:
+                filter_info += f" in lesson {lesson_number}"
+            return f"No relevant content found{filter_info}."
+
+        return self._format_results(results)
+
+    def _format_results(self, results: List[Tuple[str, Dict]]) -> str:
+        formatted = []
+        sources = []
+        for doc, meta in results:
+            course_title = meta.get("course_title", "unknown")
+            lesson_num = meta.get("lesson_number")
+            header = f"[{course_title}"
+            if lesson_num is not None:
+                header += f" - Lesson {lesson_num}"
+            header += "]"
+            source = course_title
+            if lesson_num is not None:
+                source += f" - Lesson {lesson_num}"
+            sources.append(source)
+            formatted.append(f"{header}\n{doc}")
+        self.last_sources = sources
         return "\n\n".join(formatted)
 
 

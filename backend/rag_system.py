@@ -4,7 +4,8 @@ from document_processor import DocumentProcessor
 from vector_store import VectorStore
 from ai_generator import AIGenerator
 from session_manager import SessionManager
-from search_tools import ToolManager, CourseSearchTool
+from hybrid_retriever import HybridRetriever
+from search_tools import ToolManager, HybridSearchTool
 from models import Course, Lesson, CourseChunk
 
 
@@ -26,9 +27,15 @@ class RAGSystem:
         )
         self.session_manager = SessionManager(config.MAX_HISTORY)
 
-        # Initialize search tools
+        # Initialize hybrid retriever and search tool
+        self.hybrid_retriever = HybridRetriever(
+            vector_store=self.vector_store,
+            cross_encoder_model=config.CROSS_ENCODER_MODEL,
+            embedding_model=config.EMBEDDING_MODEL,
+            candidates=config.HYBRID_CANDIDATES,
+        )
         self.tool_manager = ToolManager()
-        self.search_tool = CourseSearchTool(self.vector_store)
+        self.search_tool = HybridSearchTool(self.vector_store, self.hybrid_retriever)
         self.tool_manager.register_tool(self.search_tool)
 
     def add_course_document(self, file_path: str) -> Tuple[Course, int]:
@@ -135,6 +142,9 @@ class RAGSystem:
         os.makedirs(self.config.CHROMA_PATH, exist_ok=True)
         with open(version_file, "w") as f:
             f.write(current_version)
+
+        # Invalidate hybrid retriever corpus cache after indexing
+        self.hybrid_retriever.reset_cache()
 
         return total_courses, total_chunks
 
