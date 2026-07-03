@@ -1,3 +1,4 @@
+import math
 from typing import Dict, Any, List, Optional, Tuple
 from abc import ABC, abstractmethod
 from vector_store import VectorStore, SearchResults
@@ -124,6 +125,7 @@ class HybridSearchTool(Tool):
         self.store = vector_store
         self.retriever = hybrid_retriever
         self.last_sources: List[str] = []
+        self.last_chunks: List[Dict] = []
 
     def get_tool_definition(self) -> Dict[str, Any]:
         return {
@@ -178,10 +180,11 @@ class HybridSearchTool(Tool):
 
         return self._format_results(results)
 
-    def _format_results(self, results: List[Tuple[str, Dict]]) -> str:
+    def _format_results(self, results: List[Tuple[str, Dict, float]]) -> str:
         formatted = []
         sources = []
-        for doc, meta in results:
+        chunks = []
+        for doc, meta, ce_score in results:
             course_title = meta.get("course_title", "unknown")
             lesson_num = meta.get("lesson_number")
             header = f"[{course_title}"
@@ -193,7 +196,18 @@ class HybridSearchTool(Tool):
                 source += f" - Lesson {lesson_num}"
             sources.append(source)
             formatted.append(f"{header}\n{doc}")
+            # sigmoid normalizes cross-encoder logit → [0, 1] for display
+            display_score = round(1.0 / (1.0 + math.exp(-ce_score)), 3)
+            chunks.append(
+                {
+                    "text": doc,
+                    "course": course_title,
+                    "lesson": lesson_num,
+                    "score": display_score,
+                }
+            )
         self.last_sources = sources
+        self.last_chunks = chunks
         return "\n\n".join(formatted)
 
 

@@ -17,7 +17,7 @@ from pydantic import BaseModel
 
 from config import config
 from rag_system import RAGSystem
-from ragas_evaluator import evaluate_async, last_scores
+from ragas_evaluator import evaluate_async, analyze_claims_async, last_scores
 
 # Phoenix tracing setup (no-op if Phoenix is unreachable)
 try:
@@ -159,20 +159,32 @@ async def query_stream(request: QueryRequest):
                 None, lambda: rag_system.search_tool.execute(query=request.query)
             )
             sources = rag_system.search_tool.last_sources[:]
+            chunks = rag_system.search_tool.last_chunks[:]
             rag_system.search_tool.last_sources = []
+            rag_system.search_tool.last_chunks = []
             rag_system.last_contexts = [search_results] if search_results else []
 
-            if search_results and "No results found" not in search_results:
+            if chunks:
+                numbered_ctx = "\n\n".join(
+                    f"[{i+1}] {c['course']}"
+                    + (
+                        f" - Lesson {c['lesson']}"
+                        if c.get("lesson") not in (None, -1)
+                        else ""
+                    )
+                    + f":\n{c['text']}"
+                    for i, c in enumerate(chunks)
+                )
                 prompt = (
-                    f"Use the following course content to answer the question.\n\n"
-                    f"Course content:\n{search_results}\n\n"
-                    f"Question: {request.query}\n\n"
-                    f"Answer primarily from the course content above. "
-                    f"For foundational AI/ML concepts (definitions, general principles) "
-                    f"that are clearly related to the course topics, you may supplement "
-                    f"with your general knowledge if the content is incomplete. "
-                    f"Only refuse if the question is completely unrelated to AI, ML, RAG, "
-                    f"LLMs, or the course topics."
+                    f"Answer the question using the source passages below. "
+                    f"After each factual claim, add an inline citation [N] "
+                    f"matching the source number "
+                    f"(e.g. 'RAG retrieves chunks [1] then generates a response [2].'). "
+                    f"For foundational AI/ML concepts not covered in the sources, "
+                    f"you may supplement with general knowledge — but do not add [N] "
+                    f"for those parts.\n\n"
+                    f"Sources:\n{numbered_ctx}\n\n"
+                    f"Question: {request.query}"
                 )
             else:
                 prompt = (
@@ -201,7 +213,14 @@ async def query_stream(request: QueryRequest):
                 api_key=config.ANTHROPIC_API_KEY,
                 model=config.ANTHROPIC_MODEL,
             )
-            yield f"data: {json.dumps({'sources': sources, 'session_id': session_id, 'done': True})}\n\n"
+            analyze_claims_async(
+                question=request.query,
+                answer=full_response,
+                contexts=rag_system.last_contexts,
+                api_key=config.ANTHROPIC_API_KEY,
+                model=config.ANTHROPIC_MODEL,
+            )
+            yield f"data: {json.dumps({'sources': sources, 'chunks': chunks, 'session_id': session_id, 'done': True})}\n\n"
         except Exception as e:
             print(f"[STREAM ERROR] {type(e).__name__}: {e}")
             yield f"data: {json.dumps({'error': str(e), 'done': True, 'sources': [], 'session_id': session_id})}\n\n"
@@ -296,6 +315,14 @@ async def get_feedback_summary():
         "accept_rate": accept_rate,
         "low_quality_count": low_quality_count,
     }
+
+
+@app.get("/api/metrics/claims")
+async def get_claims():
+    """Return the last per-claim faithfulness analysis."""
+    import ragas_evaluator
+
+    return ragas_evaluator.last_claims
 
 
 @app.get("/api/metrics/ragas")

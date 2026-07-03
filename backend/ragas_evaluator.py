@@ -1,3 +1,4 @@
+import json as _json
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as _FutureTimeout
 from prometheus_client import Gauge, Histogram
 
@@ -21,9 +22,13 @@ relevancy_hist = Histogram(
 )
 
 _executor = ThreadPoolExecutor(max_workers=1)
+_claims_executor = ThreadPoolExecutor(max_workers=1)
 
 # Last computed scores — read by GET /api/metrics/ragas
 last_scores: dict = {"faithfulness": None, "relevancy": None, "ready": False}
+
+# Last claim-level analysis — read by GET /api/metrics/claims
+last_claims: dict = {"claims": [], "ready": False}
 
 # Rolling history for auto-tuning (last 10 faithfulness scores)
 _score_history: list[float] = []
@@ -106,6 +111,55 @@ def _run_ragas(question: str, answer: str, contexts: list, api_key: str, model: 
     except Exception as e:
         print(f"RAGAS evaluation error: {e}")
         last_scores = {"faithfulness": None, "relevancy": None, "ready": True}
+
+
+def _analyze_claims_sync(
+    question: str, answer: str, contexts: list, api_key: str, model: str
+) -> list:
+    import anthropic
+
+    client = anthropic.Anthropic(api_key=api_key or None)
+    ctx = "\n\n---\n\n".join(contexts[:3])
+    prompt = (
+        f"Source passages:\n{ctx}\n\n"
+        f'Answer to the question "{question}":\n{answer}\n\n'
+        "For each distinct factual claim in the answer, state if it is SUPPORTED "
+        "or NOT SUPPORTED by the source passages above.\n"
+        'Reply ONLY with a JSON array: [{"claim": "...", "supported": true}]'
+    )
+    resp = client.messages.create(
+        model=model,
+        max_tokens=1000,
+        temperature=0,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    text = resp.content[0].text.strip()
+    if "```" in text:
+        text = text.split("```")[1]
+        if text.startswith("json"):
+            text = text[4:]
+    return _json.loads(text.strip())
+
+
+def _run_claims(question: str, answer: str, contexts: list, api_key: str, model: str):
+    global last_claims
+    try:
+        claims = _analyze_claims_sync(question, answer, contexts, api_key, model)
+        last_claims = {"claims": claims, "ready": True}
+    except Exception as e:
+        print(f"[CLAIMS] error: {e}")
+        last_claims = {"claims": [], "ready": True}
+
+
+def analyze_claims_async(
+    question: str, answer: str, contexts: list, api_key: str, model: str
+):
+    global last_claims
+    last_claims = {"claims": [], "ready": False}
+    if contexts and answer:
+        _claims_executor.submit(_run_claims, question, answer, contexts, api_key, model)
+    else:
+        last_claims = {"claims": [], "ready": True}
 
 
 def evaluate_async(
