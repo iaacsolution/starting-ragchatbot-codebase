@@ -899,6 +899,194 @@ details[open] .suggested-header::before {
 .copy-btn:hover { opacity: 1; border-color: var(--border-color); color: var(--primary-color); }
 .copy-btn svg { pointer-events: none; }
 
+/* ── Inline citations ───────────────────────────────────────────── */
+sup.citation {
+    cursor: pointer;
+    color: var(--primary-color);
+    font-size: 0.68em;
+    font-weight: 700;
+    padding: 0 2px;
+    text-decoration: underline dotted;
+    vertical-align: super;
+    line-height: 0;
+    transition: opacity 0.15s;
+}
+sup.citation:hover { opacity: 0.7; }
+
+.citation-popover {
+    position: fixed;
+    z-index: 1000;
+    width: 340px;
+    max-height: 220px;
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    padding: 0.75rem;
+    font-size: 0.78rem;
+}
+
+.popover-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    gap: 0.5rem;
+}
+
+.popover-score {
+    flex-shrink: 0;
+    color: var(--primary-color);
+    font-size: 0.72rem;
+}
+
+.popover-text {
+    color: var(--text-primary);
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ── Retrieval detail panel ─────────────────────────────────────── */
+.detail-panel {
+    margin-top: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 0.8rem;
+}
+
+.detail-header {
+    cursor: pointer;
+    padding: 0.4rem 0.75rem;
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-weight: 600;
+    list-style: none;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.detail-header::before {
+    content: '▶';
+    font-size: 0.65rem;
+    transition: transform 0.2s ease;
+}
+.detail-panel[open] .detail-header::before { transform: rotate(90deg); }
+.detail-header::-webkit-details-marker { display: none; }
+
+.detail-content {
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: var(--background);
+}
+
+/* Chunks */
+.chunks-section { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.chunk-item {
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.chunk-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.3rem 0.6rem;
+    background: var(--surface);
+}
+
+.chunk-source {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chunk-score {
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.1rem 0.4rem;
+    border-radius: 10px;
+    margin-left: 0.5rem;
+}
+.chunk-score.good   { background: rgba(34,197,94,.15);  color: #4ade80; }
+.chunk-score.medium { background: rgba(234,179,8,.15);  color: #facc15; }
+.chunk-score.poor   { background: rgba(239,68,68,.15);  color: #f87171; }
+[data-theme="light"] .chunk-score.good   { color: #16a34a; }
+[data-theme="light"] .chunk-score.medium { color: #a16207; }
+[data-theme="light"] .chunk-score.poor   { color: #dc2626; }
+
+.chunk-text {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Claims */
+.claims-section {
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.claims-loading, .claims-empty {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.claims-header {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    margin-bottom: 0.25rem;
+}
+.claims-header.ok   { background: rgba(34,197,94,.1);  color: #4ade80; }
+.claims-header.warn { background: rgba(251,191,36,.1); color: #fbbf24; }
+[data-theme="light"] .claims-header.ok   { color: #16a34a; }
+[data-theme="light"] .claims-header.warn { color: #b45309; }
+
+.claim-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+}
+.claim-item.supported   { color: var(--text-secondary); }
+.claim-item.unsupported { background: rgba(251,191,36,.08); color: var(--text-primary); }
+
+.claim-icon {
+    flex-shrink: 0;
+    font-weight: 700;
+    width: 1rem;
+}
+.claim-item.supported   .claim-icon { color: #4ade80; }
+.claim-item.unsupported .claim-icon { color: #fbbf24; }
+[data-theme="light"] .claim-item.supported   .claim-icon { color: #16a34a; }
+[data-theme="light"] .claim-item.unsupported .claim-icon { color: #b45309; }
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .main-content {

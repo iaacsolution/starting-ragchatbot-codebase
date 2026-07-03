@@ -126,6 +126,9 @@ async function sendMessage() {
                     } catch (_) {
                         contentDiv.textContent = fullText;
                     }
+                    if (data.chunks && data.chunks.length > 0) {
+                        addInlineCitations(contentDiv, data.chunks);
+                    }
                     if (data.sources && data.sources.length > 0) {
                         const sourcesEl = document.createElement('details');
                         sourcesEl.className = 'sources-collapsible';
@@ -134,6 +137,29 @@ async function sendMessage() {
                             <div class="sources-content">${data.sources.join(', ')}</div>
                         `;
                         messageDiv.appendChild(sourcesEl);
+                    }
+                    if (data.chunks && data.chunks.length > 0) {
+                        const detailEl = document.createElement('details');
+                        detailEl.className = 'detail-panel';
+                        const chunksHtml = data.chunks.map(chunk => {
+                            const scoreClass = chunk.score >= 0.7 ? 'good' : chunk.score >= 0.5 ? 'medium' : 'poor';
+                            const lesson = (chunk.lesson != null && chunk.lesson !== -1) ? ` · Lesson ${chunk.lesson}` : '';
+                            return `<div class="chunk-item">
+                                <div class="chunk-header">
+                                    <span class="chunk-source">${chunk.course}${lesson}</span>
+                                    <span class="chunk-score ${scoreClass}">${Math.round(chunk.score * 100)}%</span>
+                                </div>
+                                <div class="chunk-text">${chunk.text}</div>
+                            </div>`;
+                        }).join('');
+                        detailEl.innerHTML = `
+                            <summary class="detail-header">Retrieval · ${data.chunks.length} chunks</summary>
+                            <div class="detail-content">
+                                <div class="chunks-section">${chunksHtml}</div>
+                                <div class="claims-section"><div class="claims-loading">⏳ vérification des affirmations…</div></div>
+                            </div>`;
+                        messageDiv.appendChild(detailEl);
+                        pollClaims(detailEl.querySelector('.claims-section'));
                     }
                     const badge = document.createElement('span');
                     badge.className = 'ragas-badge pending';
@@ -314,6 +340,98 @@ function sendFeedback(rating, query, upBtn, downBtn) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: currentSessionId, rating, query }),
     }).catch(() => {});
+}
+
+function addInlineCitations(contentDiv, chunks) {
+    let html = contentDiv.innerHTML;
+    html = html.replace(/\[(\d+)\]/g, (match, num) => {
+        const idx = parseInt(num, 10) - 1;
+        if (idx >= 0 && idx < chunks.length) {
+            return `<sup class="citation" data-idx="${idx}" title="Cliquer pour voir la source">${num}</sup>`;
+        }
+        return match;
+    });
+    contentDiv.innerHTML = html;
+    contentDiv.querySelectorAll('sup.citation').forEach(el => {
+        el.addEventListener('click', e => {
+            e.stopPropagation();
+            showCitationPopover(el, chunks[parseInt(el.dataset.idx, 10)]);
+        });
+    });
+}
+
+function showCitationPopover(citationEl, chunk) {
+    document.querySelectorAll('.citation-popover').forEach(p => p.remove());
+
+    const lesson = (chunk.lesson != null && chunk.lesson !== -1) ? ` · Lesson ${chunk.lesson}` : '';
+    const scorePct = Math.round((chunk.score || 0) * 100);
+
+    const popover = document.createElement('div');
+    popover.className = 'citation-popover';
+    popover.innerHTML = `
+        <div class="popover-header">
+            <span>${chunk.course}${lesson}</span>
+            <span class="popover-score">${scorePct}%</span>
+        </div>
+        <div class="popover-text">${chunk.text}</div>`;
+    document.body.appendChild(popover);
+
+    const rect = citationEl.getBoundingClientRect();
+    const pw = 340;
+    let left = rect.left + window.scrollX;
+    let top = rect.bottom + window.scrollY + 6;
+    if (left + pw > window.innerWidth - 16) left = window.innerWidth - pw - 16;
+    popover.style.left = `${left}px`;
+    popover.style.top = `${top}px`;
+
+    setTimeout(() => {
+        document.addEventListener('click', () => {
+            popover.remove();
+        }, { once: true });
+    }, 0);
+}
+
+async function pollClaims(claimsSection, attempts = 0) {
+    const MAX_ATTEMPTS = 20;
+    const INTERVAL_MS = 3000;
+
+    if (attempts >= MAX_ATTEMPTS) {
+        claimsSection.innerHTML = '<div class="claims-empty">— vérification timeout</div>';
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/metrics/claims`);
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        if (!data.ready) {
+            setTimeout(() => pollClaims(claimsSection, attempts + 1), INTERVAL_MS);
+            return;
+        }
+
+        if (!data.claims || data.claims.length === 0) {
+            claimsSection.innerHTML = '<div class="claims-empty">— aucune affirmation analysée</div>';
+            return;
+        }
+
+        const unsupported = data.claims.filter(c => !c.supported).length;
+        const headerCls = unsupported > 0 ? 'warn' : 'ok';
+        const headerTxt = unsupported > 0
+            ? `${unsupported} affirmation(s) non ancrée(s) dans les sources`
+            : 'Toutes les affirmations sont ancrées dans les sources';
+        const header = `<div class="claims-header ${headerCls}">${headerTxt}</div>`;
+
+        const items = data.claims.map(c => {
+            const cls = c.supported ? 'supported' : 'unsupported';
+            const icon = c.supported ? '✓' : '⚠';
+            return `<div class="claim-item ${cls}"><span class="claim-icon">${icon}</span><span class="claim-text">${c.claim}</span></div>`;
+        }).join('');
+
+        claimsSection.innerHTML = header + items;
+    } catch {
+        setTimeout(() => pollClaims(claimsSection, attempts + 1), INTERVAL_MS);
+    }
 }
 
 // Poll /api/metrics/ragas until scores are ready, then update the badge
