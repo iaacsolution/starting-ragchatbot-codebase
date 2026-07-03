@@ -96,10 +96,10 @@ class HybridRetriever:
         k: int = 5,
         course_title: Optional[str] = None,
         lesson_number: Optional[int] = None,
-    ) -> List[Tuple[str, Dict]]:
+    ) -> List[Tuple[str, Dict, float]]:
         """
-        Return top-k (document, metadata) pairs after hybrid retrieval
-        and cross-encoder reranking.
+        Return top-k (document, metadata, ce_score) tuples after hybrid retrieval
+        and cross-encoder reranking. ce_score is the raw cross-encoder logit.
         """
         self._load_corpus()
         if not self._corpus:
@@ -124,7 +124,10 @@ class HybridRetriever:
         ce_scores = self.cross_encoder.predict(pairs)
 
         reranked = sorted(zip(candidates, ce_scores), key=lambda x: x[1], reverse=True)
-        return [(self._corpus[idx], self._meta[idx]) for (idx, _), _ in reranked[:k]]
+        return [
+            (self._corpus[idx], self._meta[idx], float(ce_score))
+            for (idx, _), ce_score in reranked[:k]
+        ]
 
     def _matches_filter(
         self, idx: int, course_title: Optional[str], lesson_number: Optional[int]
