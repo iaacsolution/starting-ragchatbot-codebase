@@ -145,6 +145,11 @@ async def test_stream():
 
 @app.post("/api/query/stream")
 async def query_stream(request: QueryRequest):
+    if not config.ANTHROPIC_API_KEY:
+        raise HTTPException(
+            status_code=503,
+            detail="ANTHROPIC_API_KEY not configured. Add it as a Secret in HF Space settings.",
+        )
     session_id = request.session_id or rag_system.session_manager.create_session()
 
     async def generate():
