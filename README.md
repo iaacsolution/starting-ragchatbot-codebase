@@ -29,6 +29,40 @@ Tu poses une question en langage naturel sur des cours IA (Anthropic Claude, MCP
 
 ---
 
+## Note de révision — 2026-07-19
+
+Cette section rectifie ce que le reste de ce document (et `CLAUDE.md`) décrit et que le code ne fait pas. Établi par audit direct du code et interception du payload API réellement envoyé à Anthropic — pas par lecture seule.
+
+### Corpus
+
+11 transcriptions de cours DeepLearning.AI (anglais) sur Claude, MCP, RAG et agents. Transcriptions autonomes, sans référence croisée : aucune question multi-hop réelle n'y est testable.
+
+### Architecture réelle
+
+- Le tool use Anthropic n'est **pas** exercé. `tools` et `tool_choice` sont absents du payload API (vérifié par interception directe de `client.messages.create`).
+- Le retrieval est déclenché par un appel Python direct (`search_tool.execute`) **avant** l'appel modèle. Architecture réelle : retrieve-then-stuff, un seul appel LLM par requête. Le modèle ne décide jamais de chercher.
+- Le contexte est concaténé dans le message utilisateur, préfixé `"Course content:"`.
+- `CourseSearchTool` n'est jamais instancié : code mort, présent uniquement dans sa définition et la documentation. Le tool enregistré est `HybridSearchTool`.
+
+### Retrieval
+
+- Chemin effectif : BM25 + similarité euclidienne exacte (`np.linalg.norm` sur tout le corpus) + reranking cross-encoder sur `HYBRID_CANDIDATES=20`.
+- Ce n'est **pas** l'index HNSW de ChromaDB, sollicité uniquement par `VectorStore.search()` et `_resolve_course_name()`, tous deux hors du chemin exécuté.
+- À cette échelle, la recherche exacte est le choix correct : rappel 100 %, pas d'approximation. HNSW échange du rappel contre de la vitesse — sans intérêt ici.
+- Limite : le corpus est encodé intégralement au premier chargement et après chaque `reset_cache()`. Ce coût d'initialisation — et non la recherche, vectorisée et O(n×384) — est le goulot. Seuil de bascule **non mesuré**.
+
+### Incohérences identifiées, non corrigées
+
+- Le `SYSTEM_PROMPT` annonce au modèle jusqu'à 2 recherches séquentielles. `MAX_TOOL_ROUNDS=2` et `_handle_tool_execution` existent. Mais le tool use n'étant pas câblé, cette capacité est structurellement inaccessible.
+- Le diagramme de `CLAUDE.md` (`AIGenerator ← tool use → CourseSearchTool`) ne reflète plus le code.
+
+### Robustesse — corrections apportées (commit `4d41034`)
+
+- 9 blocs `except Exception` de `vector_store.py` avalaient leurs exceptions avec un `print()`. Convertis en logs avec stack trace et contexte, ERROR ou WARNING selon l'impact réel. Flux de contrôle inchangé, mêmes valeurs de retour.
+- Un seul est sur le chemin exercé (`get_all_content`) et c'était le pire : une exception y produisait un corpus vide et le système répondait `"No relevant content found"` — indiscernable d'une base légitimement vide. Un flag `corpus_load_degraded` sur `HybridRetriever` distingue désormais les deux cas : corpus vide avec des cours indexés (`get_course_count() > 0`) déclenche un message dédié côté utilisateur et un log ERROR côté serveur ; corpus légitimement vide ne change pas de comportement.
+
+---
+
 ## Fonctionnalités
 
 ### RAG Pipeline — améliorations progressives
