@@ -1,10 +1,24 @@
 from __future__ import annotations
 
+import logging
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from rank_bm25 import BM25Okapi
 from sentence_transformers import CrossEncoder, SentenceTransformer
+
+logger = logging.getLogger(__name__)
+if not logger.handlers:
+    _handler = logging.StreamHandler()
+    _handler.setFormatter(
+        logging.Formatter(
+            fmt="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+    )
+    logger.addHandler(_handler)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
 
 
 def _reciprocal_rank_fusion(
@@ -40,6 +54,12 @@ class HybridRetriever:
         self._meta: List[Dict] = []
         self._embeddings: Optional[np.ndarray] = None
         self._bm25: Optional[BM25Okapi] = None
+        # True when get_all_content() returned an empty corpus while the
+        # course catalog is non-empty - signals a retrieval failure rather
+        # than a legitimately empty knowledge base. Callers can check this
+        # to distinguish "nothing indexed on this topic" from "retrieval is
+        # broken", which otherwise produce the identical empty-results output.
+        self.corpus_load_degraded: bool = False
 
     def reset_cache(self) -> None:
         """Invalidate the in-memory corpus cache after new documents are indexed."""
@@ -47,6 +67,7 @@ class HybridRetriever:
         self._meta = []
         self._embeddings = None
         self._bm25 = None
+        self.corpus_load_degraded = False
 
     def _load_corpus(self) -> None:
         if self._bm25 is not None:
@@ -57,10 +78,20 @@ class HybridRetriever:
         self._meta = raw.get("metadatas") or []
 
         if not self._corpus:
+            indexed_course_count = self.store.get_course_count()
+            self.corpus_load_degraded = indexed_course_count > 0
+            if self.corpus_load_degraded:
+                logger.error(
+                    "corpus vide alors que %d cours sont indexes - panne de "
+                    "retrieval probable (get_all_content() a renvoye un "
+                    "resultat vide malgre course_catalog non-vide)",
+                    indexed_course_count,
+                )
             self._bm25 = BM25Okapi([[""]])
             self._embeddings = np.empty((0, 384))
             return
 
+        self.corpus_load_degraded = False
         self._embeddings = self.encoder.encode(
             self._corpus,
             batch_size=64,

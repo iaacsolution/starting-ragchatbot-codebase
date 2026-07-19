@@ -1,7 +1,21 @@
+import logging
 import math
 from typing import Dict, Any, List, Optional, Tuple
 from abc import ABC, abstractmethod
 from vector_store import VectorStore, SearchResults
+
+logger = logging.getLogger(__name__)
+if not logger.handlers:
+    _handler = logging.StreamHandler()
+    _handler.setFormatter(
+        logging.Formatter(
+            fmt="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+    )
+    logger.addHandler(_handler)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
 
 
 class Tool(ABC):
@@ -171,6 +185,19 @@ class HybridSearchTool(Tool):
         )
 
         if not results:
+            if getattr(self.retriever, "corpus_load_degraded", False):
+                logger.error(
+                    "HybridSearchTool.execute: corpus_load_degraded=True for "
+                    "query=%r course_name=%r lesson_number=%r - this is a "
+                    "retrieval outage, not a legitimately empty corpus",
+                    query,
+                    course_name,
+                    lesson_number,
+                )
+                return (
+                    "The search service is temporarily unavailable. "
+                    "Please try again shortly."
+                )
             filter_info = ""
             if course_name:
                 filter_info += f" in course '{course_name}'"

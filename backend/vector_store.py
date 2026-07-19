@@ -1,9 +1,23 @@
+import logging
 import chromadb
 from chromadb.config import Settings
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from models import Course, CourseChunk
 from sentence_transformers import SentenceTransformer
+
+logger = logging.getLogger(__name__)
+if not logger.handlers:
+    _handler = logging.StreamHandler()
+    _handler.setFormatter(
+        logging.Formatter(
+            fmt="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+    )
+    logger.addHandler(_handler)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
 
 
 @dataclass
@@ -45,6 +59,7 @@ class VectorStore:
 
     def __init__(self, chroma_path: str, embedding_model: str, max_results: int = 5):
         self.max_results = max_results
+        self.chroma_path = chroma_path
         # Initialize ChromaDB client
         self.client = chromadb.PersistentClient(
             path=chroma_path, settings=Settings(anonymized_telemetry=False)
@@ -110,6 +125,16 @@ class VectorStore:
             )
             return SearchResults.from_chroma(results)
         except Exception as e:
+            logger.error(
+                "course_content.query failed | query=%r course_title=%r "
+                "lesson_number=%r filter=%r n_results=%r",
+                query,
+                course_title,
+                lesson_number,
+                filter_dict,
+                search_limit,
+                exc_info=True,
+            )
             return SearchResults.empty(f"Search error: {str(e)}")
 
     def _resolve_course_name(self, course_name: str) -> Optional[str]:
@@ -121,7 +146,11 @@ class VectorStore:
                 # Return the title (which is now the ID)
                 return results["metadatas"][0][0]["title"]
         except Exception as e:
-            print(f"Error resolving course name: {e}")
+            logger.warning(
+                "course_catalog.query failed while resolving course_name=%r",
+                course_name,
+                exc_info=True,
+            )
 
         return None
 
@@ -210,7 +239,13 @@ class VectorStore:
             self.course_catalog = self._create_collection("course_catalog")
             self.course_content = self._create_collection("course_content")
         except Exception as e:
-            print(f"Error clearing data: {e}")
+            logger.error(
+                "clear_all_data failed while deleting/recreating collections "
+                "'course_catalog' and 'course_content' (chroma_path=%r) - "
+                "collections may be left in a partially-deleted state",
+                self.chroma_path,
+                exc_info=True,
+            )
 
     def get_existing_course_titles(self) -> List[str]:
         """Get all existing course titles from the vector store"""
@@ -221,7 +256,12 @@ class VectorStore:
                 return results["ids"]
             return []
         except Exception as e:
-            print(f"Error getting existing course titles: {e}")
+            logger.error(
+                "course_catalog.get failed while listing existing course titles "
+                "(collection='course_catalog') - callers will see an empty list "
+                "and may re-process/re-add already-indexed courses",
+                exc_info=True,
+            )
             return []
 
     def get_course_count(self) -> int:
@@ -232,7 +272,12 @@ class VectorStore:
                 return len(results["ids"])
             return 0
         except Exception as e:
-            print(f"Error getting course count: {e}")
+            logger.warning(
+                "course_catalog.get failed while counting courses "
+                "(collection='course_catalog') - get_course_analytics() will "
+                "report total_courses=0",
+                exc_info=True,
+            )
             return 0
 
     def get_all_content(self) -> Dict[str, Any]:
@@ -240,7 +285,14 @@ class VectorStore:
         try:
             return self.course_content.get(include=["documents", "metadatas"])
         except Exception as e:
-            print(f"Error fetching all content: {e}")
+            logger.error(
+                "course_content.get failed while fetching the full corpus "
+                "(collection='course_content') - HybridRetriever will load an "
+                "EMPTY corpus, every subsequent search() call returns no "
+                "results, and RAGSystem.query() will silently fall back to "
+                "the no-context/general-answer prompt branch",
+                exc_info=True,
+            )
             return {"documents": [], "metadatas": []}
 
     def get_all_courses_metadata(self) -> List[Dict[str, Any]]:
@@ -263,7 +315,12 @@ class VectorStore:
                 return parsed_metadata
             return []
         except Exception as e:
-            print(f"Error getting courses metadata: {e}")
+            logger.warning(
+                "course_catalog.get failed while building courses metadata "
+                "(collection='course_catalog') - get_all_courses_metadata() "
+                "returns an empty list",
+                exc_info=True,
+            )
             return []
 
     def get_course_link(self, course_title: str) -> Optional[str]:
@@ -276,7 +333,12 @@ class VectorStore:
                 return metadata.get("course_link")
             return None
         except Exception as e:
-            print(f"Error getting course link: {e}")
+            logger.warning(
+                "course_catalog.get failed while fetching course_link "
+                "(course_title=%r) - get_course_link() returns None",
+                course_title,
+                exc_info=True,
+            )
             return None
 
     def get_lesson_link(self, course_title: str, lesson_number: int) -> Optional[str]:
@@ -297,4 +359,11 @@ class VectorStore:
                             return lesson.get("lesson_link")
             return None
         except Exception as e:
-            print(f"Error getting lesson link: {e}")
+            logger.warning(
+                "course_catalog.get/lessons_json parsing failed while "
+                "fetching lesson_link (course_title=%r, lesson_number=%r) - "
+                "get_lesson_link() returns None",
+                course_title,
+                lesson_number,
+                exc_info=True,
+            )
