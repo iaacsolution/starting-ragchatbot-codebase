@@ -4,7 +4,8 @@ Batch RAGAS evaluation script.
 Usage (from backend/):
     uv run python run_eval.py
 
-Runs 15 representative questions through the RAG pipeline, evaluates
+Runs 20 representative questions through the RAG pipeline (15 original +
+5 added 2026-07-19: 3 cross-lingual, 2 compound cross-course), evaluates
 Faithfulness and AnswerRelevancy with RAGAS, and writes a JSON report
 to ../eval_results.json plus a console summary table.
 """
@@ -45,7 +46,28 @@ TEST_QUESTIONS = [
     "What are agent skills in the Anthropic framework?",
     # Production RAG
     "What are the main challenges of deploying a RAG system in production?",
+    # --- Cross-lingual (FR question / EN-only corpus) ---
+    "Dans les transcriptions de cours indexées, quel est le texte EXACT de l'avis "
+    "client utilisé comme exemple pour l'analyse de sentiment avec le téléphone "
+    "Acme ? Cite-le mot pour mot.",
+    "Selon la démo SQLite présentée dans le cours sur MCP, combien de produits, "
+    "d'utilisateurs et de commandes contenait la base de données ?",
+    "Dans le cours sur la recherche avancée avec Chroma, combien de chunks "
+    "obtient-on en découpant le rapport annuel Microsoft d'abord par "
+    "caractères, puis par tokens ?",
+    # --- Compound cross-course (not true sequential multi-hop, see caveat) ---
+    "According to the MCP course, how many products and users appear in the "
+    "SQLite demo database? And according to the Agent Skills course, what are "
+    "the three components the Claude Agent SDK provides for working with skills?",
+    "What is the exact customer review text used as the sentiment analysis "
+    "example with the Acme phone (Computer Use course), and how many Airbnb "
+    "listings are in the dataset used in the Prompt Compression course?",
 ]
+
+
+def _distinct_courses(sources: list[str]) -> int:
+    """Count distinct course titles in a list of 'Course Title - Lesson N' source strings."""
+    return len({s.split(" - Lesson ")[0] for s in sources})
 
 
 def run_pipeline(rag: RAGSystem) -> list[dict]:
@@ -67,6 +89,9 @@ def run_pipeline(rag: RAGSystem) -> list[dict]:
                 "contexts": contexts,
                 "sources": sources,
                 "latency_s": round(elapsed, 2),
+                "n_chunks": len(sources),
+                "answer_preview": answer[:300],
+                "n_distinct_courses": _distinct_courses(sources),
             }
         )
     return rows
