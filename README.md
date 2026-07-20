@@ -154,6 +154,9 @@ FastAPI /api/query/stream
 
 Le Space est déployé sur [HuggingFace Spaces](https://huggingface.co/spaces/Krebs/claude-courses-assistant) — ChromaDB pré-indexé dans l'image, démarrage en ~30s.
 
+> **Secret requis** : dans les settings du Space → **Secrets** → ajouter `ANTHROPIC_API_KEY = sk-ant-...`
+> Sans cette clé, l'app démarre mais toutes les requêtes renvoient une erreur 503.
+
 ```bash
 git push origin main && git push hf main
 ```
