@@ -28,6 +28,10 @@ Tu poses une question en langage naturel sur des cours IA (Anthropic Claude, MCP
 ```
 
 ---
+## Auditing a RAG system
+
+The audit of this codebase is packaged as a Claude Code skill:
+**[RAG Reality Check](https://agensi.io/skills/rag-reality-check)** — traces the code path actually executed, finds silent failures, measures retrieval separately from answer quality, and shows where a metric like faithfulness is blind.
 
 ## Note de révision — 2026-07-19
 
